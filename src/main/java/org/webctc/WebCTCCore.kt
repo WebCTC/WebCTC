@@ -16,8 +16,7 @@ import jp.ngt.rtm.entity.train.util.FormationManager
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import net.minecraft.server.MinecraftServer
 
-
-@Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID)
+@Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
     var server: MinecraftServer? = null
 
