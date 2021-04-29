@@ -14,6 +14,7 @@ import jp.ngt.rtm.entity.train.util.Formation
 import jp.ngt.rtm.entity.train.util.FormationManager
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import net.minecraft.server.MinecraftServer
+import net.minecraftforge.common.config.Configuration
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
@@ -21,6 +22,7 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
+        WebCTCConfig.preInit(Configuration(event.suggestedConfigurationFile))
     }
 
     @Mod.EventHandler
@@ -96,7 +98,7 @@ class WebCTCCore {
                     )
                 }
 
-                listen(8080)
+                listen(WebCTCConfig.portNumber)
             }
         }
     }
