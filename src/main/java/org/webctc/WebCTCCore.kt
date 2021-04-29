@@ -81,7 +81,7 @@ class WebCTCCore {
                         gson.toJson(
                             event.server.entityWorld.loadedEntityList
                                 .filterIsInstance<EntityTrainBase>()
-                                .map { EntityTrainBase::toMutableMap }
+                                .map(EntityTrainBase::toMutableMap)
                         )
                     )
                 }
