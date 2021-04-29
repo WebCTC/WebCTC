@@ -65,7 +65,7 @@ class WebCTCCore {
                     res.contentType = MediaType._json.mime
                     res.send(
                         gson.toJson(
-                            formation?.let { it ->
+                            formation?.let {
                                 it.entries
                                     .map { entry -> entry.train.toMutableMap() }
                             }
