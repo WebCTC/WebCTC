@@ -11,6 +11,7 @@ import express.utils.MediaType
 import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.parts.EntityFloor
 import jp.ngt.rtm.entity.train.util.Formation
+import jp.ngt.rtm.entity.train.util.FormationEntry
 import jp.ngt.rtm.entity.train.util.FormationManager
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import net.minecraft.server.MinecraftServer
@@ -56,7 +57,7 @@ class WebCTCCore {
                     val formation = FormationManager.getInstance().getFormation(formationId.toLong())
 
                     res.contentType = MediaType._json.mime
-                    res.send(gson.toJson(formation.toMutableMap()))
+                    res.send(gson.toJson(formation?.toMutableMap()))
                 }
 
                 get("/formations/:fid/trains") { req, res ->
@@ -68,8 +69,8 @@ class WebCTCCore {
                         gson.toJson(
                             formation?.let {
                                 it.entries
-                                    .map { entry -> entry.train }
-                                    .map { Formation::toMutableMap }
+                                    .map { FormationEntry::train }
+                                    .map { EntityTrainBase::toMutableMap }
                             }
                         )
                     )
@@ -81,7 +82,7 @@ class WebCTCCore {
                         gson.toJson(
                             event.server.entityWorld.loadedEntityList
                                 .filterIsInstance<EntityTrainBase>()
-                                .map(EntityTrainBase::toMutableMap)
+                                .map { EntityTrainBase::toMutableMap }
                         )
                     )
                 }
