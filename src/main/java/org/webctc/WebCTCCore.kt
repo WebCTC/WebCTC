@@ -117,11 +117,12 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
 
     jsonMap["id"] = this.id
     jsonMap["entries"] = this.entries
+        .filterNotNull()
         .map {
-            mutableMapOf<String, Any>(
-                "train" to it.train.entityId,
+            mutableMapOf<String, Any?>(
+                "train" to (it.train?.entityId ?: 0),
                 "entryId" to it.entryId,
-                "dir" to it.dir,
+                "dir" to it.dir
             )
         }
     val controlCar = (Formation::class.java.getDeclaredField("controlCar")
@@ -130,7 +131,7 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
     jsonMap["driver"] = controlCar?.let { (it as EntityTrainBase).riddenByEntity?.commandSenderName }
     jsonMap["direction"] = Formation::class.java.getDeclaredField("direction")
         .apply { isAccessible = true }.getByte(this)
-    jsonMap["speed"] = controlCar?.let { (it as EntityTrainBase).speed } ?: 0
+    jsonMap["speed"] = controlCar?.let { (it as EntityTrainBase).speed } ?: 0f
 
     return jsonMap
 }
