@@ -1,20 +1,14 @@
 package org.webctc.router.api
 
-import com.google.gson.GsonBuilder
-import express.ExpressRouter
 import express.utils.MediaType
 import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.parts.EntityFloor
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import org.webctc.WebCTCCore
+import org.webctc.router.WebCTCRouter
 
-class ApiTrainsRouter : ExpressRouter() {
+class ApiTrainsRouter : WebCTCRouter() {
     init {
-        val gson = GsonBuilder()
-            .serializeNulls()
-            .disableHtmlEscaping()
-            .create()
-
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.send(
