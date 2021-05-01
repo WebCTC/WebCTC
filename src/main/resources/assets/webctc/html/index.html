@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Title</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #canvas {
+            position: relative;
+            left: 50%;
+            top: 50%;
+            margin-left: -480px;
+            margin-top: -360px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let canvas = document.getElementById('canvas');
+            let styles = canvas.getAttribute('style') || '';
+            let context = canvas.getContext('2d');
+
+            context.fillStyle = 'rgba(0,0,16, 0.66)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            let updateRail = () => {
+                const DATA_URL = './api/rails/'
+                fetch(DATA_URL)
+                    .then((response) => response.json())
+                    .then((jsonData) => {
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                        context.fillStyle = 'rgba(0,0,16, 0.66)';
+                        context.fillRect(0, 0, canvas.width, canvas.height);
+                        let xCoords = [];
+                        let zCoords = [];
+                        console.log(jsonData);
+                        jsonData.forEach(railCore => {
+                            railCore["railMaps"].forEach(railMap => {
+                                let startRP = railMap["startRP"];
+                                if (startRP != null) {
+                                    xCoords.push(startRP["posX"])
+                                    zCoords.push(startRP["posZ"])
+                                }
+
+                                let endRP = railMap["endRP"];
+                                if (endRP != null) {
+                                    xCoords.push(endRP["posX"])
+                                    zCoords.push(endRP["posZ"])
+                                }
+                            });
+                        });
+                        let minX = Math.min(...xCoords)
+                        let maxX = Math.max(...xCoords)
+                        let minZ = Math.min(...zCoords)
+                        let maxZ = Math.max(...zCoords)
+                        let marginX = canvas.width / 10
+                        let scaleX = canvas.width * 4 / 5 / (maxX - minX)
+                        let marginZ = canvas.height / 10
+                        let scaleZ = canvas.height * 4 / 5 / (maxZ - minZ)
+                        let scale = Math.min(scaleX, scaleZ)
+                        jsonData.forEach(railCore => {
+                            railCore["railMaps"].forEach(railMap => {
+                                let startRP = railMap["startRP"];
+                                let endRP = railMap["endRP"];
+                                if (startRP != null && endRP != null) {
+                                    context.beginPath();
+                                    let startPosX = (startRP["posX"] - minX) * scale + marginX
+                                    let startPosZ = (startRP["posZ"] - minZ) * scale + marginZ
+                                    let endPosX = (endRP["posX"] - minX) * scale + marginX
+                                    let endPosZ = (endRP["posZ"] - minZ) * scale + marginZ;
+                                    context.moveTo(startPosX, startPosZ);
+                                    context.lineTo(endPosX, endPosZ);
+                                    context.strokeStyle = railCore["isTrainOnRail"] ? "red" : "white";
+                                    context.lineWidth = 3;
+                                    context.stroke();
+                                }
+                            });
+                        });
+                    });
+            };
+
+            let onResize = canvas => {
+                let scale = Math.min(window.innerWidth / canvas.width, window.innerHeight / canvas.height);
+                let transform = 'scale(' + scale + ',' + scale + ');';
+
+                canvas.setAttribute('style', styles +
+                    '    -moz-transform: ' + transform +
+                    '     -ms-transform: ' + transform +
+                    '      -o-transform: ' + transform +
+                    '         transform: ' + transform +
+                    ' -webkit-transform-origin: center center;' +
+                    '    -moz-transform-origin: center center;' +
+                    '     -ms-transform-origin: center center;' +
+                    '      -o-transform-origin: center center;' +
+                    '         transform-origin: center center;'
+                );
+                updateRail(canvas)
+            };
+
+            onResize(canvas);
+            window.addEventListener('resize', () => onResize(canvas), false);
+            setInterval(() => updateRail(), 1000);
+        });
+    </script>
+</head>
+
+<body>
+<canvas id="canvas" width=960 height=720
+        style="position: relative; left: 50%; margin-left: -480px; top: 50%; margin-top: -360px;">
+</canvas>
+</body>
+
+</html>
