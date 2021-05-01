@@ -21,5 +21,16 @@ class RailCache {
             tag.setInteger("z", this.z)
             return tag
         }
+
+        override fun equals(other: Any?): Boolean {
+            return other is Pos && this.x == other.x && this.y == other.y && this.z == other.z
+        }
+
+        override fun hashCode(): Int {
+            var result = x
+            result = 31 * result + y
+            result = 31 * result + z
+            return result
+        }
     }
 }
