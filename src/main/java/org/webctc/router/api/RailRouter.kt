@@ -52,7 +52,7 @@ fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
 fun TileEntityLargeRailCore.getNeighborRailCores(): List<Map<String, Any>> {
     return this.allRailMaps.map {
         mapOf(
-            "startPR" to it.startRP,
+            "startRP" to it.startRP,
             "endRP" to it.endRP,
             "length" to it.length,
             "neighborRailCores" to mapOf(
