@@ -6,9 +6,9 @@ import express.Express
 import net.minecraft.server.MinecraftServer
 import net.minecraftforge.common.config.Configuration
 import org.webctc.router.DefaultRouter
-import org.webctc.router.api.ApiFormationsRouter
 import org.webctc.router.api.ApiRouter
-import org.webctc.router.api.ApiTrainsRouter
+import org.webctc.router.api.FormationsRouter
+import org.webctc.router.api.TrainsRouter
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
@@ -35,8 +35,8 @@ class WebCTCCore {
             init {
                 use("/", DefaultRouter())
                 use("/api", ApiRouter())
-                use("/api/formations", ApiFormationsRouter())
-                use("/api/trains", ApiTrainsRouter())
+                use("/api/formations", FormationsRouter())
+                use("/api/trains", TrainsRouter())
                 all() { req, res -> res.send("URL is incorrect.") }
 
                 listen(WebCTCConfig.portNumber)

@@ -6,7 +6,7 @@ import jp.ngt.rtm.entity.train.util.Formation
 import jp.ngt.rtm.entity.train.util.FormationManager
 import org.webctc.router.WebCTCRouter
 
-class ApiFormationsRouter : WebCTCRouter() {
+class FormationsRouter : WebCTCRouter() {
     init {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime

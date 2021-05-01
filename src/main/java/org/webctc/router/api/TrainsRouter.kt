@@ -7,7 +7,7 @@ import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import org.webctc.WebCTCCore
 import org.webctc.router.WebCTCRouter
 
-class ApiTrainsRouter : WebCTCRouter() {
+class TrainsRouter : WebCTCRouter() {
     init {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
