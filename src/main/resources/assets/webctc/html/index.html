@@ -9,113 +9,177 @@
     <style>
         html,
         body {
+            background-color: darkslategray;
             height: 100%;
             margin: 0;
         }
-
-        #canvas {
-            position: relative;
-            left: 50%;
-            top: 50%;
-            margin-left: -480px;
-            margin-top: -360px;
-        }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let canvas = document.getElementById('canvas');
-            let styles = canvas.getAttribute('style') || '';
-            let context = canvas.getContext('2d');
+        const RAIL_DATA_URL = './api/rails/'
+        const SIGNAL_DATA_URL = './api/signals/'
 
-            context.fillStyle = 'rgba(0,0,16, 0.66)';
-            context.fillRect(0, 0, canvas.width, canvas.height);
+        let globalScale = 1.0;
+        let svg = document.getElementById('svg');
 
-            let updateRail = () => {
-                const DATA_URL = './api/rails/'
-                fetch(DATA_URL)
-                    .then((response) => response.json())
-                    .then((jsonData) => {
-                        context.clearRect(0, 0, canvas.width, canvas.height);
-                        context.fillStyle = 'rgba(0,0,16, 0.66)';
-                        context.fillRect(0, 0, canvas.width, canvas.height);
-                        let xCoords = [];
-                        let zCoords = [];
-                        jsonData.forEach(railCore => {
-                            railCore["railMaps"].forEach(railMap => {
-                                let startRP = railMap["startRP"];
-                                if (startRP != null) {
-                                    xCoords.push(startRP["posX"])
-                                    zCoords.push(startRP["posZ"])
-                                }
+        document.addEventListener('DOMContentLoaded', () => {
+            let svg = document.getElementById('svg');
+            let updateRail = (viewBoxChange) => {
+                let minX = 0;
+                let minZ = 0;
+                let maxX = 0;
+                let maxZ = 0;
+                let marginX = 0;
+                let marginZ = 0;
+                let scale = 1;
+                let svgParent = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                const promises = []
 
-                                let endRP = railMap["endRP"];
-                                if (endRP != null) {
-                                    xCoords.push(endRP["posX"])
-                                    zCoords.push(endRP["posZ"])
-                                }
+                promises.push(
+                    fetch(RAIL_DATA_URL)
+                        .then((response) => response.json())
+                        .then((jsonData) => {
+                            let xCoords = [];
+                            let zCoords = [];
+                            jsonData.forEach(railCore => {
+                                railCore["railMaps"].forEach(railMap => {
+                                    let startRP = railMap["startRP"];
+                                    if (startRP != null) {
+                                        xCoords.push(startRP["posX"])
+                                        zCoords.push(startRP["posZ"])
+                                    }
+
+                                    let endRP = railMap["endRP"];
+                                    if (endRP != null) {
+                                        xCoords.push(endRP["posX"])
+                                        zCoords.push(endRP["posZ"])
+                                    }
+                                });
                             });
-                        });
-                        let minX = Math.min(...xCoords)
-                        let maxX = Math.max(...xCoords)
-                        let minZ = Math.min(...zCoords)
-                        let maxZ = Math.max(...zCoords)
-                        let marginX = canvas.width / 10
-                        let scaleX = canvas.width * 4 / 5 / (maxX - minX)
-                        let marginZ = canvas.height / 10
-                        let scaleZ = canvas.height * 4 / 5 / (maxZ - minZ)
-                        let scale = Math.min(scaleX, scaleZ)
-                        jsonData.forEach(railCore => {
-                            let isCache = railCore["isCache"]
-                            let isTrainOnRail = railCore["isTrainOnRail"]
-                            railCore["railMaps"].forEach(railMap => {
-                                let startRP = railMap["startRP"];
-                                let endRP = railMap["endRP"];
-                                if (startRP != null && endRP != null) {
-                                    context.beginPath();
-                                    let startPosX = (startRP["posX"] - minX) * scale + marginX
-                                    let startPosZ = (startRP["posZ"] - minZ) * scale + marginZ
-                                    let endPosX = (endRP["posX"] - minX) * scale + marginX
-                                    let endPosZ = (endRP["posZ"] - minZ) * scale + marginZ;
-                                    context.moveTo(startPosX, startPosZ);
-                                    context.lineTo(endPosX, endPosZ);
-                                    context.strokeStyle = isCache ? "lightgray" : isTrainOnRail ? "red" : "white";
-                                    context.lineWidth = 3;
-                                    context.stroke();
-                                }
+                            minX = Math.min(...xCoords)
+                            maxX = Math.max(...xCoords)
+                            minZ = Math.min(...zCoords)
+                            maxZ = Math.max(...zCoords)
+                            marginX = window.innerWidth / 10
+                            let scaleX = window.innerWidth * 4 / 5 / (maxX - minX)
+                            marginZ = window.innerHeight / 10
+                            let scaleZ = window.innerHeight * 4 / 5 / (maxZ - minZ)
+                            scale = Math.min(scaleX, scaleZ)
+                            jsonData.forEach(railCore => {
+                                let isCache = railCore["isCache"]
+                                let isTrainOnRail = railCore["isTrainOnRail"]
+                                railCore["railMaps"].forEach(railMap => {
+                                    let startRP = railMap["startRP"];
+                                    let endRP = railMap["endRP"];
+                                    if (startRP != null && endRP != null) {
+                                        let startPosX = startRP["posX"] - minX + marginX
+                                        let startPosZ = startRP["posZ"] - minZ + marginZ
+                                        let endPosX = endRP["posX"] - minX + marginX
+                                        let endPosZ = endRP["posZ"] - minZ + marginZ;
+                                        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                        line.setAttribute('x1', startPosX);
+                                        line.setAttribute('y1', startPosZ);
+                                        line.setAttribute('x2', endPosX);
+                                        line.setAttribute('y2', endPosZ);
+                                        line.setAttribute('stroke', isCache ? 'lightgray' : isTrainOnRail ? 'red' : 'white');
+                                        line.setAttribute('stroke-width', '3px');
+                                        svgParent.appendChild(line);
+                                    }
+                                });
                             });
-                        });
-                    });
+                        }));
+
+                promises.push(
+                    fetch(SIGNAL_DATA_URL)
+                        .then((response) => response.json())
+                        .then((jsonData) => {
+                            jsonData.forEach(signal => {
+                                let pos = signal["pos"]
+                                let rotation = signal["rotation"]
+                                let signalLevel = signal["signalLevel"]
+
+                                let posX = pos[0] - minX + marginX
+                                let posZ = pos[2] - minZ + marginZ
+
+                                let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                                circle.setAttribute('cx', String(posX - 1))
+                                circle.setAttribute('cy', String(posZ - 1))
+                                circle.setAttribute('t', "1")
+                                circle.setAttribute('fill', getSignalColor(signalLevel))
+                                circle.setAttribute('stroke', "white")
+                                circle.setAttribute('stroke-width', "0.5px")
+                                svgParent.appendChild(circle);
+                            });
+                        }));
+
+                Promise.all(promises).then(() => {
+                    svg.weight = maxX - minX
+                    svg.height = maxZ - minZ
+                    if (viewBoxChange) {
+                        svg.setAttribute("viewBox", "0 0 " + (window.innerWidth / scale) + " " + (window.innerHeight / scale))
+                        globalScale = 1 / scale
+                    }
+                    svg.innerHTML = svgParent.innerHTML;
+                });
             };
 
-            let onResize = canvas => {
-                let scale = Math.min(window.innerWidth / canvas.width, window.innerHeight / canvas.height);
-                let transform = 'scale(' + scale + ',' + scale + ');';
+            svg.onwheel = (event) => {
+                let viewBoxValues = svg.getAttribute("viewBox").split(" ");
+                let scale = event.deltaY > 0 ? 1.1 : 0.9
+                globalScale = globalScale * scale
+                console.log(globalScale)
+                svg.setAttribute("viewBox",
+                    viewBoxValues[0] + " " +
+                    viewBoxValues[1] + " " +
+                    Number(viewBoxValues[2]) * scale + " " +
+                    Number(viewBoxValues[3]) * scale + " "
+                )
+            }
 
-                canvas.setAttribute('style', styles +
-                    '    -moz-transform: ' + transform +
-                    '     -ms-transform: ' + transform +
-                    '      -o-transform: ' + transform +
-                    '         transform: ' + transform +
-                    ' -webkit-transform-origin: center center;' +
-                    '    -moz-transform-origin: center center;' +
-                    '     -ms-transform-origin: center center;' +
-                    '      -o-transform-origin: center center;' +
-                    '         transform-origin: center center;'
-                );
-                updateRail(canvas)
+            let onMouseMove = (event) => {
+                let x = event.movementX;
+                let y = event.movementY;
+                let viewBoxValues = svg.getAttribute("viewBox").split(" ");
+                svg.setAttribute("viewBox",
+                    (Number(viewBoxValues[0]) - x * globalScale) + " " +
+                    (Number(viewBoxValues[1]) - y * globalScale) + " " +
+                    viewBoxValues[2] + " " +
+                    viewBoxValues[3] + " "
+                )
             };
 
-            onResize(canvas);
-            window.addEventListener('resize', () => onResize(canvas), false);
-            setInterval(() => updateRail(), 1000);
+            svg.style.position = "absolute";
+            svg.ondragstart = () => false;
+            svg.onmousedown = () => document.addEventListener("mousemove", onMouseMove);
+            svg.onmouseup = () => document.removeEventListener("mousemove", onMouseMove);
+
+            window.addEventListener('resize', () => updateRail(true), false);
+            updateRail(true)
+            setInterval(() => updateRail(false), 1000);
         });
+
+
+        function getSignalColor(signalLevel) {
+            switch (signalLevel) {
+                case 0:
+                    return "rgba(0,0,0,0)"
+                case 1:
+                    return "rgb(255,0,0)"
+                case 2:
+                    return "rgb(255,122,0)"
+                case 3:
+                    return "rgb(255,255,0)"
+                case 4:
+                    return "rgb(122,255,0)"
+                default:
+                    return "rgb(0,255,255)"
+            }
+        }
     </script>
 </head>
 
 <body>
-<canvas id="canvas" width=960 height=720
-        style="position: relative; left: 50%; margin-left: -480px; top: 50%; margin-top: -360px;">
-</canvas>
+<svg id="svg" width=100% height=100% xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+</svg>
 </body>
 
 </html>
