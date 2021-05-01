@@ -8,6 +8,7 @@ import net.minecraftforge.common.config.Configuration
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.ApiRouter
 import org.webctc.router.api.FormationsRouter
+import org.webctc.router.api.RailRouter
 import org.webctc.router.api.TrainsRouter
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
@@ -37,6 +38,7 @@ class WebCTCCore {
                 use("/api", ApiRouter())
                 use("/api/formations", FormationsRouter())
                 use("/api/trains", TrainsRouter())
+                use("/api/rails", RailRouter())
                 all() { req, res -> res.send("URL is incorrect.") }
 
                 listen(WebCTCConfig.portNumber)
