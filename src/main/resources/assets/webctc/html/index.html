@@ -66,6 +66,8 @@
                         let scaleZ = canvas.height * 4 / 5 / (maxZ - minZ)
                         let scale = Math.min(scaleX, scaleZ)
                         jsonData.forEach(railCore => {
+                            let isCache = railCore["isCache"]
+                            let isTrainOnRail = railCore["isTrainOnRail"]
                             railCore["railMaps"].forEach(railMap => {
                                 let startRP = railMap["startRP"];
                                 let endRP = railMap["endRP"];
@@ -77,7 +79,7 @@
                                     let endPosZ = (endRP["posZ"] - minZ) * scale + marginZ;
                                     context.moveTo(startPosX, startPosZ);
                                     context.lineTo(endPosX, endPosZ);
-                                    context.strokeStyle = railCore["isTrainOnRail"] ? "red" : "white";
+                                    context.strokeStyle = isCache ? "lightgray" : isTrainOnRail ? "red" : "white";
                                     context.lineWidth = 3;
                                     context.stroke();
                                 }
