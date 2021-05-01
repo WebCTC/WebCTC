@@ -52,7 +52,7 @@ class WebCTCCore {
     }
 
     companion object {
-        const val MODID = "WebCTC"
+        const val MODID = "webctc"
         const val VERSION = "1.0-SNAPSHOT"
 
         @Mod.Instance
