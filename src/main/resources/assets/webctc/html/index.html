@@ -161,17 +161,19 @@
                                                     value.setAttribute('cy', String(cy))
                                                     group.appendChild(value)
 
-                                                    let polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-                                                    polyline.setAttribute('points',
-                                                        (cx - 1.5 * cos) + "," + (cy - 1.5 * sin) + " " +
-                                                        (cx - 3 * cos) + "," + (cy - 3 * sin) + " " +
-                                                        (cx - 3 * cos + fixX * sin) + "," + (cy - 3 * sin + fixX * cos)
-                                                    );
-                                                    polyline.setAttribute('stroke', 'lightgray');
-                                                    polyline.setAttribute('stroke-width', '0.5px');
-                                                    polyline.setAttribute('name', 'holizonalLine');
-                                                    polyline.setAttribute('fill', 'none');
-                                                    support.appendChild(polyline);
+                                                    if (fixX !== 0) {
+                                                        let polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                                                        polyline.setAttribute('points',
+                                                            (cx + 1.5 * cos) + "," + (cy - 1.5 * sin) + " " +
+                                                            (cx + 3 * cos) + "," + (cy - 3 * sin) + " " +
+                                                            (cx + 3 * cos + fixX * sin) + "," + (cy - 3 * sin + fixX * cos)
+                                                        );
+                                                        polyline.setAttribute('stroke', 'lightgray');
+                                                        polyline.setAttribute('stroke-width', '0.5px');
+                                                        polyline.setAttribute('name', 'horizontalLine');
+                                                        polyline.setAttribute('fill', 'none');
+                                                        support.appendChild(polyline);
+                                                    }
                                                 })
                                             Array.from(group.getElementsByTagName('line'))
                                                 .filter(line => line.getAttribute("name") === "verticalLine")
