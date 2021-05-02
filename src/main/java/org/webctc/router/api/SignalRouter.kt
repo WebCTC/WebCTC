@@ -10,6 +10,7 @@ class SignalRouter : WebCTCRouter() {
     init {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
 
             val signals = WebCTCCore.INSTANCE.server.entityWorld.loadedTileEntityList
                 .filterIsInstance(TileEntitySignal::class.java)
