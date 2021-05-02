@@ -94,17 +94,32 @@
                                         let rotation = signal["rotation"]
                                         let signalLevel = signal["signalLevel"]
 
-                                        let posX = pos[0] - minX + marginX
-                                        let posZ = pos[2] - minZ + marginZ
+                                        let posX = pos[0] - minX + marginX - 1
+                                        let posZ = pos[2] - minZ + marginZ - 1
+
+                                        let group = document.createElement('g')
 
                                         let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                                        circle.setAttribute('cx', String(posX - 1))
-                                        circle.setAttribute('cy', String(posZ - 1))
+                                        circle.setAttribute('cx', String(posX))
+                                        circle.setAttribute('cy', String(posZ))
                                         circle.setAttribute('r', "1.5px")
                                         circle.setAttribute('fill', getSignalColor(signalLevel))
                                         circle.setAttribute('stroke', "lightgray")
                                         circle.setAttribute('stroke-width', "0.5px")
-                                        svgParent.appendChild(circle);
+                                        group.appendChild(circle)
+
+                                        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                        let cos = Math.cos((270 + rotation) * (Math.PI / 180))
+                                        let sin = Math.sin((270 + rotation) * (Math.PI / 180))
+                                        line.setAttribute('x1', String(posX + 1.5 * cos));
+                                        line.setAttribute('y1', String(posZ - 1.5 * sin));
+                                        line.setAttribute('x2', String(posX + 4 * cos));
+                                        line.setAttribute('y2', String(posZ - 4 * sin));
+                                        line.setAttribute('stroke', 'lightgray');
+                                        line.setAttribute('stroke-width', '0.5px');
+                                        group.appendChild(line);
+
+                                        svgParent.appendChild(group);
                                     });
                                 }
                             ))
