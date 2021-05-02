@@ -45,6 +45,9 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
+        url "https://jitpack.io"
+    }
+    maven {
         url "https://www.cursemaven.com"
     }
 }
@@ -54,6 +57,7 @@ dependencies {
 
     implementation "curse.maven:ngtlib-288989:2940833"
     implementation "curse.maven:realtrainmod-288988:3039063"
+    implementation 'com.github.masa300:SignalControllerMod:master-SNAPSHOT'
 
     embed "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
