@@ -72,11 +72,9 @@
                                                 let startPosZ = startRP["posZ"] - minZ + marginZ
                                                 let endPosX = endRP["posX"] - minX + marginX
                                                 let endPosZ = endRP["posZ"] - minZ + marginZ;
-                                                let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                                                line.setAttribute('x1', startPosX);
-                                                line.setAttribute('y1', startPosZ);
-                                                line.setAttribute('x2', endPosX);
-                                                line.setAttribute('y2', endPosZ);
+                                                let line = createLine(
+                                                    startPosX, startPosZ,
+                                                    endPosX, endPosZ)
                                                 line.setAttribute('stroke', isCache ? 'lightgray' : isTrainOnRail ? 'red' : 'white');
                                                 line.setAttribute('stroke-width', '1.5px');
                                                 svgParent.appendChild(line);
@@ -111,21 +109,19 @@
                                             group.id = id
                                             group.appendChild(circle)
 
-                                            let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                                            line.setAttribute('x1', String(posX + 1.5 * cos));
-                                            line.setAttribute('y1', String(posZ - 1.5 * sin));
-                                            line.setAttribute('x2', String(posX + 4 * cos));
-                                            line.setAttribute('y2', String(posZ - 4 * sin));
+                                            let line = createLineFromComponent(
+                                                posX + 1.5 * cos, posZ - 1.5 * sin,
+                                                2.5 * cos, -2.5 * sin
+                                            )
                                             line.setAttribute('stroke', 'lightgray');
                                             line.setAttribute('stroke-width', '0.5px');
                                             line.setAttribute('name', 'verticalLine');
                                             group.appendChild(line);
 
-                                            let baseLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                                            baseLine.setAttribute('x1', String(posX + 4 * cos + 1.5 * sin));
-                                            baseLine.setAttribute('y1', String(posZ - 4 * sin + 1.5 * cos));
-                                            baseLine.setAttribute('x2', String(posX + 4 * cos - 1.5 * sin));
-                                            baseLine.setAttribute('y2', String(posZ - 4 * sin - 1.5 * cos));
+                                            let baseLine = createLineFromComponent(
+                                                posX + 4 * cos + 1.5 * sin, posZ - 4 * sin + 1.5 * cos,
+                                                -3.0 * sin, -3.0 * cos
+                                            )
                                             baseLine.setAttribute('stroke', 'lightgray');
                                             baseLine.setAttribute('stroke-width', '0.5px');
                                             baseLine.setAttribute('name', 'horizontalLine');
@@ -146,17 +142,13 @@
                                                 .forEach((value, index) => {
                                                     let fixX = Number(value.getAttribute("fix"))
                                                     if (fixX !== 0) {
-                                                        if (index === 0) {
-                                                            minus += 1.5
-                                                        } else if (index - last) {
-                                                            minus -= 1.5
-                                                        } else {
-                                                            minus += 1.5
-                                                        }
+                                                        minus += (index - last) ? -1.5 : +1.5
                                                         last = index
+                                                    } else if (index - last) {
+                                                        minus -= 1.0
                                                     }
-                                                    let cx = posX - (2.5 * index + minus) * cos - fixX * sin
-                                                    let cy = posZ + (2.5 * index + minus) * sin - fixX * cos
+                                                    let cx = posX - (3.5 * index + minus) * cos - fixX * sin
+                                                    let cy = posZ + (3.5 * index + minus) * sin - fixX * cos
                                                     value.setAttribute('cx', String(cx))
                                                     value.setAttribute('cy', String(cy))
                                                     group.appendChild(value)
@@ -170,7 +162,7 @@
                                                         );
                                                         polyline.setAttribute('stroke', 'lightgray');
                                                         polyline.setAttribute('stroke-width', '0.5px');
-                                                        polyline.setAttribute('name', 'horizontalLine');
+                                                        polyline.setAttribute('name', 'holizonalLine');
                                                         polyline.setAttribute('fill', 'none');
                                                         support.appendChild(polyline);
                                                     }
@@ -262,6 +254,19 @@
             circle.setAttribute('stroke', "lightgray")
             circle.setAttribute('stroke-width', "0.5px")
             return circle
+        }
+
+        function createLineFromComponent(x, y, xComponent, yComponent) {
+            return createLine(x, y, x + xComponent, y + yComponent)
+        }
+
+        function createLine(x1, y1, x2, y2) {
+            let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', String(x1));
+            line.setAttribute('y1', String(y1));
+            line.setAttribute('x2', String(x2));
+            line.setAttribute('y2', String(y2));
+            return line
         }
     </script>
 </head>
