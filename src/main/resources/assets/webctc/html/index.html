@@ -94,7 +94,7 @@
                                         let cos = Math.cos((270 + rotation) * (Math.PI / 180))
                                         let sin = Math.sin((270 + rotation) * (Math.PI / 180))
                                         let signalLevel = signal["signalLevel"]
-                                        let p = Math.abs(blockDirection * 90 - rotation)
+                                        let p = (blockDirection * 90 - rotation + 360) % 360
                                         let fixX = (45 < p && p < 135) ? 3 : ((225 < p && p < 315) ? -3 : 0);
 
                                         let posX = pos[0] - minX + marginX - 2
