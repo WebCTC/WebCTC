@@ -92,33 +92,41 @@
                                     json.forEach(signal => {
                                         let pos = signal["pos"]
                                         let rotation = signal["rotation"]
+                                        let cos = Math.cos((270 + rotation) * (Math.PI / 180))
+                                        let sin = Math.sin((270 + rotation) * (Math.PI / 180))
                                         let signalLevel = signal["signalLevel"]
 
                                         let posX = pos[0] - minX + marginX - 1
                                         let posZ = pos[2] - minZ + marginZ - 1
+                                        let id = "signal," + pos[0] + "," + pos[2]
 
-                                        let group = document.createElement('g')
+                                        let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel)
 
-                                        let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                                        circle.setAttribute('cx', String(posX))
-                                        circle.setAttribute('cy', String(posZ))
-                                        circle.setAttribute('r', "1.5px")
-                                        circle.setAttribute('fill', getSignalColor(signalLevel))
-                                        circle.setAttribute('stroke', "lightgray")
-                                        circle.setAttribute('stroke-width', "0.5px")
-                                        group.appendChild(circle)
+                                        let group
+                                        if ((group = svgParent.getElementById(id)) == null) {
+                                            group = document.createElement('g')
+                                            group.id = id
+                                            group.appendChild(circle)
 
-                                        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                                        let cos = Math.cos((270 + rotation) * (Math.PI / 180))
-                                        let sin = Math.sin((270 + rotation) * (Math.PI / 180))
-                                        line.setAttribute('x1', String(posX + 1.5 * cos));
-                                        line.setAttribute('y1', String(posZ - 1.5 * sin));
-                                        line.setAttribute('x2', String(posX + 4 * cos));
-                                        line.setAttribute('y2', String(posZ - 4 * sin));
-                                        line.setAttribute('stroke', 'lightgray');
-                                        line.setAttribute('stroke-width', '0.5px');
-                                        group.appendChild(line);
-
+                                            let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                            line.setAttribute('x1', String(posX + 1.5 * cos));
+                                            line.setAttribute('y1', String(posZ - 1.5 * sin));
+                                            line.setAttribute('x2', String(posX + 4 * cos));
+                                            line.setAttribute('y2', String(posZ - 4 * sin));
+                                            line.setAttribute('stroke', 'lightgray');
+                                            line.setAttribute('stroke-width', '0.5px');
+                                            group.appendChild(line);
+                                        } else {
+                                            let circleArray = Array.from(group.getElementsByTagName('circle'))
+                                            circleArray.push(circle)
+                                            circleArray
+                                                .sort((a, b) => Number(a.getAttribute("yCoord")) < Number(b.getAttribute("yCoord")) ? -1 : 1)
+                                                .forEach((value, index) => {
+                                                    value.setAttribute('cx', String(posX + 3.5 * index * cos))
+                                                    value.setAttribute('cy', String(posZ + 3.5 * index * sin))
+                                                    group.appendChild(value)
+                                                })
+                                        }
                                         svgParent.appendChild(group);
                                     });
                                 }
@@ -185,6 +193,18 @@
                 default:
                     return "rgb(51,102,255)"
             }
+        }
+
+        function createSignalCircle(posX, yCoord, posZ, signalLevel) {
+            let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('yCoord', String(yCoord))
+            circle.setAttribute('cx', String(posX))
+            circle.setAttribute('cy', String(posZ))
+            circle.setAttribute('r', "1.5px")
+            circle.setAttribute('fill', getSignalColor(signalLevel))
+            circle.setAttribute('stroke', "lightgray")
+            circle.setAttribute('stroke-width', "0.5px")
+            return circle
         }
     </script>
 </head>
