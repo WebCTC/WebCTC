@@ -31,7 +31,7 @@ apply {
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
-version = "latest"
+version = "1.12.2-latest"
 group = "org.webctc"
 archivesBaseName = "WebCTC"
 
