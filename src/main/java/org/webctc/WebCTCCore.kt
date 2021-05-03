@@ -4,8 +4,8 @@ import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.*
 import express.Express
 import net.minecraft.server.MinecraftServer
+import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
-import org.webctc.railcache.RailCache
 import org.webctc.railcache.RailCacheData
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.*
@@ -14,6 +14,7 @@ import org.webctc.router.api.*
 class WebCTCCore {
     lateinit var server: MinecraftServer
     lateinit var express: Express
+    lateinit var railData: WorldSavedData
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
@@ -33,11 +34,13 @@ class WebCTCCore {
         server = event.server
         val world = server.entityWorld
 
-        var data = world.mapStorage.loadData(RailCache::class.java, "webctc_railcache")
-        if (data == null) {
-            data = RailCacheData("webctc_railcache")
-            world.mapStorage.setData("webctc_railcache", data)
+        var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache")
+        if (railData == null) {
+            railData = RailCacheData("webctc_railcache")
+            world.mapStorage.setData("webctc_railcache", railData)
         }
+        this.railData = railData
+
         express = object : Express() {
             init {
                 use("/", DefaultRouter())
