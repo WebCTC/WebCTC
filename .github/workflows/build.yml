@@ -48,6 +48,6 @@ jobs:
                 uses: actions/upload-artifact@v2
                 with:
                     # optional, default is artifact
-                    name: WebCTC-${{ steps.vars.outputs.sha_short }}.jar
+                    name: WebCTC-1.7.10-${{ steps.vars.outputs.sha_short }}.jar
                     # A file, directory or wildcard pattern that describes what to upload
                     path: build/libs/WebCTC-1.7.10-latest.jar
