@@ -1,15 +1,10 @@
 package org.webctc.railcache
 
 import net.minecraft.nbt.NBTTagCompound
-import org.webctc.WebCTCCore
 
 class RailCache {
     companion object {
         var railCoreMapCache = mutableMapOf<Pos, MutableMap<String, Any?>>()
-            set(value) {
-                field = value
-                WebCTCCore.INSTANCE.railData.markDirty()
-            }
     }
 
     data class Pos(val x: Int, val y: Int, val z: Int) {

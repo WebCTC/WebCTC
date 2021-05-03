@@ -9,6 +9,7 @@ import net.minecraftforge.common.config.Configuration
 import org.webctc.railcache.RailCacheData
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.*
+import org.webctc.thread.UpdateThread
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
@@ -30,8 +31,8 @@ class WebCTCCore {
     }
 
     @Mod.EventHandler
-    fun onServerStart(event: FMLServerStartingEvent) {
-        server = event.server
+    fun onServerStart(event: FMLServerStartedEvent) {
+        server = MinecraftServer.getServer()
         val world = server.entityWorld
 
         var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache")
@@ -54,11 +55,14 @@ class WebCTCCore {
                 listen(WebCTCConfig.portNumber)
             }
         }
+        UpdateThread.start()
     }
 
     @Mod.EventHandler
     fun onServerStop(event: FMLServerStoppingEvent) {
         express.stop()
+        railData.markDirty()
+        UpdateThread.stop()
     }
 
     companion object {

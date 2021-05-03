@@ -15,19 +15,7 @@ class RailRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            WebCTCCore.INSTANCE.server.entityWorld.loadedTileEntityList
-                .filterIsInstance(TileEntityLargeRailCore::class.java)
-                .forEach {
-                    RailCache.railCoreMapCache[it.startPoint.toPos()] = it.toMutableMap()
-                }
-            val coreList = RailCache.railCoreMapCache
-                .filter {
-                    val tileEntity = WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(it.key.x, it.key.y, it.key.z)
-                    tileEntity is TileEntityLargeRailCore
-                }.toMutableMap()
-            res.send(gson.toJson(coreList.map { it.value.toMutableMap() }))
-            coreList.forEach { (_, u) -> u["isCache"] = true }
-            RailCache.railCoreMapCache = coreList
+            res.send(gson.toJson(RailCache.railCoreMapCache.map { it.value.toMutableMap() }))
         }
         get("/rail") { req, res ->
             res.contentType = MediaType._json.mime
@@ -47,7 +35,7 @@ class RailRouter : WebCTCRouter() {
     }
 }
 
-private fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
+fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
     val jsonMap = mutableMapOf<String, Any?>()
 
     jsonMap["pos"] = this.startPoint
@@ -58,7 +46,7 @@ private fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
     return jsonMap
 }
 
-private fun TileEntityLargeRailCore.getNeighborRailCores(): List<Map<String, Any>> {
+fun TileEntityLargeRailCore.getNeighborRailCores(): List<Map<String, Any>> {
     return this.allRailMaps.map {
         mapOf(
             "startRP" to it.startRP,
@@ -72,7 +60,7 @@ private fun TileEntityLargeRailCore.getNeighborRailCores(): List<Map<String, Any
     }
 }
 
-private fun RailPosition.getNeighborRail(world: World): TileEntityLargeRailCore? {
+fun RailPosition.getNeighborRail(world: World): TileEntityLargeRailCore? {
     return (world.getTileEntity(
         MathHelper.floor_double(this.posX + RailPosition.REVISION[this.direction.toInt()][0]),
         this.blockY,
@@ -80,4 +68,4 @@ private fun RailPosition.getNeighborRail(world: World): TileEntityLargeRailCore?
     ) as? TileEntityLargeRailBase)?.railCore
 }
 
-private fun IntArray.toPos() = RailCache.Pos(this[0], this[1], this[2])
+fun IntArray.toPos() = RailCache.Pos(this[0], this[1], this[2])
