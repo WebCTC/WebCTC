@@ -41,7 +41,7 @@ fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
     jsonMap["pos"] = this.startPoint
     jsonMap["isTrainOnRail"] = this.isTrainOnRail
     jsonMap["railMaps"] = this.getNeighborRailCores()
-    jsonMap["isCache"] = false
+//    jsonMap["isCache"] = false
 
     return jsonMap
 }
