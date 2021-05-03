@@ -25,18 +25,18 @@ class SignalRouter : WebCTCRouter() {
 fun TileEntitySignal.toMutableMap(): MutableMap<String, Any?> {
     val jsonMap = mutableMapOf<String, Any?>()
 
-    jsonMap["pos"] = arrayOf(this.xCoord, this.yCoord, this.zCoord)
+    jsonMap["pos"] = arrayOf(this.x, this.y, this.z)
     jsonMap["rotation"] = this.rotation
     jsonMap["signalLevel"] = NGTUtil.getField(TileEntitySignal::class.java, this, "signalLevel")
     jsonMap["signalType"] = getSignalTypes(this)
     jsonMap["blockDirection"] = this.blockDirection
-    jsonMap["modelname"] = this.modelName
+    jsonMap["modelname"] = this.resourceState.resourceName
 
     return jsonMap
 }
 
 fun getSignalTypes(tileEntitySignal: TileEntitySignal): Map<Int, Boolean> {
-    return ModelSetSignal.parseLightParts(tileEntitySignal.modelSet.config.lights).associate {
+    return ModelSetSignal.parseLightParts(tileEntitySignal.resourceState.resourceSet.config.lights).associate {
         it.signalLevel to true
     }
 }

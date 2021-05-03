@@ -36,17 +36,17 @@ fun EntityTrainBase.toMutableMap(): MutableMap<String, Any?> {
     jsonMap["id"] = this.entityId
     jsonMap["speed"] = this.speed
     jsonMap["notch"] = this.notch
-    jsonMap["modelName"] = this.modelName
+    jsonMap["modelName"] = this.resourceState.resourceName
     jsonMap["isControlCar"] = this.isControlCar
     jsonMap["signal"] = this.signal
-    jsonMap["driver"] = this.riddenByEntity?.commandSenderName
+    jsonMap["driver"] = this.firstPassenger.displayName
     jsonMap["passengers"] =
         EntityVehicleBase::class.java.getDeclaredField("vehicleFloors")
             .apply { isAccessible = true }.get(this)
             ?.let { vehicleFloors ->
                 (vehicleFloors as List<*>)
                     .filterIsInstance(EntityFloor::class.java)
-                    .map { entityFloor -> entityFloor.riddenByEntity?.commandSenderName }
+                    .map { entityFloor -> entityFloor.firstPassenger.displayName }
             }
     jsonMap["pos"] = arrayOf(this.posX, this.posY, this.posZ)
     jsonMap["trainStateData"] =

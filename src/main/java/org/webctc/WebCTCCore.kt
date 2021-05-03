@@ -1,11 +1,11 @@
 package org.webctc
 
-import cpw.mods.fml.common.Mod
-import cpw.mods.fml.common.event.*
 import express.Express
 import net.minecraft.server.MinecraftServer
-import net.minecraft.world.WorldSavedData
+import net.minecraft.world.storage.WorldSavedData
 import net.minecraftforge.common.config.Configuration
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.common.event.*
 import org.webctc.railcache.RailCacheData
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.*
@@ -34,10 +34,10 @@ class WebCTCCore {
         server = event.server
         val world = server.entityWorld
 
-        var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache")
+        var railData = world.mapStorage?.getOrLoadData(RailCacheData::class.java, "webctc_railcache")
         if (railData == null) {
             railData = RailCacheData("webctc_railcache")
-            world.mapStorage.setData("webctc_railcache", railData)
+            world.mapStorage?.setData("webctc_railcache", railData)
         }
         this.railData = railData
 
