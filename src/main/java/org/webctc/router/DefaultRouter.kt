@@ -12,5 +12,14 @@ class DefaultRouter : ExpressRouter() {
             val inputStream = NGTFileLoader.getInputStream(ResourceLocation(WebCTCCore.MODID, "html/index.html"))
             res.streamFrom(0, inputStream, MediaType._html)
         }
+        get("/:fileName") { req, res ->
+            val fileName = req.getParam("fileName")
+            try {
+                val inputStream = NGTFileLoader.getInputStream(ResourceLocation(WebCTCCore.MODID, "html/$fileName"))
+                res.streamFrom(0, inputStream, MediaType._html)
+            } catch (e: Exception) {
+                res.send("URL is incorrect.")
+            }
+        }
     }
 }
