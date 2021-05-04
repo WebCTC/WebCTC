@@ -5,6 +5,7 @@ import jp.ngt.ngtlib.util.NGTUtil
 import jp.ngt.rtm.electric.TileEntitySignal
 import jp.ngt.rtm.modelpack.modelset.ModelSetSignal
 import org.webctc.WebCTCCore
+import org.webctc.cache.signal.SignalCacheData
 import org.webctc.router.WebCTCRouter
 
 class SignalRouter : WebCTCRouter() {
@@ -12,12 +13,7 @@ class SignalRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-
-            val signals = WebCTCCore.INSTANCE.server.entityWorld.loadedTileEntityList
-                .filterIsInstance(TileEntitySignal::class.java)
-            res.send(
-                gson.toJson(signals.map(TileEntitySignal::toMutableMap))
-            )
+            res.send(gson.toJson(SignalCacheData.signalMapCache.map { it.value }))
         }
         get("/signal") { req, res ->
             res.contentType = MediaType._json.mime
@@ -41,12 +37,15 @@ class SignalRouter : WebCTCRouter() {
 fun TileEntitySignal.toMutableMap(): MutableMap<String, Any?> {
     val jsonMap = mutableMapOf<String, Any?>()
 
-    jsonMap["pos"] = arrayOf(this.xCoord, this.yCoord, this.zCoord)
-    jsonMap["rotation"] = this.rotation
-    jsonMap["signalLevel"] = NGTUtil.getField(TileEntitySignal::class.java, this, "signalLevel")
+    try {
+        jsonMap["pos"] = arrayOf(this.xCoord, this.yCoord, this.zCoord)
+        jsonMap["rotation"] = this.rotation
+        jsonMap["signalLevel"] = NGTUtil.getField(TileEntitySignal::class.java, this, "signalLevel")
 //        jsonMap["signalType"] = getSignalTypes(this)
-    jsonMap["blockDirection"] = this.blockDirection
-    jsonMap["modelname"] = this.modelName
+        jsonMap["blockDirection"] = this.blockDirection
+        jsonMap["modelname"] = this.modelName
+    } catch (e: Exception) {
+    }
 
     return jsonMap
 }

@@ -7,7 +7,8 @@ import jp.ngt.rtm.rail.util.RailPosition
 import net.minecraft.util.MathHelper
 import net.minecraft.world.World
 import org.webctc.WebCTCCore
-import org.webctc.railcache.RailCache
+import org.webctc.cache.Pos
+import org.webctc.cache.rail.RailCacheData
 import org.webctc.router.WebCTCRouter
 
 class RailRouter : WebCTCRouter() {
@@ -15,7 +16,7 @@ class RailRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(RailCache.railCoreMapCache.map { it.value.toMutableMap() }))
+            res.send(gson.toJson(RailCacheData.railMapCache.map { it.value }))
         }
         get("/rail") { req, res ->
             res.contentType = MediaType._json.mime
@@ -39,10 +40,13 @@ class RailRouter : WebCTCRouter() {
 fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
     val jsonMap = mutableMapOf<String, Any?>()
 
-    jsonMap["pos"] = this.startPoint
-    jsonMap["isTrainOnRail"] = this.isTrainOnRail
-    jsonMap["railMaps"] = this.getNeighborRailCores()
+    try {
+        jsonMap["pos"] = this.startPoint
+        jsonMap["isTrainOnRail"] = this.isTrainOnRail
+        jsonMap["railMaps"] = this.getNeighborRailCores()
 //    jsonMap["isCache"] = false
+    } catch (e: Exception) {
+    }
 
     return jsonMap
 }
@@ -69,4 +73,4 @@ fun RailPosition.getNeighborRail(world: World): TileEntityLargeRailCore? {
     ) as? TileEntityLargeRailBase)?.railCore
 }
 
-fun IntArray.toPos() = RailCache.Pos(this[0], this[1], this[2])
+fun IntArray.toPos() = Pos(this[0], this[1], this[2])

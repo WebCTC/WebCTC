@@ -6,16 +6,19 @@ import express.Express
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
-import org.webctc.railcache.RailCacheData
+import org.webctc.cache.rail.RailCacheUpdateThread
+import org.webctc.cache.signal.SignalCacheUpdateThread
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.*
-import org.webctc.thread.UpdateThread
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
     lateinit var server: MinecraftServer
     lateinit var express: Express
     lateinit var railData: WorldSavedData
+    lateinit var signalData: WorldSavedData
+    lateinit var railCacheUpdateThread: Thread
+    lateinit var signalCacheUpdateThread: Thread
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
@@ -33,14 +36,6 @@ class WebCTCCore {
     @Mod.EventHandler
     fun onServerStart(event: FMLServerStartedEvent) {
         server = MinecraftServer.getServer()
-        val world = server.entityWorld
-
-        var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache")
-        if (railData == null) {
-            railData = RailCacheData("webctc_railcache")
-            world.mapStorage.setData("webctc_railcache", railData)
-        }
-        this.railData = railData
 
         express = object : Express() {
             init {
@@ -55,14 +50,19 @@ class WebCTCCore {
                 listen(WebCTCConfig.portNumber)
             }
         }
-        UpdateThread.start()
+        railCacheUpdateThread = RailCacheUpdateThread()
+        railCacheUpdateThread.start()
+        signalCacheUpdateThread = SignalCacheUpdateThread()
+        signalCacheUpdateThread.start()
     }
 
     @Mod.EventHandler
     fun onServerStop(event: FMLServerStoppingEvent) {
         express.stop()
-        railData.markDirty()
-        UpdateThread.stop()
+//        railData.markDirty()
+//        signalData.markDirty()
+        railCacheUpdateThread.interrupt()
+        signalCacheUpdateThread.interrupt()
     }
 
     companion object {

@@ -1,4 +1,4 @@
-package org.webctc.railcache
+package org.webctc.cache
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -7,34 +7,39 @@ import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
 
-class RailCacheData(mapName: String) : WorldSavedData(mapName) {
+abstract class CacheData(mapName: String) : WorldSavedData(mapName) {
+    abstract fun getMapCache(): MutableMap<Pos, MutableMap<String, Any?>>
+
     private val gson: Gson = GsonBuilder()
         .serializeNulls()
         .disableHtmlEscaping()
         .create()
 
+    abstract val TAG_NAME: String
+
     override fun readFromNBT(nbt: NBTTagCompound) {
-        val tagList = nbt.getTagList("RailCache", 10)
+        getMapCache().clear()
+        val tagList = nbt.getTagList(TAG_NAME, 10)
         for (i in 0 until tagList.tagCount()) {
             val tag = tagList.getCompoundTagAt(i)
-            val pos = RailCache.Pos.readFromNBT(tag)
+            val pos = Pos.readFromNBT(tag)
             val json =
                 gson.fromJson<MutableMap<String, Any?>>(
                     tag.getString("json"),
                     object : TypeToken<MutableMap<String, Any?>>() {}.type
                 )
-            json?.let { RailCache.railCoreMapCache[pos] = it }
+            json?.let { getMapCache()[pos] = it }
         }
     }
 
     override fun writeToNBT(nbt: NBTTagCompound) {
         val tagList = NBTTagList()
-        RailCache.railCoreMapCache.forEach {
+        getMapCache().forEach {
             tagList.appendTag(it.key.writeToNBT())
             val tag = NBTTagCompound()
             tag.setString("json", gson.toJson(it.value))
             tagList.appendTag(tag)
         }
-        nbt.setTag("RailCache", tagList)
+        nbt.setTag(TAG_NAME, tagList)
     }
 }
