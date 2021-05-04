@@ -23,7 +23,7 @@ class RailCacheData(mapName: String) : WorldSavedData(mapName) {
                     tag.getString("json"),
                     object : TypeToken<MutableMap<String, Any?>>() {}.type
                 )
-            RailCache.railCoreMapCache[pos] = json
+            json?.let { RailCache.railCoreMapCache[pos] = it }
         }
     }
 
