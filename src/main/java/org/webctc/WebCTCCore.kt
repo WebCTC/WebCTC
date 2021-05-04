@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.event.*
 import org.webctc.railcache.RailCacheData
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.*
+import org.webctc.thread.UpdateThread
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
@@ -55,11 +56,13 @@ class WebCTCCore {
                 listen(WebCTCConfig.portNumber)
             }
         }
+        UpdateThread.start()
     }
 
     @Mod.EventHandler
     fun onServerStop(event: FMLServerStoppingEvent) {
         express.stop()
+        UpdateThread.stop()
     }
 
     companion object {
