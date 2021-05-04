@@ -19,6 +19,22 @@ class SignalRouter : WebCTCRouter() {
                 gson.toJson(signals.map(TileEntitySignal::toMutableMap))
             )
         }
+        get("/signal") { req, res ->
+            res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
+            val x = req.getQuery("x").toIntOrNull()
+            val y = req.getQuery("y").toIntOrNull()
+            val z = req.getQuery("z").toIntOrNull()
+            var railCore: TileEntitySignal? = null
+            if (x != null && y != null && z != null) {
+                railCore = WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z) as? TileEntitySignal
+            }
+            res.send(
+                gson.toJson(
+                    railCore?.toMutableMap()
+                )
+            )
+        }
     }
 }
 

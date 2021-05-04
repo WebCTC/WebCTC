@@ -14,7 +14,9 @@ class ApiRouter : ExpressRouter() {
                         "http://${req.host}${req.uri}trains/\n" +
                         "http://${req.host}${req.uri}trains/<entityId>\n" +
                         "http://${req.host}${req.uri}rails/\n" +
-                        "http://${req.host}${req.uri}rails/rail?x=<x>&y=<y>&z=<z>\n"
+                        "http://${req.host}${req.uri}rails/rail?x=<x>&y=<y>&z=<z>\n" +
+                        "http://${req.host}${req.uri}signals/\n" +
+                        "http://${req.host}${req.uri}signals/signal?x=<x>&y=<y>&z=<z>\n"
             )
         }
     }
