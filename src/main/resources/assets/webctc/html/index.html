@@ -75,7 +75,7 @@
                                                 let line = createLine(
                                                     startPosX, startPosZ,
                                                     endPosX, endPosZ)
-                                                line.setAttribute('stroke', isCache ? 'lightgray' : isTrainOnRail ? 'red' : 'white');
+                                                line.setAttribute('stroke', isTrainOnRail ? 'red' : 'white');
                                                 line.setAttribute('stroke-width', '1.5px');
                                                 svgParent.appendChild(line);
                                             }
@@ -97,8 +97,8 @@
                                         let p = (blockDirection * 90 - rotation + 360) % 360
                                         let fixX = (45 < p && p < 135) ? 3 : ((225 < p && p < 315) ? -3 : 0);
 
-                                        let posX = pos[0] - minX + marginX - 2
-                                        let posZ = pos[2] - minZ + marginZ - 2
+                                        let posX = pos[0] - minX + marginX
+                                        let posZ = pos[2] - minZ + marginZ
                                         let id = "signal," + pos[0] + "," + pos[2]
 
                                         let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
