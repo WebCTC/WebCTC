@@ -19,6 +19,7 @@ class RailRouter : WebCTCRouter() {
         }
         get("/rail") { req, res ->
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
             val x = req.getQuery("x").toIntOrNull()
             val y = req.getQuery("y").toIntOrNull()
             val z = req.getQuery("z").toIntOrNull()

@@ -11,6 +11,7 @@ class TrainsRouter : WebCTCRouter() {
     init {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
             res.send(
                 gson.toJson(
                     WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
@@ -24,6 +25,7 @@ class TrainsRouter : WebCTCRouter() {
             val entity = WebCTCCore.INSTANCE.server.entityWorld.getEntityByID(eId.toInt())
 
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
             res.send(gson.toJson(entity?.let { (it as? EntityTrainBase)?.toMutableMap() }))
         }
     }

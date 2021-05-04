@@ -10,6 +10,7 @@ class FormationsRouter : WebCTCRouter() {
     init {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
             res.send(gson.toJson(FormationManager.getInstance().formations.values.map(Formation::toMutableMap)))
         }
 
@@ -18,6 +19,7 @@ class FormationsRouter : WebCTCRouter() {
             val formation = FormationManager.getInstance().getFormation(formationId.toLong())
 
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
             res.send(gson.toJson(formation?.toMutableMap()))
         }
         get("/:formationId/trains") { req, res ->
@@ -25,6 +27,7 @@ class FormationsRouter : WebCTCRouter() {
             val formation = FormationManager.getInstance().getFormation(formationId.toLong())
 
             res.contentType = MediaType._json.mime
+            res.setHeader("Access-Control-Allow-Origin", "*")
             res.send(gson.toJson(formation?.let { it.entries.map { entry -> entry.train.toMutableMap() } }))
         }
     }
