@@ -4,6 +4,7 @@ import express.Express
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.storage.WorldSavedData
 import net.minecraftforge.common.config.Configuration
+import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.*
 import org.webctc.railcache.RailCacheData
@@ -30,8 +31,8 @@ class WebCTCCore {
     }
 
     @Mod.EventHandler
-    fun onServerStart(event: FMLServerStartingEvent) {
-        server = event.server
+    fun onServerStart(event: FMLServerStartedEvent) {
+        server = FMLCommonHandler.instance().minecraftServerInstance
         val world = server.entityWorld
 
         var railData = world.mapStorage?.getOrLoadData(RailCacheData::class.java, "webctc_railcache")
