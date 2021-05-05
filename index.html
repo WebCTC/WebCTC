@@ -141,7 +141,15 @@
                                                 .sort((a, b) => Number(a.getAttribute("yCoord")) < Number(b.getAttribute("yCoord")) ? -1 : 1)
                                                 .forEach((value, index) => {
                                                     let fixX = Number(value.getAttribute("fix"))
-                                                    if (fixX !== 0) {
+                                                    if(fixX === 0 && index == 0) {
+                                                        minus += (index - last) ? -1.5 : +1.5
+                                                        last = index
+                                                        fixX = circleArray[index + 1].getAttribute("fix") * -1
+                                                    } else if (fixX !== 0 && index != 0) {
+                                                        minus += (index - last) ? -1.5 : +1.5
+                                                        last = index
+                                                        fixX = 0;
+                                                    } else if (fixX !== 0) {
                                                         minus += (index - last) ? -1.5 : +1.5
                                                         last = index
                                                     } else if (index - last) {
@@ -153,7 +161,7 @@
                                                     value.setAttribute('cy', String(cy))
                                                     group.appendChild(value)
 
-                                                    if (fixX !== 0) {
+                                                    if (fixX !== 0 || fixX === 0 && index == 0) {
                                                         let polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
                                                         polyline.setAttribute('points',
                                                             (cx + 1.5 * cos) + "," + (cy - 1.5 * sin) + " " +
