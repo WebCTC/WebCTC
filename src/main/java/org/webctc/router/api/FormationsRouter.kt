@@ -4,6 +4,7 @@ import express.utils.MediaType
 import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.util.Formation
 import jp.ngt.rtm.entity.train.util.FormationManager
+import net.minecraft.entity.player.EntityPlayer
 import org.webctc.router.WebCTCRouter
 
 class FormationsRouter : WebCTCRouter() {
@@ -46,13 +47,14 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
                 "dir" to it.dir
             )
         }
-    val controlCar = (Formation::class.java.getDeclaredField("controlCar")
-        .apply { isAccessible = true }.get(this))
-    jsonMap["controlCar"] = controlCar?.let { (it as EntityTrainBase).entityId }
-    jsonMap["driver"] = controlCar?.let { (it as EntityTrainBase).riddenByEntity?.commandSenderName }
+    val controlCar: EntityTrainBase? = (Formation::class.java.getDeclaredField("controlCar")
+        .apply { isAccessible = true }.get(this) as? EntityTrainBase)
+    jsonMap["controlCar"] = controlCar?.entityId
+    val driver = controlCar?.riddenByEntity as? EntityPlayer
+    jsonMap["driver"] = driver?.commandSenderName
     jsonMap["direction"] = Formation::class.java.getDeclaredField("direction")
         .apply { isAccessible = true }.getByte(this)
-    jsonMap["speed"] = controlCar?.let { (it as EntityTrainBase).speed } ?: 0f
+    jsonMap["speed"] = controlCar?.speed ?: 0f
 
     return jsonMap
 }
