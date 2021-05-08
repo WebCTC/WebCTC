@@ -1,13 +1,18 @@
 package org.webctc
 
+import cpw.mods.fml.common.FMLCommonHandler
 import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.*
+import cpw.mods.fml.common.eventhandler.SubscribeEvent
+import cpw.mods.fml.common.gameevent.TickEvent
 import express.Express
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
-import org.webctc.cache.rail.RailCacheUpdateThread
-import org.webctc.cache.signal.SignalCacheUpdateThread
+import org.webctc.cache.rail.RailCacheData
+import org.webctc.cache.rail.RailCacheUpdate
+import org.webctc.cache.signal.SignalCacheData
+import org.webctc.cache.signal.SignalCacheUpdate
 import org.webctc.router.DefaultRouter
 import org.webctc.router.api.*
 
@@ -17,12 +22,13 @@ class WebCTCCore {
     lateinit var express: Express
     lateinit var railData: WorldSavedData
     lateinit var signalData: WorldSavedData
-    lateinit var railCacheUpdateThread: Thread
-    lateinit var signalCacheUpdateThread: Thread
+    lateinit var railCacheUpdate: RailCacheUpdate
+    lateinit var signalCacheUpdate: SignalCacheUpdate
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
         WebCTCConfig.preInit(Configuration(event.suggestedConfigurationFile))
+        FMLCommonHandler.instance().bus().register(this)
     }
 
     @Mod.EventHandler
@@ -36,6 +42,21 @@ class WebCTCCore {
     @Mod.EventHandler
     fun onServerStart(event: FMLServerStartedEvent) {
         server = MinecraftServer.getServer()
+        val world = server.entityWorld
+
+        var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache")
+        if (railData == null) {
+            railData = RailCacheData("webctc_railcache")
+            world.mapStorage.setData("webctc_railcache", railData)
+        }
+        this.railData = railData
+
+        var signalData = world.mapStorage.loadData(SignalCacheData::class.java, "webctc_signalcache")
+        if (signalData == null) {
+            signalData = SignalCacheData("webctc_signalcache")
+            world.mapStorage.setData("webctc_signalcache", signalData)
+        }
+        this.signalData = signalData
 
         express = object : Express() {
             init {
@@ -50,19 +71,27 @@ class WebCTCCore {
                 listen(WebCTCConfig.portNumber)
             }
         }
-        railCacheUpdateThread = RailCacheUpdateThread()
-        railCacheUpdateThread.start()
-        signalCacheUpdateThread = SignalCacheUpdateThread()
-        signalCacheUpdateThread.start()
+        railCacheUpdate = RailCacheUpdate()
+        signalCacheUpdate = SignalCacheUpdate()
     }
 
     @Mod.EventHandler
     fun onServerStop(event: FMLServerStoppingEvent) {
         express.stop()
-//        railData.markDirty()
-//        signalData.markDirty()
-        railCacheUpdateThread.interrupt()
-        signalCacheUpdateThread.interrupt()
+        railData.markDirty()
+        signalData.markDirty()
+    }
+
+    private var tickCount = 0
+
+    @SubscribeEvent
+    fun onServerTick(event: TickEvent.ServerTickEvent) {
+        tickCount++
+        if (tickCount == 20 && event.phase.equals(TickEvent.Phase.END)) {
+            railCacheUpdate.execute()
+            signalCacheUpdate.execute()
+            tickCount = 0
+        }
     }
 
     companion object {

@@ -43,8 +43,9 @@ fun TileEntitySignal.toMutableMap(): MutableMap<String, Any?> {
         jsonMap["signalLevel"] = NGTUtil.getField(TileEntitySignal::class.java, this, "signalLevel")
 //        jsonMap["signalType"] = getSignalTypes(this)
         jsonMap["blockDirection"] = this.blockDirection
-        jsonMap["modelname"] = this.modelName
+        jsonMap["modelName"] = this.modelName
     } catch (e: Exception) {
+        e.printStackTrace()
     }
 
     return jsonMap

@@ -22,7 +22,7 @@ abstract class CacheData(mapName: String) : WorldSavedData(mapName) {
         val tagList = nbt.getTagList(TAG_NAME, 10)
         for (i in 0 until tagList.tagCount()) {
             val tag = tagList.getCompoundTagAt(i)
-            val pos = Pos.readFromNBT(tag)
+            val pos = Pos.readFromNBT(tag.getCompoundTag("pos"))
             val json =
                 gson.fromJson<MutableMap<String, Any?>>(
                     tag.getString("json"),
@@ -35,8 +35,8 @@ abstract class CacheData(mapName: String) : WorldSavedData(mapName) {
     override fun writeToNBT(nbt: NBTTagCompound) {
         val tagList = NBTTagList()
         getMapCache().forEach {
-            tagList.appendTag(it.key.writeToNBT())
             val tag = NBTTagCompound()
+            tag.setTag("pos", it.key.writeToNBT())
             tag.setString("json", gson.toJson(it.value))
             tagList.appendTag(tag)
         }
