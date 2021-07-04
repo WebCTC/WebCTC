@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "webctc",
+  "name": "WebCTC",
+  "description": "No more need to build a complicated circuit and IC. Let's make CTC more easily with WebCTC !",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://github.com/WebCTC/WebCTC",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["Kaiz_JP", "masa0300"],
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
