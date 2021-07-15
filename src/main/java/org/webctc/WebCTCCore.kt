@@ -14,6 +14,7 @@ import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.signal.SignalCacheUpdate
 import org.webctc.router.DefaultRouter
+import org.webctc.router.RouterManager
 import org.webctc.router.api.*
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
@@ -33,6 +34,12 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
+        RouterManager.registerRouter("/", DefaultRouter())
+        RouterManager.registerRouter("/api", ApiRouter())
+        RouterManager.registerRouter("/api/formations", FormationsRouter())
+        RouterManager.registerRouter("/api/trains", TrainsRouter())
+        RouterManager.registerRouter("/api/rails", RailRouter())
+        RouterManager.registerRouter("/api/signals", SignalRouter())
     }
 
     @Mod.EventHandler
@@ -60,12 +67,7 @@ class WebCTCCore {
 
         express = object : Express() {
             init {
-                use("/", DefaultRouter())
-                use("/api", ApiRouter())
-                use("/api/formations", FormationsRouter())
-                use("/api/trains", TrainsRouter())
-                use("/api/rails", RailRouter())
-                use("/api/signals", SignalRouter())
+                RouterManager.routerMap.forEach { (path, router) -> use(path, router) }
                 all() { req, res -> res.send("URL is incorrect.") }
 
                 listen(WebCTCConfig.portNumber)
