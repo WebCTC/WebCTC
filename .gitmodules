@@ -1,4 +1,0 @@
-[submodule "src/main/resources/assets/webctc/html"]
-	path = src/main/resources/assets/webctc/html
-	url = https://github.com/WebCTC/WebCTCFrontend.git
-	branch = master

@@ -57,15 +57,7 @@ dependencies {
     embed 'org.jetbrains:annotations:20.1.0'
 }
 
-task submodulesUpdate(type:Exec) {
-    description 'Updates (and inits) git submodules'
-    commandLine 'git', 'submodule', 'foreach', 'git pull origin master'
-    commandLine 'git', 'submodule', 'update', '--remote'
-    group 'Build Setup'
-}
-
 processResources {
-    dependsOn submodulesUpdate
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
