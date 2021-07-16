@@ -49,10 +49,10 @@ repositories {
 
 dependencies {
     embed 'io.vacco.java-express:java-express:0.2.1'
-    implementation 'io.vacco.java-express:java-express:0.2.1'
+    api 'io.vacco.java-express:java-express:0.2.1'
 
-    implementation "curse.maven:ngtlib-288989:2940833"
-    implementation "curse.maven:realtrainmod-288988:3039063"
+    api "curse.maven:ngtlib-288989:2940833"
+    api "curse.maven:realtrainmod-288988:3039063"
 
     embed "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     embed 'org.jetbrains:annotations:20.1.0'
@@ -93,7 +93,7 @@ jar {
         }
     }
 
-    from(rootDir){
+    from(rootDir) {
         include 'README.md'
         include 'LICENSE'
     }
