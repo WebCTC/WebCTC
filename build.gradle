@@ -23,7 +23,7 @@ configurations {
     embed
     compile.extendsFrom(embed)
 }
-
+apply plugin: 'java-library'
 apply plugin: 'forge'
 apply plugin: 'kotlin'
 
