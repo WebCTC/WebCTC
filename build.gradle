@@ -25,7 +25,9 @@ configurations {
 }
 apply plugin: 'java-library'
 apply plugin: 'forge'
-apply plugin: 'kotlin'
+apply plugin: "java"
+apply plugin: "kotlin"
+apply plugin: "org.jetbrains.kotlin.jvm"
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
