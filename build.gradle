@@ -49,6 +49,7 @@ repositories {
 
 dependencies {
     embed 'io.vacco.java-express:java-express:0.2.1'
+    implementation 'io.vacco.java-express:java-express:0.2.1'
 
     implementation "curse.maven:ngtlib-288989:2940833"
     implementation "curse.maven:realtrainmod-288988:3039063"
