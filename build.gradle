@@ -21,7 +21,6 @@ buildscript {
 
 configurations {
     embed
-    compile.extendsFrom(embed)
 }
 apply plugin: 'java-library'
 apply plugin: 'forge'
@@ -84,14 +83,9 @@ task sourcesJar(type: Jar) {
 }
 
 jar {
-    dependsOn configurations.compile
-    from {
-        configurations.embed.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-    configurations.embed.each { dep ->
-        from(project.zipTree(dep)) {
+    configurations.embed.each {dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
         }
     }
 
