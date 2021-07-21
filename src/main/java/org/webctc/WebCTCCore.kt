@@ -34,7 +34,6 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
-        RouterManager.registerRouter("/", DefaultRouter())
         RouterManager.registerRouter("/api", ApiRouter())
         RouterManager.registerRouter("/api/formations", FormationsRouter())
         RouterManager.registerRouter("/api/trains", TrainsRouter())
@@ -68,6 +67,7 @@ class WebCTCCore {
         express = object : Express() {
             init {
                 RouterManager.routerMap.forEach { (path, router) -> use(path, router) }
+                use("/", DefaultRouter())
                 all() { req, res -> res.send("URL is incorrect.") }
 
                 listen(WebCTCConfig.portNumber)
