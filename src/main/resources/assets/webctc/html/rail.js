@@ -1,3 +1,8 @@
+const RAIL_DATA_URL = '/api/rails/'
+const SIGNAL_DATA_URL = '/api/signals/'
+
+let globalScale = 1.0;
+
 async function updateRail(svg, viewBoxChange) {
     let minX = 0;
     let minZ = 0;
