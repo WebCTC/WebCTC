@@ -20,7 +20,7 @@ import org.webctc.router.api.*
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
     lateinit var server: MinecraftServer
-    lateinit var express: Express
+    var express: Express? = null
     lateinit var railData: WorldSavedData
     lateinit var signalData: WorldSavedData
     lateinit var railCacheUpdate: RailCacheUpdate
@@ -64,22 +64,24 @@ class WebCTCCore {
         }
         this.signalData = signalData
 
-        express = object : Express() {
-            init {
-                RouterManager.routerMap.forEach { (path, router) -> use(path, router) }
-                use("/", DefaultRouter())
-                all() { req, res -> res.send("URL is incorrect.") }
+        if (express == null) {
+            express = object : Express() {
+                init {
+                    RouterManager.routerMap.forEach { (path, router) -> use(path, router) }
+                    use("/", DefaultRouter())
+                    all() { req, res -> res.send("URL is incorrect.") }
 
-                listen(WebCTCConfig.portNumber)
+                }
             }
         }
+        express!!.listen(WebCTCConfig.portNumber)
         railCacheUpdate = RailCacheUpdate()
         signalCacheUpdate = SignalCacheUpdate()
     }
 
     @Mod.EventHandler
     fun onServerStop(event: FMLServerStoppingEvent) {
-        express.stop()
+        express?.stop()
         railData.markDirty()
         signalData.markDirty()
     }
