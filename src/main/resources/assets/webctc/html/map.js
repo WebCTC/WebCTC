@@ -74,12 +74,12 @@ async function updateRail(svg, viewBoxChange) {
                         svg.appendChild(group)
                     }
                 });
-
-                document.querySelectorAll("[id$='flag']").forEach(group => group.remove())
             }))
         .then(await fetch(SIGNAL_DATA_URL)
             .then(res => res.json())
             .then(json => {
+                document.querySelectorAll("[id^='signal']").forEach(group => group.id += "flag")
+
                 json.forEach(signal => {
                     let pos = signal["pos"]
                     let rotation = signal["rotation"]
@@ -92,11 +92,11 @@ async function updateRail(svg, viewBoxChange) {
 
                     let posX = pos[0] - minX + marginX
                     let posZ = pos[2] - minZ + marginZ
-                    let id = "signal," + pos[0] + "," + pos[1] + "," + pos[2] + ","
+                    let id = "signal," + pos[0] + "," + pos[2] + ","
 
                     let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
 
-                    let group = svg.getElementById(id)
+                    let group = svg.getElementById(id + "flag") || svg.getElementById(id)
                     if (group == null) {
                         group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
                         group.id = id
@@ -121,6 +121,7 @@ async function updateRail(svg, viewBoxChange) {
                         group.appendChild(baseLine);
                         svg.appendChild(group);
                     } else {
+                        group.id = id
                         let minus = 0
                         let last;
                         let circleArray = Array.from(group.getElementsByTagName('circle'))
@@ -130,7 +131,10 @@ async function updateRail(svg, viewBoxChange) {
                         }
                         support.innerHTML = ""
 
-                        circleArray.push(circle)
+                        if (circleArray.find(c => Number(c.getAttribute("yCoord")) === pos[1]) == null) {
+                            circleArray.push(circle)
+                        }
+
                         circleArray
                             .sort((a, b) => Number(a.getAttribute("yCoord")) < Number(b.getAttribute("yCoord")) ? -1 : 1)
                             .forEach((value, index) => {
@@ -138,7 +142,7 @@ async function updateRail(svg, viewBoxChange) {
                                 if (fixX === 0 && index === 0) {
                                     minus += (index - last) ? -1.5 : +1.5
                                     last = index
-                                    fixX = circleArray[index + 1].getAttribute("fix") * -1
+                                    fixX = Number(circleArray[index + 1].getAttribute("fix")) * -1
                                 } else if (fixX !== 0 && index !== 0) {
                                     minus += (index - last) ? -1.5 : +1.5
                                     last = index
@@ -151,8 +155,8 @@ async function updateRail(svg, viewBoxChange) {
                                 }
                                 let cx = posX - (3.5 * index + minus) * cos - fixX * sin
                                 let cy = posZ + (3.5 * index + minus) * sin - fixX * cos
-                                value.setAttribute('cx', String(cx))
-                                value.setAttribute('cy', String(cy))
+                                value.setAttribute('cx', cx)
+                                value.setAttribute('cy', cy)
                                 group.appendChild(value)
 
                                 if (fixX !== 0 || fixX === 0 && index === 0) {
@@ -172,14 +176,16 @@ async function updateRail(svg, viewBoxChange) {
                         Array.from(group.getElementsByTagName('line'))
                             .filter(line => line.getAttribute("name") === "verticalLine")
                             .find(line => {
-                                line.setAttribute('x1', String(posX + (1.5 - 2.5 * circleArray.length - minus) * cos));
-                                line.setAttribute('y1', String(posZ - (1.5 - 2.5 * circleArray.length - minus) * sin));
+                                line.setAttribute('x1', posX + (1.5 - 2.5 * circleArray.length - minus) * cos);
+                                line.setAttribute('y1', posZ - (1.5 - 2.5 * circleArray.length - minus) * sin);
                             })
                         group.appendChild(support);
                     }
                 });
             }))
         .then(() => {
+            document.querySelectorAll(`[id$='flag']`).forEach(group => group.remove())
+
             svg.weight = maxX - minX
             svg.height = maxZ - minZ
             if (viewBoxChange) {
@@ -211,10 +217,10 @@ function getSignalColor(signalLevel) {
 
 function createSignalCircle(posX, yCoord, posZ, signalLevel, fixX) {
     let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('yCoord', String(yCoord))
-    circle.setAttribute('fix', String(fixX))
-    circle.setAttribute('cx', String(posX))
-    circle.setAttribute('cy', String(posZ))
+    circle.setAttribute('yCoord', yCoord)
+    circle.setAttribute('fix', fixX)
+    circle.setAttribute('cx', posX)
+    circle.setAttribute('cy', posZ)
     circle.setAttribute('r', "1.5px")
     circle.setAttribute('fill', getSignalColor(signalLevel))
     circle.setAttribute('stroke', "lightgray")
