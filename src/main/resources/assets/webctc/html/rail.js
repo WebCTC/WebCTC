@@ -11,14 +11,6 @@ async function updateRail(svg, viewBoxChange) {
     let marginX = window.innerWidth / 10;
     let marginZ = window.innerHeight / 10;
     let scale = 1;
-    let signals = document.getElementById("signals");
-    if (signals != null) {
-        signals.innerHTML = ""
-    } else {
-        signals = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        signals.id = "signals"
-        svg.appendChild(signals)
-    }
 
     Promise.resolve()
         .then(await fetch(RAIL_DATA_URL)
@@ -104,7 +96,7 @@ async function updateRail(svg, viewBoxChange) {
 
                     let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
 
-                    let group = signals.getElementById(id)
+                    let group = svg.getElementById(id)
                     if (group == null) {
                         group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
                         group.id = id
@@ -127,7 +119,7 @@ async function updateRail(svg, viewBoxChange) {
                         baseLine.setAttribute('stroke-width', '0.5px');
                         baseLine.setAttribute('name', 'horizontalLine');
                         group.appendChild(baseLine);
-                        signals.appendChild(group);
+                        svg.appendChild(group);
                     } else {
                         let minus = 0
                         let last;
