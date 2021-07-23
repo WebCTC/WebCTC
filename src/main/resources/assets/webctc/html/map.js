@@ -131,7 +131,7 @@ async function updateRail(svg, viewBoxChange) {
                         }
                         support.innerHTML = ""
 
-                        if (circleArray.find(c => Number(c.getAttribute("yCoord")) === pos[1]) == null) {
+                        if (circleArray.find(c => Number(c.getAttribute("yCoord")) === Number(pos[1])) == null) {
                             circleArray.push(circle)
                         }
 
