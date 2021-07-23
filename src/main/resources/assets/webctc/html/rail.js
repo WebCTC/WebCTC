@@ -42,6 +42,9 @@ async function updateRail(svg, viewBoxChange) {
                 scale = Math.min(scaleX, scaleZ)
                 json.forEach(railCore => {
                     let isTrainOnRail = railCore["isTrainOnRail"]
+                    let group = document.createElement('g')
+                    let pos = railCore["pos"];
+                    group.id = "rail," + pos[0] + "," + pos[1] + "," + pos[2]
                     railCore["railMaps"].forEach(railMap => {
                         let startRP = railMap["startRP"];
                         let endRP = railMap["endRP"];
@@ -55,9 +58,10 @@ async function updateRail(svg, viewBoxChange) {
                                 endPosX, endPosZ)
                             line.setAttribute('stroke', isTrainOnRail ? 'red' : 'white');
                             line.setAttribute('stroke-width', '1.5px');
-                            svgParent.appendChild(line);
+                            group.appendChild(line)
                         }
                     });
+                    svgParent.appendChild(group)
                 });
             }))
         .then(await fetch(SIGNAL_DATA_URL)
@@ -75,12 +79,12 @@ async function updateRail(svg, viewBoxChange) {
 
                     let posX = pos[0] - minX + marginX
                     let posZ = pos[2] - minZ + marginZ
-                    let id = "signal," + pos[0] + "," + pos[2]
+                    let id = "signal," + pos[0] + "," + pos[1] + "," + pos[2]
 
                     let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
 
-                    let group
-                    if ((group = svgParent.getElementById(id)) == null) {
+                    let group = svgParent.getElementById(id)
+                    if (group == null) {
                         group = document.createElement('g')
                         group.id = id
                         group.appendChild(circle)
