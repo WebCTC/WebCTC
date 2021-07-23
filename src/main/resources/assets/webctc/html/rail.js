@@ -11,7 +11,15 @@ async function updateRail(svg, viewBoxChange) {
     let marginX = window.innerWidth / 10;
     let marginZ = window.innerHeight / 10;
     let scale = 1;
-    let svgParent = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    let signals = document.getElementById("signals");
+    if (signals != null) {
+        signals.innerHTML = ""
+    } else {
+        signals = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        signals.id = "signals"
+        svg.appendChild(signals)
+    }
+
     Promise.resolve()
         .then(await fetch(RAIL_DATA_URL)
             .then(res => res.json())
@@ -40,29 +48,42 @@ async function updateRail(svg, viewBoxChange) {
                 let scaleX = window.innerWidth * 4 / 5 / (maxX - minX)
                 let scaleZ = window.innerHeight * 4 / 5 / (maxZ - minZ)
                 scale = Math.min(scaleX, scaleZ)
+
+                document.querySelectorAll("[id^='rail']").forEach(group => group.id += "flag")
+
                 json.forEach(railCore => {
-                    let isTrainOnRail = railCore["isTrainOnRail"]
-                    let group = document.createElement('g')
                     let pos = railCore["pos"];
-                    group.id = "rail," + pos[0] + "," + pos[1] + "," + pos[2]
-                    railCore["railMaps"].forEach(railMap => {
-                        let startRP = railMap["startRP"];
-                        let endRP = railMap["endRP"];
-                        if (startRP != null && endRP != null) {
-                            let startPosX = startRP["posX"] - minX + marginX
-                            let startPosZ = startRP["posZ"] - minZ + marginZ
-                            let endPosX = endRP["posX"] - minX + marginX
-                            let endPosZ = endRP["posZ"] - minZ + marginZ;
-                            let line = createLine(
-                                startPosX, startPosZ,
-                                endPosX, endPosZ)
-                            line.setAttribute('stroke', isTrainOnRail ? 'red' : 'white');
-                            line.setAttribute('stroke-width', '1.5px');
-                            group.appendChild(line)
-                        }
-                    });
-                    svgParent.appendChild(group)
+                    let id = "rail," + pos[0] + "," + pos[1] + "," + pos[2] + ","
+                    let isTrainOnRail = railCore["isTrainOnRail"]
+
+                    let group = document.getElementById(id + "flag")
+                    if (group != null) {
+                        group.setAttribute('stroke', isTrainOnRail ? 'red' : 'white')
+                        group.id = id
+                    } else {
+                        group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+                        group.id = id
+                        group.setAttribute('stroke', isTrainOnRail ? 'red' : 'white');
+                        group.setAttribute('stroke-width', '1.5px');
+                        railCore["railMaps"].forEach(railMap => {
+                            let startRP = railMap["startRP"];
+                            let endRP = railMap["endRP"];
+                            if (startRP != null && endRP != null) {
+                                let startPosX = startRP["posX"] - minX + marginX
+                                let startPosZ = startRP["posZ"] - minZ + marginZ
+                                let endPosX = endRP["posX"] - minX + marginX
+                                let endPosZ = endRP["posZ"] - minZ + marginZ;
+                                let line = createLine(
+                                    startPosX, startPosZ,
+                                    endPosX, endPosZ)
+                                group.appendChild(line)
+                            }
+                        });
+                        svg.appendChild(group)
+                    }
                 });
+
+                document.querySelectorAll("[id$='flag']").forEach(group => group.remove())
             }))
         .then(await fetch(SIGNAL_DATA_URL)
             .then(res => res.json())
@@ -79,13 +100,13 @@ async function updateRail(svg, viewBoxChange) {
 
                     let posX = pos[0] - minX + marginX
                     let posZ = pos[2] - minZ + marginZ
-                    let id = "signal," + pos[0] + "," + pos[1] + "," + pos[2]
+                    let id = "signal," + pos[0] + "," + pos[1] + "," + pos[2] + ","
 
                     let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
 
-                    let group = svgParent.getElementById(id)
+                    let group = signals.getElementById(id)
                     if (group == null) {
-                        group = document.createElement('g')
+                        group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
                         group.id = id
                         group.appendChild(circle)
 
@@ -106,6 +127,7 @@ async function updateRail(svg, viewBoxChange) {
                         baseLine.setAttribute('stroke-width', '0.5px');
                         baseLine.setAttribute('name', 'horizontalLine');
                         group.appendChild(baseLine);
+                        signals.appendChild(group);
                     } else {
                         let minus = 0
                         let last;
@@ -163,7 +185,6 @@ async function updateRail(svg, viewBoxChange) {
                             })
                         group.appendChild(support);
                     }
-                    svgParent.appendChild(group);
                 });
             }))
         .then(() => {
@@ -173,7 +194,6 @@ async function updateRail(svg, viewBoxChange) {
                 svg.setAttribute("viewBox", "0 0 " + (window.innerWidth / scale) + " " + (window.innerHeight / scale))
                 globalScale = 1 / scale
             }
-            svg.innerHTML = svgParent.innerHTML
         })
 }
 
