@@ -135,44 +135,46 @@ async function updateRail(svg, viewBoxChange) {
                             circleArray.push(circle)
                         }
 
-                        circleArray
-                            .sort((a, b) => Number(a.getAttribute("yCoord")) < Number(b.getAttribute("yCoord")) ? -1 : 1)
-                            .forEach((value, index) => {
-                                let fixX = Number(value.getAttribute("fix"))
-                                if (fixX === 0 && index === 0) {
-                                    minus += (index - last) ? -1.5 : +1.5
-                                    last = index
-                                    fixX = Number(circleArray[index + 1].getAttribute("fix")) * -1
-                                } else if (fixX !== 0 && index !== 0) {
-                                    minus += (index - last) ? -1.5 : +1.5
-                                    last = index
-                                    fixX = 0;
-                                } else if (fixX !== 0) {
-                                    minus += (index - last) ? -1.5 : +1.5
-                                    last = index
-                                } else if (index - last) {
-                                    minus -= 1.0
-                                }
-                                let cx = posX - (3.5 * index + minus) * cos - fixX * sin
-                                let cy = posZ + (3.5 * index + minus) * sin - fixX * cos
-                                value.setAttribute('cx', cx)
-                                value.setAttribute('cy', cy)
-                                group.appendChild(value)
+                        if (circleArray.length > 1) {
+                            circleArray
+                                .sort((a, b) => Number(a.getAttribute("yCoord")) < Number(b.getAttribute("yCoord")) ? -1 : 1)
+                                .forEach((value, index) => {
+                                    let fixX = Number(value.getAttribute("fix"))
+                                    if (fixX === 0 && index === 0) {
+                                        minus += (index - last) ? -1.5 : +1.5
+                                        last = index
+                                        fixX = Number(circleArray[index + 1].getAttribute("fix")) * -1
+                                    } else if (fixX !== 0 && index !== 0) {
+                                        minus += (index - last) ? -1.5 : +1.5
+                                        last = index
+                                        fixX = 0;
+                                    } else if (fixX !== 0) {
+                                        minus += (index - last) ? -1.5 : +1.5
+                                        last = index
+                                    } else if (index - last) {
+                                        minus -= 1.0
+                                    }
+                                    let cx = posX - (3.5 * index + minus) * cos - fixX * sin
+                                    let cy = posZ + (3.5 * index + minus) * sin - fixX * cos
+                                    value.setAttribute('cx', cx)
+                                    value.setAttribute('cy', cy)
+                                    group.appendChild(value)
 
-                                if (fixX !== 0 || fixX === 0 && index === 0) {
-                                    let polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-                                    polyline.setAttribute('points',
-                                        (cx + 1.5 * cos) + "," + (cy - 1.5 * sin) + " " +
-                                        (cx + 3 * cos) + "," + (cy - 3 * sin) + " " +
-                                        (cx + 3 * cos + fixX * sin) + "," + (cy - 3 * sin + fixX * cos)
-                                    );
-                                    polyline.setAttribute('stroke', 'lightgray');
-                                    polyline.setAttribute('stroke-width', '0.5px');
-                                    polyline.setAttribute('name', 'holizonalLine');
-                                    polyline.setAttribute('fill', 'none');
-                                    support.appendChild(polyline);
-                                }
-                            })
+                                    if (fixX !== 0 || fixX === 0 && index === 0) {
+                                        let polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                                        polyline.setAttribute('points',
+                                            (cx + 1.5 * cos) + "," + (cy - 1.5 * sin) + " " +
+                                            (cx + 3 * cos) + "," + (cy - 3 * sin) + " " +
+                                            (cx + 3 * cos + fixX * sin) + "," + (cy - 3 * sin + fixX * cos)
+                                        );
+                                        polyline.setAttribute('stroke', 'lightgray');
+                                        polyline.setAttribute('stroke-width', '0.5px');
+                                        polyline.setAttribute('name', 'holizonalLine');
+                                        polyline.setAttribute('fill', 'none');
+                                        support.appendChild(polyline);
+                                    }
+                                })
+                        }
                         Array.from(group.getElementsByTagName('line'))
                             .filter(line => line.getAttribute("name") === "verticalLine")
                             .find(line => {
