@@ -31,7 +31,7 @@ apply plugin: "org.jetbrains.kotlin.jvm"
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
-version = "1.7.10-latest"
+version = "1.7.10-SNAPSHOT"
 group = "org.webctc"
 archivesBaseName = "WebCTC"
 
