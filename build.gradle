@@ -80,11 +80,11 @@ task sourcesJar(type: Jar) {
 }
 
 jar {
-//    configurations.embed.each {dep ->
-//        from(project.zipTree(dep)){
-//            exclude 'META-INF', 'META-INF/**'
-//        }
-//    }
+    configurations.embed.each {dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
 
     from(rootDir) {
         include 'README.md'
