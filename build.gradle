@@ -54,9 +54,6 @@ dependencies {
 
     api "curse.maven:ngtlib-288989:2940833"
     api "curse.maven:realtrainmod-288988:3039063"
-
-    embed "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    embed 'org.jetbrains:annotations:20.1.0'
 }
 
 processResources {
