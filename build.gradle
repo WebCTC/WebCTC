@@ -46,11 +46,14 @@ repositories {
     maven {
         url "https://www.cursemaven.com"
     }
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    embed 'io.vacco.java-express:java-express:0.2.1'
-    api 'io.vacco.java-express:java-express:0.2.1'
+    embed 'com.github.Kai-Z-JP:java-express:d74e391f'
+    api 'com.github.Kai-Z-JP:java-express:d74e391f'
 
     api "curse.maven:ngtlib-288989:2940833"
     api "curse.maven:realtrainmod-288988:3039063"
@@ -80,8 +83,8 @@ task sourcesJar(type: Jar) {
 }
 
 jar {
-    configurations.embed.each {dep ->
-        from(project.zipTree(dep)){
+    configurations.embed.each { dep ->
+        from(project.zipTree(dep)) {
             exclude 'META-INF', 'META-INF/**'
         }
     }
