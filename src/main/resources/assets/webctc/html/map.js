@@ -8,8 +8,8 @@ async function updateRail(svg, viewBoxChange) {
     let minZ = 0;
     let maxX = 0;
     let maxZ = 0;
-    let marginX = window.innerWidth / 10;
-    let marginZ = window.innerHeight / 10;
+    let marginX = svg.clientWidth / 10;
+    let marginZ = svg.clientHeight / 10;
     let scale = 1;
 
     Promise.resolve()
@@ -37,8 +37,8 @@ async function updateRail(svg, viewBoxChange) {
                 maxX = Math.max(...xCoords)
                 minZ = Math.min(...zCoords)
                 maxZ = Math.max(...zCoords)
-                let scaleX = window.innerWidth * 4 / 5 / (maxX - minX)
-                let scaleZ = window.innerHeight * 4 / 5 / (maxZ - minZ)
+                let scaleX = svg.clientWidth * 4 / 5 / (maxX - minX)
+                let scaleZ = svg.clientHeight * 4 / 5 / (maxZ - minZ)
                 scale = Math.min(scaleX, scaleZ)
 
                 document.querySelectorAll("[id^='rail']").forEach(group => group.id += "flag")
@@ -188,10 +188,10 @@ async function updateRail(svg, viewBoxChange) {
         .then(() => {
             document.querySelectorAll(`[id$='flag']`).forEach(group => group.remove())
 
-            svg.weight = maxX - minX
-            svg.height = maxZ - minZ
+            svg.clientWidth = maxX - minX
+            svg.clientHeight = maxZ - minZ
             if (viewBoxChange) {
-                svg.setAttribute("viewBox", "0 0 " + (window.innerWidth / scale) + " " + (window.innerHeight / scale))
+                svg.setAttribute("viewBox", "0 0 " + (svg.clientWidth / scale) + " " + (svg.clientHeight / scale))
                 globalScale = 1 / scale
             }
         })
