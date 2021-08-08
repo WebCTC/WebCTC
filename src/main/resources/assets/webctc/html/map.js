@@ -131,8 +131,11 @@ async function updateRail(svg, viewBoxChange) {
                         }
                         support.innerHTML = ""
 
-                        if (circleArray.find(c => Number(c.getAttribute("yCoord")) === Number(pos[1])) == null) {
+                        let circleCache = circleArray.find(c => Number(c.getAttribute("yCoord")) === Number(pos[1]))
+                        if (circleCache.length === 0) {
                             circleArray.push(circle)
+                        } else {
+                            circleCache[0].setAttribute('fill', getSignalColor(signalLevel))
                         }
 
                         if (circleArray.length > 1) {
