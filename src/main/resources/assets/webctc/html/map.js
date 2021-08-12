@@ -1,5 +1,7 @@
 const RAIL_DATA_URL = '/api/rails/'
 const SIGNAL_DATA_URL = '/api/signals/'
+const FORMATION_DATA_URL = '/api/formations/'
+const TRAIN_DATA_URL = '/api/trains/'
 
 let globalScale = 1.0;
 
@@ -187,6 +189,49 @@ async function updateRail(svg, viewBoxChange) {
                         group.appendChild(support);
                     }
                 });
+            }))
+        .then(await fetch(FORMATION_DATA_URL)
+            .then(res => res.json())
+            .then(json => {
+                document.querySelectorAll("[id^='formation']").forEach(group => group.id += "flag")
+                json.forEach(formation => {
+                    if (formation["controlCar"] != null) {
+                        let id = "formation," + formation["id"] + ","
+                        let group = svg.getElementById(id + "flag") || svg.getElementById(id)
+
+                        if (group == null) {
+                            group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+                            svg.appendChild(group)
+                        }
+                        group.id = id
+                        fetch(TRAIN_DATA_URL + formation["controlCar"])
+                            .then(res => res.json())
+                            .then(json => {
+                                group.innerHTML = ""
+                                let pos = json["pos"]
+                                let posX = pos[0] - minX + marginX
+                                let posZ = pos[2] - minZ + marginZ
+
+                                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                rect.setAttribute('x', String(posX - 3))
+                                rect.setAttribute('y', String(posZ - 3))
+                                rect.setAttribute('width', "6px")
+                                rect.setAttribute('height', "6px")
+                                rect.setAttribute('fill', "YELLOW")
+                                rect.setAttribute('stroke', "GRAY")
+                                group.appendChild(rect)
+
+                                let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                text.textContent = json["driver"]
+                                text.setAttribute('x', String(posX + 3))
+                                text.setAttribute('y', String(posZ + 2))
+                                text.setAttribute('font-size', "8")
+                                text.setAttribute('font-weight', "bold")
+                                text.setAttribute('fill', "black")
+                                group.appendChild(text)
+                            })
+                    }
+                })
             }))
         .then(() => {
             document.querySelectorAll(`[id$='flag']`).forEach(group => group.remove())
