@@ -1,6 +1,8 @@
 package org.webctc.router.api
 
 import express.utils.MediaType
+import jp.ngt.rtm.CommonProxy
+import jp.ngt.rtm.RTMCore
 import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.util.Formation
 import jp.ngt.rtm.entity.train.util.FormationManager
@@ -12,12 +14,12 @@ class FormationsRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(FormationManager.getInstance().formations.values.map(Formation::toMutableMap)))
+            res.send(gson.toJson(this.getServerFormationManager().formations.values.map(Formation::toMutableMap)))
         }
 
         get("/:formationId") { req, res ->
             val formationId = req.getParam("formationId")
-            val formation = FormationManager.getInstance().getFormation(formationId.toLong())
+            val formation = this.getServerFormationManager().getFormation(formationId.toLong())
 
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
@@ -25,12 +27,18 @@ class FormationsRouter : WebCTCRouter() {
         }
         get("/:formationId/trains") { req, res ->
             val formationId = req.getParam("formationId")
-            val formation = FormationManager.getInstance().getFormation(formationId.toLong())
+            val formation = this.getServerFormationManager().getFormation(formationId.toLong())
 
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
             res.send(gson.toJson(formation?.let { it.entries.map { entry -> entry.train.toMutableMap() } }))
         }
+    }
+
+    private fun getServerFormationManager(): FormationManager {
+        return CommonProxy::class.java.getDeclaredField("fm")
+            .apply { isAccessible = true }
+            .get(RTMCore.proxy) as FormationManager
     }
 }
 
@@ -39,16 +47,15 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
 
     jsonMap["id"] = this.id
     jsonMap["entries"] = this.entries
-        .filterNotNull()
-        .map {
+        .mapNotNull {
             mutableMapOf<String, Any?>(
                 "train" to (it.train?.entityId ?: 0),
                 "entryId" to it.entryId,
                 "dir" to it.dir
             )
         }
-    val controlCar: EntityTrainBase? = (Formation::class.java.getDeclaredField("controlCar")
-        .apply { isAccessible = true }.get(this) as? EntityTrainBase)
+    val controlCar: EntityTrainBase? = Formation::class.java.getDeclaredMethod("getControlCar")
+        .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
     jsonMap["controlCar"] = controlCar?.entityId
     val driver = controlCar?.riddenByEntity as? EntityPlayer
     jsonMap["driver"] = driver?.commandSenderName

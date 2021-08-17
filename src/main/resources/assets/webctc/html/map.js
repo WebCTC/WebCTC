@@ -207,6 +207,10 @@ async function updateRail(svg, viewBoxChange) {
                         fetch(TRAIN_DATA_URL + formation["controlCar"])
                             .then(res => res.json())
                             .then(json => {
+                                if (json == null) {
+                                    group.remove()
+                                    return;
+                                }
                                 group.innerHTML = ""
                                 let pos = json["pos"]
                                 let posX = pos[0] - minX + marginX
