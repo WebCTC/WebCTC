@@ -98,7 +98,7 @@ class WebCTCCore {
 
     companion object {
         const val MODID = "webctc"
-        const val VERSION = "0.0.1"
+        const val VERSION = "0.0.2"
 
         @Mod.Instance
         lateinit var INSTANCE: WebCTCCore
