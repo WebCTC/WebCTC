@@ -17,4 +17,22 @@ data class Pos(val x: Int, val y: Int, val z: Int) {
         tag.setInteger("z", this.z)
         return tag
     }
+
+    override fun hashCode(): Int {
+        return (this.y + this.z * 31) * 31 + this.x
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Pos
+
+        if (x != other.x) return false
+        if (y != other.y) return false
+        if (z != other.z) return false
+
+        return true
+    }
+
 }
