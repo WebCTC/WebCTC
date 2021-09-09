@@ -195,7 +195,7 @@ async function updateRail(svg, viewBoxChange) {
             .then(json => {
                 document.querySelectorAll("[id^='formation']").forEach(group => group.id += "flag")
                 json.forEach(formation => {
-                    if (formation["controlCar"] != null) {
+                    if (formation != null && formation["controlCar"] != null) {
                         let id = "formation," + formation["id"] + ","
                         let group = svg.getElementById(id + "flag") || svg.getElementById(id)
 
