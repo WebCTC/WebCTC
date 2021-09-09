@@ -14,7 +14,7 @@ class FormationsRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(this.getServerFormationManager().formations.values.map(Formation::toMutableMap)))
+            res.send(gson.toJson(this.getServerFormationManager().formations.values.mapNotNull { Formation::toMutableMap }))
         }
 
         get("/:formationId") { req, res ->
@@ -31,7 +31,7 @@ class FormationsRouter : WebCTCRouter() {
 
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(formation?.let { it.entries.map { entry -> entry.train.toMutableMap() } }))
+            res.send(gson.toJson(formation?.let { it.entries.mapNotNull { entry -> entry.train.toMutableMap() } }))
         }
     }
 
@@ -54,7 +54,7 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
                 "dir" to it.dir
             )
         }
-    val controlCar: EntityTrainBase? = Formation::class.java.getDeclaredMethod("getControlCar")
+    val controlCar = Formation::class.java.getDeclaredMethod("getControlCar")
         .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
     jsonMap["controlCar"] = controlCar?.entityId
     val driver = controlCar?.riddenByEntity as? EntityPlayer
