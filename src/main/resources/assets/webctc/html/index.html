@@ -12,11 +12,54 @@
             background-color: darkslategray;
             height: 100%;
             margin: 0;
+            position: relative;
+        }
+
+        #loader,
+        #loader:after {
+            border-radius: 50%;
+            width: 5em;
+            height: 5em;
+        }
+
+        #loader {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: auto;
+            position: absolute;
+            border-top: 0.5em solid rgba(255, 255, 255, 0.2);
+            border-right: 0.5em solid rgba(255, 255, 255, 0.2);
+            border-bottom: 0.5em solid rgba(255, 255, 255, 0.2);
+            border-left: 0.5em solid #ffffff;
+            animation: load 1.1s infinite ease;
+        }
+
+        @keyframes load {
+            0% {
+                transform: rotate(90deg);
+            }
+            100% {
+                transform: rotate(450deg);
+            }
+        }
+
+        #svg {
+            visibility: hidden;
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             let svg = document.getElementById('svg');
+            try {
+                await updateRail(svg, true)
+            } catch (e) {
+                alert("Error!"
+                    + "\n" + e);
+                return;
+            }
+
             svg.onwheel = (event) => {
                 let viewBoxValues = svg.getAttribute("viewBox").split(" ");
                 let scale = event.deltaY > 0 ? 1.1 : 0.9
@@ -46,12 +89,26 @@
             svg.onmousedown = () => document.addEventListener("mousemove", onMouseMove);
             svg.onmouseup = () => document.removeEventListener("mousemove", onMouseMove);
 
-            window.addEventListener('resize', () => {
+            let timer;
+            let startTimer = () => timer = setInterval(() => updateRail(svg, false), 1000);
+            let stopTimer = () => clearInterval(timer)
+            const _sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            window.onresize = async () => {
+                document.getElementById('loader').style.display = "block";
+                svg.style.visibility = "hidden"
+                stopTimer()
+                await _sleep(1000);
                 svg.innerHTML = "";
-                updateRail(svg, true);
-            }, false);
-            updateRail(svg, true)
-            setInterval(() => updateRail(svg, false), 1000);
+                await updateRail(svg, true);
+                startTimer()
+                svg.style.visibility = "visible"
+                document.getElementById('loader').style.display = "none";
+            }
+            startTimer();
+            await _sleep(1000);
+            document.getElementById('loader').style.display = "none";
+            svg.style.visibility = "visible"
         });
     </script>
     <script src="https://cdn.jsdelivr.net/gh/webctc/webctc@1.7.10/src/main/resources/assets/webctc/html/map.min.js">
@@ -60,6 +117,7 @@
 </head>
 
 <body>
+<div id="loader"></div>
 <svg id="svg" width=100% height=100% xmlns="http://www.w3.org/2000/svg">
 </svg>
 </body>
