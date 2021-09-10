@@ -4,56 +4,58 @@ const FORMATION_DATA_URL = '/api/formations/'
 const TRAIN_DATA_URL = '/api/trains/'
 
 let globalScale = 1.0;
+let minX = 0;
+let minZ = 0;
+let maxX = 0;
+let maxZ = 0;
+let scale = 1;
 
 async function updateRail(svg, viewBoxChange) {
-    let minX = 0;
-    let minZ = 0;
-    let maxX = 0;
-    let maxZ = 0;
     let marginX = svg.clientWidth / 10;
     let marginZ = svg.clientHeight / 10;
-    let scale = 1;
 
     Promise.resolve()
         .then(await fetch(RAIL_DATA_URL)
             .then(res => res.json())
             .then(json => {
-                let xCoords = [];
-                let zCoords = [];
-                json.forEach(railCore => {
-                    railCore["railMaps"].forEach(railMap => {
-                        let startRP = railMap["startRP"];
-                        if (startRP != null) {
-                            xCoords.push(startRP["posX"])
-                            zCoords.push(startRP["posZ"])
-                        }
+                if (viewBoxChange) {
+                    let xCoords = [];
+                    let zCoords = [];
+                    json.forEach(railCore => {
+                        railCore["railMaps"].forEach(railMap => {
+                            let startRP = railMap["startRP"];
+                            if (startRP != null) {
+                                xCoords.push(startRP["posX"])
+                                zCoords.push(startRP["posZ"])
+                            }
 
-                        let endRP = railMap["endRP"];
-                        if (endRP != null) {
-                            xCoords.push(endRP["posX"])
-                            zCoords.push(endRP["posZ"])
-                        }
+                            let endRP = railMap["endRP"];
+                            if (endRP != null) {
+                                xCoords.push(endRP["posX"])
+                                zCoords.push(endRP["posZ"])
+                            }
+                        });
                     });
-                });
-                minX = Math.min(...xCoords)
-                maxX = Math.max(...xCoords)
-                minZ = Math.min(...zCoords)
-                maxZ = Math.max(...zCoords)
-                let scaleX = svg.clientWidth * 4 / 5 / (maxX - minX)
-                let scaleZ = svg.clientHeight * 4 / 5 / (maxZ - minZ)
-                scale = Math.min(scaleX, scaleZ)
+                    minX = Math.min(...xCoords)
+                    maxX = Math.max(...xCoords)
+                    minZ = Math.min(...zCoords)
+                    maxZ = Math.max(...zCoords)
+                    let scaleX = svg.clientWidth * 4 / 5 / (maxX - minX)
+                    let scaleZ = svg.clientHeight * 4 / 5 / (maxZ - minZ)
+                    scale = Math.min(scaleX, scaleZ)
+                }
 
-                document.querySelectorAll("[id^='rail']").forEach(group => group.id += "flag")
+                let updateList = Array.from(document.querySelectorAll("[id^='rail']"))
 
                 json.forEach(railCore => {
                     let pos = railCore["pos"];
                     let id = "rail," + pos[0] + "," + pos[1] + "," + pos[2] + ","
                     let isTrainOnRail = railCore["isTrainOnRail"]
 
-                    let group = document.getElementById(id + "flag")
+                    let group = document.getElementById(id)
                     if (group != null) {
+                        updateList = updateList.filter(n => n !== group)
                         group.setAttribute('stroke', isTrainOnRail ? 'red' : 'white')
-                        group.id = id
                     } else {
                         group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
                         group.id = id
@@ -76,11 +78,13 @@ async function updateRail(svg, viewBoxChange) {
                         svg.appendChild(group)
                     }
                 });
+
+                updateList.forEach(n => n.remove());
             }))
         .then(await fetch(SIGNAL_DATA_URL)
             .then(res => res.json())
             .then(json => {
-                document.querySelectorAll("[id^='signal']").forEach(group => group.id += "flag")
+                let updateList = Array.from(document.querySelectorAll("[id^='signal']"))
 
                 json.forEach(signal => {
                     let pos = signal["pos"]
@@ -98,11 +102,10 @@ async function updateRail(svg, viewBoxChange) {
 
                     let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
 
-                    let group = svg.getElementById(id + "flag") || svg.getElementById(id)
+                    let group = svg.getElementById(id)
                     if (group == null) {
                         group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
                         group.id = id
-                        group.appendChild(circle)
 
                         let line = createLineFromComponent(
                             posX + 1.5 * cos, posZ - 1.5 * sin,
@@ -121,9 +124,12 @@ async function updateRail(svg, viewBoxChange) {
                         baseLine.setAttribute('stroke-width', '0.5px');
                         baseLine.setAttribute('name', 'horizontalLine');
                         group.appendChild(baseLine);
+
+                        group.appendChild(circle)
+
                         svg.appendChild(group);
                     } else {
-                        group.id = id
+                        updateList = updateList.filter(n => n !== group)
                         let minus = 0
                         let last;
                         let circleArray = Array.from(group.getElementsByTagName('circle'))
@@ -189,21 +195,26 @@ async function updateRail(svg, viewBoxChange) {
                         group.appendChild(support);
                     }
                 });
+
+                updateList.forEach(n => n.remove());
             }))
         .then(await fetch(FORMATION_DATA_URL)
             .then(res => res.json())
             .then(json => {
-                document.querySelectorAll("[id^='formation']").forEach(group => group.id += "flag")
+                let updateList = Array.from(document.querySelectorAll("[id^='formation']"))
+
                 json.forEach(formation => {
                     if (formation != null && formation["controlCar"] != null) {
                         let id = "formation," + formation["id"] + ","
-                        let group = svg.getElementById(id + "flag") || svg.getElementById(id)
+                        let group = svg.getElementById(id)
 
                         if (group == null) {
                             group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+                            group.id = id
                             svg.appendChild(group)
+                        } else {
+                            updateList = updateList.filter(n => n !== group)
                         }
-                        group.id = id
                         fetch(TRAIN_DATA_URL + formation["controlCar"])
                             .then(res => res.json())
                             .then(json => {
@@ -235,11 +246,11 @@ async function updateRail(svg, viewBoxChange) {
                                 group.appendChild(text)
                             })
                     }
-                })
+                });
+
+                updateList.forEach(n => n.remove());
             }))
         .then(() => {
-            document.querySelectorAll(`[id$='flag']`).forEach(group => group.remove())
-
             svg.clientWidth = maxX - minX
             svg.clientHeight = maxZ - minZ
             if (viewBoxChange) {
