@@ -1,4 +1,4 @@
-const setupViewBoxEvents = (svg) => {
+export const setupViewBoxEvents = (svg) => {
     const {fromEvent} = rxjs;
     const {map, switchMap, takeUntil} = rxjs.operators;
 
