@@ -60,35 +60,6 @@
                 return;
             }
 
-            svg.onwheel = (event) => {
-                let viewBoxValues = svg.getAttribute("viewBox").split(" ");
-                let scale = event.deltaY > 0 ? 1.1 : 0.9
-                globalScale = globalScale * scale
-                svg.setAttribute("viewBox",
-                    viewBoxValues[0] + " " +
-                    viewBoxValues[1] + " " +
-                    Number(viewBoxValues[2]) * scale + " " +
-                    Number(viewBoxValues[3]) * scale + " "
-                )
-            }
-
-            let onMouseMove = (event) => {
-                let x = event.movementX;
-                let y = event.movementY;
-                let viewBoxValues = svg.getAttribute("viewBox").split(" ");
-                svg.setAttribute("viewBox",
-                    (Number(viewBoxValues[0]) - x * globalScale) + " " +
-                    (Number(viewBoxValues[1]) - y * globalScale) + " " +
-                    viewBoxValues[2] + " " +
-                    viewBoxValues[3] + " "
-                )
-            };
-
-            svg.style.position = "absolute";
-            svg.ondragstart = () => false;
-            svg.onmousedown = () => document.addEventListener("mousemove", onMouseMove);
-            svg.onmouseup = () => document.removeEventListener("mousemove", onMouseMove);
-
             let timer;
             let startTimer = () => timer = setInterval(() => updateRail(svg, false), 1000);
             let stopTimer = () => clearInterval(timer)
@@ -109,11 +80,17 @@
             await _sleep(1000);
             document.getElementById('loader').style.display = "none";
             svg.style.visibility = "visible"
+            setupViewBoxEvents(svg)
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/gh/webctc/webctc@1.7.10/src/main/resources/assets/webctc/html/map.min.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.3.0/rxjs.umd.min.js"
+            integrity="sha512-y3JTS47nnpKORJX8Jn1Rlm+QgRIIZHtu3hWxal0e81avPrqUH48yk+aCi+gprT0RMAcpYa0WCkapxe+bpBHD6g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <script src="https://cdn.jsdelivr.net/gh/webctc/webctc@1.7.10/src/main/resources/assets/webctc/html/map.min.js">
     </script>
+
+    <script src="https://cdn.jsdelivr.net/gh/webctc/webctc@1.7.10/src/main/resources/assets/webctc/html/viewbox.min.js"></script>
 </head>
 
 <body>
