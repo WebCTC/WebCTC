@@ -56,7 +56,8 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
         }
     val controlCar = Formation::class.java.getDeclaredMethod("getControlCar")
         .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
-    jsonMap["controlCar"] = controlCar?.entityId
+    jsonMap["controlCar"] = controlCar?.toMutableMap()
+
     val driver = controlCar?.riddenByEntity as? EntityPlayer
     jsonMap["driver"] = driver?.commandSenderName
     jsonMap["direction"] = Formation::class.java.getDeclaredField("direction")

@@ -204,7 +204,7 @@ async function updateRail(svg, viewBoxChange) {
                 let updateList = Array.from(document.querySelectorAll("[id^='formation']"))
 
                 json.forEach(formation => {
-                    if (formation != null && formation["controlCar"] != null) {
+                    if (formation != null && formation["controlCarMap"] != null) {
                         let id = "formation," + formation["id"] + ","
                         let group = svg.getElementById(id)
 
@@ -215,36 +215,29 @@ async function updateRail(svg, viewBoxChange) {
                         } else {
                             updateList = updateList.filter(n => n !== group)
                         }
-                        fetch(TRAIN_DATA_URL + formation["controlCar"])
-                            .then(res => res.json())
-                            .then(json => {
-                                if (json == null) {
-                                    group.remove()
-                                    return;
-                                }
-                                group.innerHTML = ""
-                                let pos = json["pos"]
-                                let posX = pos[0] - minX + marginX
-                                let posZ = pos[2] - minZ + marginZ
+                        json = formation["controlCarMap"]
+                        group.innerHTML = ""
+                        let pos = json["pos"]
+                        let posX = pos[0] - minX + marginX
+                        let posZ = pos[2] - minZ + marginZ
 
-                                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                                rect.setAttribute('x', String(posX - 3))
-                                rect.setAttribute('y', String(posZ - 3))
-                                rect.setAttribute('width', "6px")
-                                rect.setAttribute('height', "6px")
-                                rect.setAttribute('fill', "YELLOW")
-                                rect.setAttribute('stroke', "GRAY")
-                                group.appendChild(rect)
+                        let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', String(posX - 3))
+                        rect.setAttribute('y', String(posZ - 3))
+                        rect.setAttribute('width', "6px")
+                        rect.setAttribute('height', "6px")
+                        rect.setAttribute('fill', "YELLOW")
+                        rect.setAttribute('stroke', "GRAY")
+                        group.appendChild(rect)
 
-                                let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                                text.textContent = json["driver"]
-                                text.setAttribute('x', String(posX + 3))
-                                text.setAttribute('y', String(posZ + 2))
-                                text.setAttribute('font-size', "8")
-                                text.setAttribute('font-weight', "bold")
-                                text.setAttribute('fill', "black")
-                                group.appendChild(text)
-                            })
+                        let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.textContent = json["driver"]
+                        text.setAttribute('x', String(posX + 3))
+                        text.setAttribute('y', String(posZ + 2))
+                        text.setAttribute('font-size', "8")
+                        text.setAttribute('font-weight', "bold")
+                        text.setAttribute('fill', "black")
+                        group.appendChild(text)
                     }
                 });
 
