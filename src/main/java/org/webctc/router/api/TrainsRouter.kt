@@ -54,6 +54,7 @@ fun EntityTrainBase.toMutableMap(): MutableMap<String, Any?> {
     jsonMap["trainStateData"] =
         (EntityTrainBase::class.java.getDeclaredMethod("getByteArray")
             .apply { isAccessible = true }.invoke(this))
+    jsonMap["name"] = this.resourceState.name
 
     return jsonMap
 }
