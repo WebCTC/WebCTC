@@ -14,7 +14,7 @@ class FormationsRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(this.getServerFormationManager().formations.values.mapNotNull { Formation::toMutableMap }))
+            res.send(gson.toJson(this.getServerFormationManager().formations.values.map { it?.toMutableMap() }))
         }
 
         get("/:formationId") { req, res ->

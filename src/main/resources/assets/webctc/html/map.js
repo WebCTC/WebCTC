@@ -204,7 +204,7 @@ async function updateRail(svg, viewBoxChange) {
                 let updateList = Array.from(document.querySelectorAll("[id^='formation']"))
 
                 json.forEach(formation => {
-                    if (formation != null && formation["controlCarMap"] != null) {
+                    if (formation != null && formation["controlCar"] != null) {
                         let id = "formation," + formation["id"] + ","
                         let group = svg.getElementById(id)
 
@@ -215,7 +215,7 @@ async function updateRail(svg, viewBoxChange) {
                         } else {
                             updateList = updateList.filter(n => n !== group)
                         }
-                        json = formation["controlCarMap"]
+                        json = formation["controlCar"]
                         group.innerHTML = ""
                         let pos = json["pos"]
                         let posX = pos[0] - minX + marginX
