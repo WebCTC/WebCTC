@@ -231,7 +231,7 @@ async function updateRail(svg, viewBoxChange) {
                         group.appendChild(rect)
 
                         let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                        text.textContent = json["driver"]
+                        text.textContent = (json["name"] === "no_name" ? "" : json["name"] + " ") + json["driver"]
                         text.setAttribute('x', String(posX + 3))
                         text.setAttribute('y', String(posZ + 2))
                         text.setAttribute('font-size', "8")
