@@ -41,7 +41,7 @@ fun EntityTrainBase.toMutableMap(): MutableMap<String, Any?> {
     jsonMap["modelName"] = this.modelName
     jsonMap["isControlCar"] = this.isControlCar
     jsonMap["signal"] = this.signal
-    jsonMap["driver"] = this.riddenByEntity?.commandSenderName
+    jsonMap["driver"] = this.riddenByEntity?.commandSenderName ?: ""
     jsonMap["passengers"] =
         EntityVehicleBase::class.java.getDeclaredField("vehicleFloors")
             .apply { isAccessible = true }.get(this)
