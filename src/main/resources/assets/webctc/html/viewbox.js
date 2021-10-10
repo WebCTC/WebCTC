@@ -19,8 +19,8 @@ const setupViewBoxEvents = (svg) => {
                     mm.preventDefault();
 
                     const delta = {
-                        x: mm.clientX - prevX,
-                        y: mm.clientY - prevY
+                        x: (mm.clientX - prevX) * globalScale,
+                        y: (mm.clientY - prevY) * globalScale
                     };
                     prevX = mm.clientX;
                     prevY = mm.clientY;
@@ -59,7 +59,7 @@ const setupViewBoxEvents = (svg) => {
         return {x, y};
     };
 
-    const scaleFactor = 1.1;
+    const scaleFactor = 1.2;
 
     const zoomAtPoint = (point, svg, scale) => {
         // normalized position from 0 to 1
@@ -90,6 +90,7 @@ const setupViewBoxEvents = (svg) => {
         ev.preventDefault();
         const position = getEventPosition(ev);
         const scale = Math.pow(scaleFactor, ev.deltaY > 0 ? 1 : -1);
+        globalScale *= scale
         zoomAtPoint(position, svg, scale);
     });
 }
