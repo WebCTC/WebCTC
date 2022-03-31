@@ -1,8 +1,10 @@
 package org.webctc.router.api
 
 import express.utils.MediaType
-import jp.ngt.rtm.rail.TileEntityLargeRailBase
 import jp.ngt.rtm.rail.TileEntityLargeRailCore
+import jp.ngt.rtm.rail.TileEntityLargeRailSwitchCore
+import jp.ngt.rtm.rail.util.RailMap
+import jp.ngt.rtm.rail.util.RailMapSwitch
 import jp.ngt.rtm.rail.util.RailPosition
 import net.minecraft.util.MathHelper
 import org.webctc.WebCTCCore
@@ -23,7 +25,6 @@ class RailRouter : WebCTCRouter() {
             val y = req.getQuery("y").toIntOrNull()
             val z = req.getQuery("z").toIntOrNull()
             var railCore: TileEntityLargeRailCore? = null
-            lateinit var railBase: TileEntityLargeRailBase
             if (x != null && y != null && z != null) {
                 railCore = WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z) as? TileEntityLargeRailCore
             }
@@ -52,17 +53,42 @@ fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
 }
 
 fun TileEntityLargeRailCore.getNeighborRailMaps(): List<Map<String, Any>> {
-    return this.allRailMaps.map {
-        mapOf(
-            "startRP" to it.startRP,
-            "endRP" to it.endRP,
-            "length" to it.length,
-            "neighborPos" to mapOf(
-                "startPR" to it.startRP.getNeighborPos(),
-                "endRP" to it.endRP.getNeighborPos()
-            )
-        )
+    if (this is TileEntityLargeRailSwitchCore) {
+        this.switch.onBlockChanged(worldObj)
     }
+    return this.allRailMaps.map { it.toMutableMap() }
+}
+
+private val isOpenField = RailMapSwitch::class.java.getDeclaredField("isOpen").apply {
+    isAccessible = true
+}
+
+fun RailMap.toMutableMap(): Map<String, Any> {
+    return if (this is RailMapSwitch)
+        this.toMutableMap()
+    else
+        mapOf(
+            "startRP" to this.startRP,
+            "endRP" to this.endRP,
+            "length" to this.length,
+            "neighborPos" to mapOf(
+                "startPR" to this.startRP.getNeighborPos(),
+                "endRP" to this.endRP.getNeighborPos()
+            ),
+        )
+}
+
+fun RailMapSwitch.toMutableMap(): Map<String, Any> {
+    return mapOf(
+        "startRP" to this.startRP,
+        "endRP" to this.endRP,
+        "length" to this.length,
+        "neighborPos" to mapOf(
+            "startPR" to this.startRP.getNeighborPos(),
+            "endRP" to this.endRP.getNeighborPos()
+        ),
+        "isNotActive" to !isOpenField[this].toString().toBoolean()
+    )
 }
 
 fun RailPosition.getNeighborPos(): Map<String, Int> {

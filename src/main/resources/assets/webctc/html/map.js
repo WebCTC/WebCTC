@@ -51,20 +51,21 @@ async function updateRail(svg, viewBoxChange) {
           let pos = railCore["pos"];
           let id = "rail," + pos[0] + "," + pos[1] + "," + pos[2] + ","
           let isTrainOnRail = railCore["isTrainOnRail"]
+          let isStraightRail = railCore["railMaps"].every(railMap => railMap["isNotActive"] === undefined)
 
           let group = document.getElementById(id)
-          if (group != null) {
+          if (group != null && isStraightRail) {
             updateList = updateList.filter(n => n !== group)
             group.setAttribute('stroke', isTrainOnRail ? 'red' : 'white')
           } else {
             group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
             group.id = id
-            group.setAttribute('stroke', isTrainOnRail ? 'red' : 'white');
             group.setAttribute('stroke-width', '1.5px');
-            railCore["railMaps"].forEach(railMap => {
+            railCore["railMaps"].sort(railMap => railMap["isNotActive"] === true ? -1 : 1).forEach(railMap => {
               let startRP = railMap["startRP"];
               let endRP = railMap["endRP"];
               if (startRP != null && endRP != null) {
+                let isNotActive = railMap["isNotActive"] === true;
                 let startPosX = startRP["posX"] - minX + marginX
                 let startPosZ = startRP["posZ"] - minZ + marginZ
                 let endPosX = endRP["posX"] - minX + marginX
@@ -72,6 +73,9 @@ async function updateRail(svg, viewBoxChange) {
                 let line = createLine(
                   startPosX, startPosZ,
                   endPosX, endPosZ)
+                if (!isStraightRail) {
+                  line.setAttribute('stroke', isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white')
+                }
                 group.appendChild(line)
               }
             });
