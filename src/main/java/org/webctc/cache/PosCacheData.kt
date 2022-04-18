@@ -7,8 +7,8 @@ import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
 
-abstract class CacheData<T>(mapName: String) : WorldSavedData(mapName) {
-    abstract fun getMapCache(): MutableMap<String, T>
+abstract class PosCacheData<T>(mapName: String) : WorldSavedData(mapName) {
+    abstract fun getMapCache(): MutableMap<Pos, T>
 
     private val gson: Gson = GsonBuilder()
         .serializeNulls()
@@ -22,13 +22,13 @@ abstract class CacheData<T>(mapName: String) : WorldSavedData(mapName) {
         val tagList = nbt.getTagList(TAG_NAME, 10)
         for (i in 0 until tagList.tagCount()) {
             val tag = tagList.getCompoundTagAt(i)
-            val key = tag.getString("pos")
+            val pos = Pos.readFromNBT(tag.getCompoundTag("pos"))
             val json =
                 gson.fromJson<T>(
                     tag.getString("json"),
                     object : TypeToken<T>() {}.type
                 )
-            json?.let { getMapCache()[key] = it }
+            json?.let { getMapCache()[pos] = it }
         }
     }
 
@@ -36,7 +36,7 @@ abstract class CacheData<T>(mapName: String) : WorldSavedData(mapName) {
         val tagList = NBTTagList()
         getMapCache().forEach {
             val tag = NBTTagCompound()
-            tag.setString("pos", it.key)
+            tag.setTag("pos", it.key.writeToNBT())
             tag.setString("json", gson.toJson(it.value))
             tagList.appendTag(tag)
         }
