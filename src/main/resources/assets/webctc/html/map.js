@@ -3,13 +3,6 @@ const SIGNAL_DATA_URL = '/api/signals/'
 const FORMATION_DATA_URL = '/api/formations/'
 const TRAIN_DATA_URL = '/api/trains/'
 
-let globalScale = 1.0;
-let minX = 0;
-let minZ = 0;
-let maxX = 0;
-let maxZ = 0;
-let scale = 1;
-
 async function updateRail(svg) {
   return Promise.resolve()
     .then(await fetch(RAIL_DATA_URL)
