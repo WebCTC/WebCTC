@@ -102,50 +102,32 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       let svg = document.getElementById('svg');
+      let g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      svg.appendChild(g);
       try {
-        await updateRail(svg, true)
+        await updateRail(g)
       } catch (e) {
-        alert("Error!"
-          + "\n" + e);
+        alert("Error!" + "\n" + e);
         return;
       }
 
       let timer;
-      let startTimer = () => timer = setInterval(() => updateRail(svg, false), 1000);
-      let stopTimer = () => clearInterval(timer)
+      let startTimer = () => timer = setInterval(() => updateRail(g), 1000);
       const _sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-      window.onresize = async () => {
-        document.getElementById('loader').style.display = "block";
-        svg.style.visibility = "hidden"
-        stopTimer()
-        await _sleep(1000);
-        svg.innerHTML = "";
-        await updateRail(svg, true);
-        startTimer()
-        svg.style.visibility = "visible"
-        document.getElementById('loader').style.display = "none";
-      }
       startTimer();
-      await _sleep(1000);
-      document.getElementById('loader').style.display = "none";
+      await _sleep(3000);
       svg.style.visibility = "visible"
-      setupViewBoxEvents(svg)
-      setupViewBoxEventsSP(svg)
+      document.getElementById('loader').style.display = "none";
+      panzoom(g)
     });
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.3.0/rxjs.umd.min.js"
-          integrity="sha512-y3JTS47nnpKORJX8Jn1Rlm+QgRIIZHtu3hWxal0e81avPrqUH48yk+aCi+gprT0RMAcpYa0WCkapxe+bpBHD6g=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script src="https://cdn.jsdelivr.net/gh/webctc/webctc@0.3.x/src/main/resources/assets/webctc/html/map.min.js">
   </script>
 
-  <script
-      src="https://cdn.jsdelivr.net/gh/webctc/webctc@0.3.x/src/main/resources/assets/webctc/html/viewbox.min.js"></script>
+  <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
 
-  <script
-      src="https://cdn.jsdelivr.net/gh/webctc/webctc@0.3.x/src/main/resources/assets/webctc/html/viewbox_sp.min.js"></script>
 </head>
 
 <body>

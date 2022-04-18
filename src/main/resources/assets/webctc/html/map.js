@@ -10,41 +10,11 @@ let maxX = 0;
 let maxZ = 0;
 let scale = 1;
 
-async function updateRail(svg, viewBoxChange) {
-  let marginX = svg.clientWidth / 10;
-  let marginZ = svg.clientHeight / 10;
-
-  Promise.resolve()
+async function updateRail(svg) {
+  return Promise.resolve()
     .then(await fetch(RAIL_DATA_URL)
       .then(res => res.json())
       .then(json => {
-        if (viewBoxChange) {
-          let xCoords = [];
-          let zCoords = [];
-          json.forEach(railCore => {
-            railCore["railMaps"].forEach(railMap => {
-              let startRP = railMap["startRP"];
-              if (startRP != null) {
-                xCoords.push(startRP["posX"])
-                zCoords.push(startRP["posZ"])
-              }
-
-              let endRP = railMap["endRP"];
-              if (endRP != null) {
-                xCoords.push(endRP["posX"])
-                zCoords.push(endRP["posZ"])
-              }
-            });
-          });
-          minX = Math.min(...xCoords)
-          maxX = Math.max(...xCoords)
-          minZ = Math.min(...zCoords)
-          maxZ = Math.max(...zCoords)
-          let scaleX = svg.clientWidth * 4 / 5 / (maxX - minX)
-          let scaleZ = svg.clientHeight * 4 / 5 / (maxZ - minZ)
-          scale = Math.min(scaleX, scaleZ)
-        }
-
         let updateList = Array.from(document.querySelectorAll("[id^='rail']"))
 
         json.forEach(railCore => {
@@ -66,13 +36,11 @@ async function updateRail(svg, viewBoxChange) {
               let endRP = railMap["endRP"];
               if (startRP != null && endRP != null) {
                 let isNotActive = railMap["isNotActive"] === true;
-                let startPosX = startRP["posX"] - minX + marginX
-                let startPosZ = startRP["posZ"] - minZ + marginZ
-                let endPosX = endRP["posX"] - minX + marginX
-                let endPosZ = endRP["posZ"] - minZ + marginZ;
-                let line = createLine(
-                  startPosX, startPosZ,
-                  endPosX, endPosZ)
+                let startPosX = startRP["posX"]
+                let startPosZ = startRP["posZ"]
+                let endPosX = endRP["posX"]
+                let endPosZ = endRP["posZ"]
+                let line = createLine(startPosX, startPosZ, endPosX, endPosZ)
                 if (!isStraightRail) {
                   line.setAttribute('stroke', isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white')
                 }
@@ -100,13 +68,13 @@ async function updateRail(svg, viewBoxChange) {
           let p = (blockDirection * 90 - rotation + 360) % 360
           let fixX = (45 < p && p < 135) ? 3 : ((225 < p && p < 315) ? -3 : 0);
 
-          let posX = pos[0] - minX + marginX
-          let posZ = pos[2] - minZ + marginZ
+          let posX = pos[0]
+          let posZ = pos[2]
           let id = "signal," + pos[0] + "," + pos[2] + ","
 
           let circle = this.createSignalCircle(posX, pos[1], posZ, signalLevel, fixX)
 
-          let group = svg.getElementById(id)
+          let group = document.getElementById(id)
           if (group == null) {
             group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
             group.id = id
@@ -210,7 +178,7 @@ async function updateRail(svg, viewBoxChange) {
         json.forEach(formation => {
           if (formation != null && formation["controlCar"] != null) {
             let id = "formation," + formation["id"] + ","
-            let group = svg.getElementById(id)
+            let group = document.getElementById(id)
 
             if (group == null) {
               group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
@@ -222,8 +190,8 @@ async function updateRail(svg, viewBoxChange) {
             json = formation["controlCar"]
             group.innerHTML = ""
             let pos = json["pos"]
-            let posX = pos[0] - minX + marginX
-            let posZ = pos[2] - minZ + marginZ
+            let posX = pos[0]
+            let posZ = pos[2]
 
             let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('x', String(posX - 3))
@@ -247,14 +215,6 @@ async function updateRail(svg, viewBoxChange) {
 
         updateList.forEach(n => n.remove());
       }))
-    .then(() => {
-      svg.clientWidth = maxX - minX
-      svg.clientHeight = maxZ - minZ
-      if (viewBoxChange) {
-        svg.setAttribute("viewBox", "0 0 " + (svg.clientWidth / scale) + " " + (svg.clientHeight / scale))
-        globalScale = 1 / scale
-      }
-    })
 }
 
 
