@@ -16,7 +16,12 @@ class RailRouter : WebCTCRouter() {
         get("/") { req, res ->
             res.contentType = MediaType._json.mime
             res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(RailCacheData.railMapCache.map { it.value }))
+
+            res.send(gson.toJson(RailCacheData.railMapCache.map { it.value }.filter {
+                req.getQuery("lite") != "true" ||
+                        it["isTrainOnRail"] == true ||
+                        (it["railMaps"] as List<Map<String, Any>>).any { it["isNotActive"] == true }
+            }))
         }
         get("/rail") { req, res ->
             res.contentType = MediaType._json.mime

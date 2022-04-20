@@ -101,22 +101,27 @@
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      let liteParam = location.search.length > 1 && location.search.substring(1).split("&").map(s => s.split("=")).find(s => s[0] === "lite");
+      let lite = liteParam !== undefined && liteParam.length === 2 && liteParam[1] === "true"
+      if (lite) {
+        document.title = "Lite" + document.title
+      }
+
       let svg = document.getElementById('svg');
       let g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       svg.appendChild(g);
       try {
-        await updateRail(g)
+        await updateRail(g, false)
       } catch (e) {
         alert("Error!" + "\n" + e);
         return;
       }
 
       let timer;
-      let startTimer = () => timer = setInterval(() => updateRail(g), 1000);
-      const _sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+      let startTimer = () => timer = setInterval(() => updateRail(g, lite), lite ? 3000 : 1000);
 
       startTimer();
-      await _sleep(3000);
       svg.style.visibility = "visible"
       document.getElementById('loader').style.display = "none";
       panzoom(g)

@@ -1,11 +1,12 @@
 const RAIL_DATA_URL = '/api/rails/'
+const RAIL_DATA_URL_LITE = '/api/rails/?lite=true'
 const SIGNAL_DATA_URL = '/api/signals/'
 const FORMATION_DATA_URL = '/api/formations/'
 const TRAIN_DATA_URL = '/api/trains/'
 
-async function updateRail(svg) {
-  return Promise.resolve()
-    .then(await fetch(RAIL_DATA_URL)
+async function updateRail(svg, lite = false) {
+  return await Promise.resolve()
+    .then(await fetch(!lite ? RAIL_DATA_URL : RAIL_DATA_URL_LITE)
       .then(res => res.json())
       .then(json => {
         let updateList = Array.from(document.querySelectorAll("[id^='rail']"))
@@ -19,11 +20,10 @@ async function updateRail(svg) {
           let group = document.getElementById(id)
           if (group != null && isStraightRail) {
             updateList = updateList.filter(n => n !== group)
-            group.setAttribute('stroke', isTrainOnRail ? 'red' : 'white')
           } else {
-            group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-            group.id = id
-            group.setAttribute('stroke-width', '1.5px');
+            let newGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+            newGroup.id = id
+            newGroup.setAttribute('stroke-width', '1.5px');
             railCore["railMaps"].sort(railMap => railMap["isNotActive"] === true ? -1 : 1).forEach(railMap => {
               let startRP = railMap["startRP"];
               let endRP = railMap["endRP"];
@@ -35,16 +35,31 @@ async function updateRail(svg) {
                 let endPosZ = endRP["posZ"]
                 let line = createLine(startPosX, startPosZ, endPosX, endPosZ)
                 if (!isStraightRail) {
-                  line.setAttribute('stroke', isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white')
+                  let color = isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white'
+                  if (line.getAttribute('stroke') !== color) {
+                    line.setAttribute('stroke', color)
+                  }
                 }
-                group.appendChild(line)
+                newGroup.appendChild(line)
               }
             });
-            svg.appendChild(group)
+            svg.appendChild(newGroup)
+            if (group != null) {
+              group.remove()
+            }
+            group = newGroup
+          }
+          let color = isTrainOnRail ? 'red' : 'white'
+          if (group.getAttribute('stroke') !== color) {
+            group.setAttribute('stroke', color)
           }
         });
 
-        updateList.forEach(n => n.remove());
+        if (!lite) {
+          updateList.forEach(n => n.remove());
+        } else {
+          updateList.filter(n => n.getAttribute('stroke') === "red").forEach(n => n.setAttribute('stroke', 'white'));
+        }
       }))
     .then(await fetch(SIGNAL_DATA_URL)
       .then(res => res.json())
@@ -101,14 +116,21 @@ async function updateRail(svg) {
             let support
             if ((support = group.getElementsByTagName('g')[0]) == null) {
               support = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              group.appendChild(support);
             }
-            support.innerHTML = ""
+
+            if (support.innerHTML !== "") {
+              support.innerHTML = ""
+            }
 
             let circleCache = circleArray.find(c => Number(c.getAttribute("yCoord")) === Number(pos[1]))
             if (circleCache == null) {
               circleArray.push(circle)
             } else {
-              circleCache.setAttribute('fill', getSignalColor(signalLevel))
+              let color = getSignalColor(signalLevel)
+              if (circleCache.getAttribute('fill') !== color) {
+                circleCache.setAttribute('fill', color)
+              }
             }
 
             if (circleArray.length > 1) {
@@ -157,7 +179,6 @@ async function updateRail(svg) {
                 line.setAttribute('x1', posX + (1.5 - 2.5 * circleArray.length - minus) * cos);
                 line.setAttribute('y1', posZ - (1.5 - 2.5 * circleArray.length - minus) * sin);
               })
-            group.appendChild(support);
           }
         });
 
