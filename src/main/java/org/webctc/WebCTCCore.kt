@@ -5,7 +5,9 @@ import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.*
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
 import cpw.mods.fml.common.gameevent.TickEvent
-import express.Express
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.routing.*
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
@@ -20,7 +22,7 @@ import org.webctc.router.api.*
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
     lateinit var server: MinecraftServer
-    lateinit var express: Express
+    lateinit var applicationEngine: ApplicationEngine
     lateinit var railData: WorldSavedData
     lateinit var signalData: WorldSavedData
     lateinit var railCacheUpdate: RailCacheUpdate
@@ -64,22 +66,21 @@ class WebCTCCore {
         }
         this.signalData = signalData
 
-        express = object : Express() {
-            init {
-                RouterManager.routerMap.forEach { (path, router) -> use(path, router::class.java.newInstance()) }
-                use("/", DefaultRouter())
-                all() { req, res -> res.send("URL is incorrect.") }
-            }
-        }
 
-        express.listen(WebCTCConfig.portNumber)
+        this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
+            routing {
+                this.route("/", DefaultRouter().install(this))
+                RouterManager.routerMap.forEach { (path, router) -> this.route(path, router.install(this)) }
+            }
+        }.start()
+
         railCacheUpdate = RailCacheUpdate()
         signalCacheUpdate = SignalCacheUpdate()
     }
 
     @Mod.EventHandler
     fun onServerStop(event: FMLServerStoppingEvent) {
-        express.stop()
+        applicationEngine.stop()
         railData.markDirty()
         signalData.markDirty()
     }

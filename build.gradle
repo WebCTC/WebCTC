@@ -1,5 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.6.21'
+    ext.ktor_version = '2.0.0'
+    ext.logback_version = "1.2.3"
     repositories {
         jcenter()
         mavenCentral()
@@ -21,6 +23,7 @@ buildscript {
 
 configurations {
     embed
+    api.extendsFrom(embed)
 }
 apply plugin: 'java-library'
 apply plugin: 'forge'
@@ -38,10 +41,10 @@ archivesBaseName = "WebCTC"
 minecraft {
     version = "1.7.10-10.13.4.1614-1.7.10"
     runDir = "eclipse"
+    srgExtra "PK: io/netty org/webctc/lib/io/netty"
 }
 
 repositories {
-    jcenter()
     mavenCentral()
     maven {
         url "https://www.cursemaven.com"
@@ -52,14 +55,19 @@ repositories {
 }
 
 dependencies {
-    embed 'com.github.Kai-Z-JP:java-express:d74e391f'
-    api 'com.github.Kai-Z-JP:java-express:d74e391f'
+    embed "io.ktor:ktor-server-core-jvm:$ktor_version"
+    embed "io.ktor:ktor-server-websockets-jvm:$ktor_version"
+    embed "io.ktor:ktor-server-cors-jvm:$ktor_version"
+    embed "io.ktor:ktor-server-host-common-jvm:$ktor_version"
+    embed "io.ktor:ktor-server-status-pages-jvm:$ktor_version"
+    embed "io.ktor:ktor-server-netty-jvm:$ktor_version"
 
     api "curse.maven:ngtlib-288989:2940833"
     api "curse.maven:realtrainmod-288988:3039063"
 }
 
 processResources {
+    duplicatesStrategy 'INCLUDE'
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
@@ -83,9 +91,10 @@ task sourcesJar(type: Jar) {
 }
 
 jar {
+    duplicatesStrategy 'INCLUDE'
     configurations.embed.each { dep ->
         from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
+            exclude 'META-INF/', 'kotlin/', 'org/slf4j/'
         }
     }
 

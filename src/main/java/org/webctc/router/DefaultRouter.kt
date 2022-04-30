@@ -1,24 +1,26 @@
 package org.webctc.router
 
-import express.ExpressRouter
-import express.utils.MediaType
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import jp.ngt.ngtlib.io.NGTFileLoader
 import net.minecraft.util.ResourceLocation
 import org.webctc.WebCTCCore
 
-class DefaultRouter : ExpressRouter() {
-    init {
-        get("/") { req, res ->
+class DefaultRouter : AbstractRouter() {
+    override fun install(application: Route): Route.() -> Unit = {
+        get("/") {
             val inputStream = NGTFileLoader.getInputStream(ResourceLocation(WebCTCCore.MODID, "html/index.html"))
-            res.streamFrom(0, inputStream, MediaType._html)
+            call.respondText(inputStream.bufferedReader().readText(), ContentType.Text.Html)
         }
-        get("/:fileName") { req, res ->
-            val fileName = req.getParam("fileName")
+        get("/{FileName}") {
+            val fileName = call.parameters["FileName"]
             try {
                 val inputStream = NGTFileLoader.getInputStream(ResourceLocation(WebCTCCore.MODID, "html/$fileName"))
-                res.streamFrom(0, inputStream, MediaType._html)
+                call.respondText(inputStream.bufferedReader().readText(), ContentType.Text.Html)
             } catch (e: Exception) {
-                res.send("URL is incorrect.")
+                call.respondText("URL is incorrect.")
             }
         }
     }

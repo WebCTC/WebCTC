@@ -1,6 +1,9 @@
 package org.webctc.router.api
 
-import express.utils.MediaType
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import jp.ngt.rtm.CommonProxy
 import jp.ngt.rtm.RTMCore
 import jp.ngt.rtm.entity.train.EntityTrainBase
@@ -10,28 +13,31 @@ import net.minecraft.entity.player.EntityPlayer
 import org.webctc.router.WebCTCRouter
 
 class FormationsRouter : WebCTCRouter() {
-    init {
-        get("/") { req, res ->
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(this.getServerFormationManager().formations.values.map { it?.toMutableMap() }))
+
+    override fun install(application: Route): Route.() -> Unit = {
+        get("/") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(this@FormationsRouter.getServerFormationManager().formations.values.map { it?.toMutableMap() })
+            }
         }
+        get("/{FormationID}") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val formationId = this.call.parameters["FormationID"]!!.toLong()
+            val formation = this@FormationsRouter.getServerFormationManager().getFormation(formationId)
 
-        get("/:formationId") { req, res ->
-            val formationId = req.getParam("formationId")
-            val formation = this.getServerFormationManager().getFormation(formationId.toLong())
-
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(formation?.toMutableMap()))
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(formation?.toMutableMap())
+            }
         }
-        get("/:formationId/trains") { req, res ->
-            val formationId = req.getParam("formationId")
-            val formation = this.getServerFormationManager().getFormation(formationId.toLong())
+        get("/{FormationID}/trains") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val formationId = this.call.parameters["FormationID"]!!.toLong()
+            val formation = this@FormationsRouter.getServerFormationManager().getFormation(formationId)
 
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(formation?.let { it.entries.mapNotNull { entry -> entry.train.toMutableMap() } }))
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(formation?.entries?.mapNotNull { it.train.toMutableMap() })
+            }
         }
     }
 

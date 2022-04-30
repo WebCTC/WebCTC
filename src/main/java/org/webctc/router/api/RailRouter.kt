@@ -1,6 +1,9 @@
 package org.webctc.router.api
 
-import express.utils.MediaType
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import jp.ngt.rtm.rail.TileEntityLargeRailCore
 import jp.ngt.rtm.rail.TileEntityLargeRailSwitchCore
 import jp.ngt.rtm.rail.util.RailMap
@@ -12,32 +15,27 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.router.WebCTCRouter
 
 class RailRouter : WebCTCRouter() {
-    init {
-        get("/") { req, res ->
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-
-            res.send(gson.toJson(RailCacheData.railMapCache.map { it.value }.filter {
-                req.getQuery("lite") != "true" ||
-                        it["isTrainOnRail"] == true ||
-                        (it["railMaps"] as List<Map<String, Any>>).any { it["isNotActive"] == true }
-            }))
+    override fun install(application: Route): Route.() -> Unit = {
+        get("/") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(RailCacheData.railMapCache.values.filter {
+                    call.request.queryParameters["lite"] != "true" ||
+                            it["isTrainOnRail"] == true ||
+                            (it["railMaps"] as List<Map<String, Any>>).any { it["isNotActive"] == true }
+                })
+            }
         }
-        get("/rail") { req, res ->
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            val x = req.getQuery("x").toIntOrNull()
-            val y = req.getQuery("y").toIntOrNull()
-            val z = req.getQuery("z").toIntOrNull()
+        get("/rail") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val x = call.request.queryParameters["x"]?.toIntOrNull()
+            val y = call.request.queryParameters["y"]?.toIntOrNull()
+            val z = call.request.queryParameters["z"]?.toIntOrNull()
             var railCore: TileEntityLargeRailCore? = null
             if (x != null && y != null && z != null) {
                 railCore = WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z) as? TileEntityLargeRailCore
             }
-            res.send(
-                gson.toJson(
-                    railCore?.toMutableMap()
-                )
-            )
+            this.call.respondText(ContentType.Application.Json) { gson.toJson(railCore?.toMutableMap()) }
         }
     }
 }

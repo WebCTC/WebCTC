@@ -1,6 +1,9 @@
 package org.webctc.router.api
 
-import express.utils.MediaType
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.parts.EntityFloor
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
@@ -8,25 +11,25 @@ import org.webctc.WebCTCCore
 import org.webctc.router.WebCTCRouter
 
 class TrainsRouter : WebCTCRouter() {
-    init {
-        get("/") { req, res ->
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(
+
+    override fun install(application: Route): Route.() -> Unit = {
+        get("/") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            this.call.respondText(ContentType.Application.Json) {
                 gson.toJson(
                     WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
-                        .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toMutableMap)
+                        .filterIsInstance<EntityTrainBase>().map(jp.ngt.rtm.entity.train.EntityTrainBase::toMutableMap)
                 )
-            )
+            }
         }
+        get("/{EntityId}") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val eId = this.call.parameters["EntityId"]?.toInt()
+            val entity = eId?.let { WebCTCCore.INSTANCE.server.entityWorld.getEntityByID(it) }
 
-        get("/:entityId") { req, res ->
-            val eId = req.getParam("entityId")
-            val entity = WebCTCCore.INSTANCE.server.entityWorld.getEntityByID(eId.toInt())
-
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(entity?.let { (it as? EntityTrainBase)?.toMutableMap() }))
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(entity?.let { (it as? EntityTrainBase)?.toMutableMap() })
+            }
         }
     }
 }

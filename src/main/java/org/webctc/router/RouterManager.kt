@@ -1,12 +1,10 @@
 package org.webctc.router
 
-import express.ExpressRouter
-
 class RouterManager {
     companion object {
-        val routerMap = mutableMapOf<String, ExpressRouter>()
+        val routerMap = mutableMapOf<String, AbstractRouter>()
 
-        fun registerRouter(path: String, router: ExpressRouter) {
+        fun registerRouter(path: String, router: AbstractRouter) {
             routerMap[path] = router
         }
     }

@@ -1,6 +1,9 @@
 package org.webctc.router.api
 
-import express.utils.MediaType
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import jp.ngt.ngtlib.util.NGTUtil
 import jp.ngt.rtm.electric.TileEntitySignal
 import jp.ngt.rtm.modelpack.modelset.ModelSetSignal
@@ -9,27 +12,25 @@ import org.webctc.cache.signal.SignalCacheData
 import org.webctc.router.WebCTCRouter
 
 class SignalRouter : WebCTCRouter() {
-    init {
-        get("/") { req, res ->
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            res.send(gson.toJson(SignalCacheData.signalMapCache.map { it.value }))
+    override fun install(application: Route): Route.() -> Unit = {
+        get("/") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(SignalCacheData.signalMapCache.values)
+            }
         }
-        get("/signal") { req, res ->
-            res.contentType = MediaType._json.mime
-            res.setHeader("Access-Control-Allow-Origin", "*")
-            val x = req.getQuery("x").toIntOrNull()
-            val y = req.getQuery("y").toIntOrNull()
-            val z = req.getQuery("z").toIntOrNull()
+        get("/signal") {
+            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val x = this.call.request.queryParameters["x"]?.toIntOrNull()
+            val y = this.call.request.queryParameters["y"]?.toIntOrNull()
+            val z = this.call.request.queryParameters["z"]?.toIntOrNull()
             var railCore: TileEntitySignal? = null
             if (x != null && y != null && z != null) {
                 railCore = WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z) as? TileEntitySignal
             }
-            res.send(
-                gson.toJson(
-                    railCore?.toMutableMap()
-                )
-            )
+            this.call.respondText(ContentType.Application.Json) {
+                gson.toJson(railCore?.toMutableMap())
+            }
         }
     }
 }
