@@ -17,6 +17,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.signal.SignalCacheUpdate
+import org.webctc.plugin.PluginManager
 import org.webctc.router.DefaultRouter
 import org.webctc.router.RouterManager
 import org.webctc.router.api.*
@@ -38,6 +39,8 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
+        PluginManager.registerPlugin { install(Compression) }
+
         RouterManager.registerRouter("/api", ApiRouter())
         RouterManager.registerRouter("/api/formations", FormationsRouter())
         RouterManager.registerRouter("/api/trains", TrainsRouter())
@@ -70,7 +73,7 @@ class WebCTCCore {
 
 
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
-            install(Compression)
+            PluginManager.pluginList.forEach { it(this) }
             routing {
                 this.route("/", DefaultRouter().install(this))
                 RouterManager.routerMap.forEach { (path, router) -> this.route(path, router.install(this)) }
