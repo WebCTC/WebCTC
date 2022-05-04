@@ -5,8 +5,10 @@ import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.*
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
 import cpw.mods.fml.common.gameevent.TickEvent
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.compression.*
 import io.ktor.server.routing.*
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
@@ -68,6 +70,7 @@ class WebCTCCore {
 
 
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
+            install(Compression)
             routing {
                 this.route("/", DefaultRouter().install(this))
                 RouterManager.routerMap.forEach { (path, router) -> this.route(path, router.install(this)) }

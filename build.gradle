@@ -61,6 +61,8 @@ dependencies {
     embed "io.ktor:ktor-server-host-common-jvm:$ktor_version"
     embed "io.ktor:ktor-server-status-pages-jvm:$ktor_version"
     embed "io.ktor:ktor-server-netty-jvm:$ktor_version"
+    embed "io.ktor:ktor-server-compression:$ktor_version"
+
 
     api "curse.maven:ngtlib-288989:2940833"
     api "curse.maven:realtrainmod-288988:3039063"
