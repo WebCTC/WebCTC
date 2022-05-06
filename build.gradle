@@ -1,9 +1,8 @@
 buildscript {
-    ext.kotlin_version = '1.5.30'
+    ext.kotlin_version = '1.6.21'
     ext.ktor_version = '2.0.1'
     ext.logback_version = "1.2.3"
     repositories {
-        jcenter()
         mavenCentral()
         maven {
             name = "forge"
@@ -14,9 +13,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath('com.anatawa12.forge:ForgeGradle:1.2-1.0.+') {
-            changing = true
-        }
+        classpath 'com.anatawa12.forge:ForgeGradle:1.2-1.0.9'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -62,7 +59,6 @@ dependencies {
     embed "io.ktor:ktor-server-status-pages-jvm:$ktor_version"
     embed "io.ktor:ktor-server-netty-jvm:$ktor_version"
     embed "io.ktor:ktor-server-compression:$ktor_version"
-
 
     api "curse.maven:ngtlib-288989:2940833"
     api "curse.maven:realtrainmod-288988:3039063"
