@@ -11,7 +11,9 @@ import jp.ngt.rtm.rail.util.RailMapSwitch
 import jp.ngt.rtm.rail.util.RailPosition
 import net.minecraft.util.MathHelper
 import org.webctc.WebCTCCore
+import org.webctc.cache.Pos
 import org.webctc.cache.rail.RailCacheData
+import org.webctc.cache.rail.data.*
 import org.webctc.router.WebCTCRouter
 
 class RailRouter : WebCTCRouter() {
@@ -20,9 +22,9 @@ class RailRouter : WebCTCRouter() {
             this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             this.call.respondText(ContentType.Application.Json) {
                 gson.toJson(RailCacheData.railMapCache.values.filter {
-                    call.request.queryParameters["lite"] != "true" ||
-                            it["isTrainOnRail"] == true ||
-                            (it["railMaps"] as List<Map<String, Any>>).any { it["isNotActive"] == true }
+                    call.request.queryParameters["lite"] != "true"
+                            || it.isTrainOnRail ||
+                            it.railMaps.filterIsInstance<RailMapSwitchData>().any { it.isNotActive }
                 })
             }
         }
@@ -40,22 +42,15 @@ class RailRouter : WebCTCRouter() {
     }
 }
 
-fun TileEntityLargeRailCore.toMutableMap(): MutableMap<String, Any?> {
-    val jsonMap = mutableMapOf<String, Any?>()
-
-    try {
-        jsonMap["pos"] = this.startPoint
-        jsonMap["isTrainOnRail"] = this.isTrainOnRail
-        jsonMap["railMaps"] = this.getNeighborRailMaps()
-//    jsonMap["isCache"] = false
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-
-    return jsonMap
+fun TileEntityLargeRailCore.toMutableMap(): LargeRailData {
+    return LargeRailData(
+        this.startPoint,
+        this.isTrainOnRail,
+        this.getNeighborRailMaps()
+    )
 }
 
-fun TileEntityLargeRailCore.getNeighborRailMaps(): List<Map<String, Any>> {
+fun TileEntityLargeRailCore.getNeighborRailMaps(): List<IRailMapData> {
     if (this is TileEntityLargeRailSwitchCore) {
         this.switch.onBlockChanged(worldObj)
     }
@@ -66,38 +61,38 @@ private val isOpenField = RailMapSwitch::class.java.getDeclaredField("isOpen").a
     isAccessible = true
 }
 
-fun RailMap.toMutableMap(): Map<String, Any> {
+fun RailMap.toMutableMap(): IRailMapData {
     return if (this is RailMapSwitch)
         this.toMutableMap()
     else
-        mapOf(
-            "startRP" to this.startRP,
-            "endRP" to this.endRP,
-            "length" to this.length,
-            "neighborPos" to mapOf(
-                "startPR" to this.startRP.getNeighborPos(),
-                "endRP" to this.endRP.getNeighborPos()
+        RailMapData(
+            this.startRP,
+            this.endRP,
+            this.length,
+            NeighborPos(
+                this.startRP.getNeighborPos(),
+                this.endRP.getNeighborPos()
             ),
         )
 }
 
-fun RailMapSwitch.toMutableMap(): Map<String, Any> {
-    return mapOf(
-        "startRP" to this.startRP,
-        "endRP" to this.endRP,
-        "length" to this.length,
-        "neighborPos" to mapOf(
-            "startPR" to this.startRP.getNeighborPos(),
-            "endRP" to this.endRP.getNeighborPos()
+fun RailMapSwitch.toMutableMap(): IRailMapData {
+    return RailMapSwitchData(
+        this.startRP,
+        this.endRP,
+        this.length,
+        NeighborPos(
+            this.startRP.getNeighborPos(),
+            this.endRP.getNeighborPos()
         ),
-        "isNotActive" to !isOpenField[this].toString().toBoolean()
+        !isOpenField[this].toString().toBoolean()
     )
 }
 
-fun RailPosition.getNeighborPos(): Map<String, Int> {
-    return mapOf(
-        "x" to MathHelper.floor_double(this.posX + RailPosition.REVISION[this.direction.toInt()][0]),
-        "y" to this.blockY,
-        "z" to MathHelper.floor_double(this.posZ + RailPosition.REVISION[this.direction.toInt()][1])
+fun RailPosition.getNeighborPos(): Pos {
+    return Pos(
+        MathHelper.floor_double(this.posX + RailPosition.REVISION[this.direction.toInt()][0]),
+        this.blockY,
+        MathHelper.floor_double(this.posZ + RailPosition.REVISION[this.direction.toInt()][1])
     )
 }

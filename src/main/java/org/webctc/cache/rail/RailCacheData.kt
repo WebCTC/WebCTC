@@ -2,13 +2,14 @@ package org.webctc.cache.rail
 
 import org.webctc.cache.Pos
 import org.webctc.cache.PosCacheData
+import org.webctc.cache.rail.data.LargeRailData
 
-class RailCacheData(mapName: String) : PosCacheData<MutableMap<String, Any?>>(mapName) {
+class RailCacheData(mapName: String) : PosCacheData<LargeRailData>(mapName) {
     companion object {
-        var railMapCache = mutableMapOf<Pos, MutableMap<String, Any?>>()
+        var railMapCache = mutableMapOf<Pos, LargeRailData>()
     }
 
-    override fun getMapCache(): MutableMap<Pos, MutableMap<String, Any?>> {
+    override fun getMapCache(): MutableMap<Pos, LargeRailData> {
         return railMapCache
     }
 
