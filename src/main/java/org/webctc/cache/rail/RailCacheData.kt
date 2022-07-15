@@ -15,4 +15,8 @@ class RailCacheData(mapName: String) : PosCacheData<LargeRailData>(mapName) {
 
     override val TAG_NAME: String
         get() = "RailCache"
+
+    override fun fromJson(json: String): LargeRailData {
+        return gson.fromJson(json, LargeRailData::class.java)
+    }
 }

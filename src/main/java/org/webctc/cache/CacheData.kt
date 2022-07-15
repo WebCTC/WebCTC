@@ -2,6 +2,7 @@ package org.webctc.cache
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
@@ -25,7 +26,7 @@ abstract class CacheData<T>(mapName: String) : WorldSavedData(mapName) {
             val json =
                 gson.fromJson<T>(
                     tag.getString("json"),
-                    this.javaClass.genericSuperclass
+                    object : TypeToken<T>() {}.type
                 )
             json?.let { getMapCache()[key] = it }
         }

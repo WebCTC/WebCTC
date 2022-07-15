@@ -2,14 +2,23 @@ package org.webctc.cache
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
+import org.webctc.cache.rail.data.IRailMapData
+import org.webctc.cache.rail.data.RailMapData
+import org.webctc.cache.rail.data.RailMapSwitchData
 
 abstract class PosCacheData<T>(mapName: String) : WorldSavedData(mapName) {
     abstract fun getMapCache(): MutableMap<Pos, T>
-
-    private val gson: Gson = GsonBuilder()
+    val gson: Gson = GsonBuilder()
+        .registerTypeAdapterFactory(
+            RuntimeTypeAdapterFactory
+                .of(IRailMapData::class.java)
+                .registerSubtype(RailMapData::class.java)
+                .registerSubtype(RailMapSwitchData::class.java)
+        )
         .serializeNulls()
         .disableHtmlEscaping()
         .create()
@@ -22,14 +31,13 @@ abstract class PosCacheData<T>(mapName: String) : WorldSavedData(mapName) {
         for (i in 0 until tagList.tagCount()) {
             val tag = tagList.getCompoundTagAt(i)
             val pos = Pos.readFromNBT(tag.getCompoundTag("pos"))
-            val json =
-                gson.fromJson<T>(
-                    tag.getString("json"),
-                    this.javaClass.genericSuperclass
-                )
+            val json = this.fromJson(tag.getString("json"))
             json?.let { getMapCache()[pos] = it }
         }
     }
+
+    abstract fun fromJson(json: String): T
+
 
     override fun writeToNBT(nbt: NBTTagCompound) {
         val tagList = NBTTagList()

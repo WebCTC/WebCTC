@@ -14,4 +14,8 @@ class SignalCacheData(mapName: String) : PosCacheData<MutableMap<String, Any?>>(
 
     override val TAG_NAME: String
         get() = "SignalCache"
+
+    override fun fromJson(json: String): MutableMap<String, Any?> {
+        return gson.fromJson(json, mutableMapOf<String, Any?>().javaClass)
+    }
 }
