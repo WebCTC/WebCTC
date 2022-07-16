@@ -1,70 +1,76 @@
-const RAIL_DATA_URL = '/api/rails/'
-const RAIL_DATA_URL_LITE = '/api/rails/?lite=true'
-const SIGNAL_DATA_URL = '/api/signals/'
-const FORMATION_DATA_URL = '/api/formations/'
-const TRAIN_DATA_URL = '/api/trains/'
+const host = location.host
+const protocol = location.protocol;
 
-async function updateRail(svg, lite = false) {
+const RAIL_DATA_URL = `${protocol}//${host}/api/rails/`
+const SIGNAL_DATA_URL = `${protocol}//${host}/api/signals/`
+const FORMATION_DATA_URL = `${protocol}//${host}/api/formations/`
+const TRAIN_DATA_URL = `${protocol}//${host}/api/trains/`
+
+async function updateRail(svg, ws = false) {
   return await Promise.resolve()
-    .then(await fetch(!lite ? RAIL_DATA_URL : RAIL_DATA_URL_LITE)
-      .then(res => res.json())
-      .then(json => {
-        let updateList = Array.from(document.querySelectorAll("[id^='rail']"))
+    .then(async () => {
+      if (!ws) {
+        let railGroup = document.getElementById("rails")
 
-        json.forEach(railCore => {
-          let pos = railCore["pos"];
-          let id = "rail," + pos[0] + "," + pos[1] + "," + pos[2] + ","
-          let isTrainOnRail = railCore["isTrainOnRail"]
-          let isStraightRail = railCore["railMaps"].every(railMap => railMap["isNotActive"] === undefined)
+        await fetch(RAIL_DATA_URL)
+          .then(res => res.json())
+          .then(json => {
+            let updateList = Array.from(document.querySelectorAll("[id^='rail,']"))
 
-          let group = document.getElementById(id)
-          if (group != null && isStraightRail) {
-            updateList = updateList.filter(n => n !== group)
-          } else {
-            let newGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-            newGroup.id = id
-            newGroup.setAttribute('stroke-width', '1.5px');
-            railCore["railMaps"].sort(railMap => railMap["isNotActive"] === true ? -1 : 1).forEach(railMap => {
-              let startRP = railMap["startRP"];
-              let endRP = railMap["endRP"];
-              if (startRP != null && endRP != null) {
-                let isNotActive = railMap["isNotActive"] === true;
-                let startPosX = startRP["posX"]
-                let startPosZ = startRP["posZ"]
-                let endPosX = endRP["posX"]
-                let endPosZ = endRP["posZ"]
-                let line = createLine(startPosX, startPosZ, endPosX, endPosZ)
-                if (!isStraightRail) {
-                  let color = isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white'
-                  if (line.getAttribute('stroke') !== color) {
-                    line.setAttribute('stroke', color)
+            json.forEach(railCore => {
+              let pos = railCore["pos"];
+              let id = "rail," + pos[0] + "," + pos[1] + "," + pos[2] + ","
+              let isTrainOnRail = railCore["isTrainOnRail"]
+              let isStraightRail = railCore["railMaps"].every(railMap => railMap["isNotActive"] === undefined)
+
+              let group = document.getElementById(id)
+              if (group != null && isStraightRail) {
+                updateList = updateList.filter(n => n !== group)
+              } else {
+                let newGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+                newGroup.id = id
+                newGroup.setAttribute('stroke-width', '1.5px');
+                railCore["railMaps"].sort(railMap => railMap["isNotActive"] === true ? -1 : 1).forEach(railMap => {
+                  let startRP = railMap["startRP"];
+                  let endRP = railMap["endRP"];
+                  if (startRP != null && endRP != null) {
+                    let isNotActive = railMap["isNotActive"] === true;
+                    let startPosX = startRP["posX"]
+                    let startPosZ = startRP["posZ"]
+                    let endPosX = endRP["posX"]
+                    let endPosZ = endRP["posZ"]
+                    let line = createLine(startPosX, startPosZ, endPosX, endPosZ)
+                    if (!isStraightRail) {
+                      if (isNotActive) {
+                        line.setAttribute('stroke', 'gray')
+                      } else {
+                        line.removeAttribute('stroke')
+                      }
+                    }
+                    newGroup.appendChild(line)
                   }
+                });
+                railGroup.appendChild(newGroup)
+                if (group != null) {
+                  group.remove()
                 }
-                newGroup.appendChild(line)
+                group = newGroup
+              }
+              let color = isTrainOnRail ? 'red' : 'white'
+              if (group.getAttribute('stroke') !== color) {
+                group.setAttribute('stroke', 'white')
               }
             });
-            svg.appendChild(newGroup)
-            if (group != null) {
-              group.remove()
-            }
-            group = newGroup
-          }
-          let color = isTrainOnRail ? 'red' : 'white'
-          if (group.getAttribute('stroke') !== color) {
-            group.setAttribute('stroke', color)
-          }
-        });
 
-        if (!lite) {
-          updateList.forEach(n => n.remove());
-        } else {
-          updateList.filter(n => n.getAttribute('stroke') === "red").forEach(n => n.setAttribute('stroke', 'white'));
-        }
-      }))
+            updateList.forEach(n => n.remove());
+          })
+      }
+    })
     .then(await fetch(SIGNAL_DATA_URL)
       .then(res => res.json())
       .then(json => {
-        let updateList = Array.from(document.querySelectorAll("[id^='signal']"))
+        let signalGroup = document.getElementById("signals")
+        let updateList = Array.from(document.querySelectorAll("[id^='signal,']"))
 
         json.forEach(signal => {
           let pos = signal["pos"]
@@ -107,7 +113,7 @@ async function updateRail(svg, lite = false) {
 
             group.appendChild(circle)
 
-            svg.appendChild(group);
+            signalGroup.appendChild(group);
           } else {
             updateList = updateList.filter(n => n !== group)
             let minus = 0
@@ -187,7 +193,8 @@ async function updateRail(svg, lite = false) {
     .then(await fetch(FORMATION_DATA_URL)
       .then(res => res.json())
       .then(json => {
-        let updateList = Array.from(document.querySelectorAll("[id^='formation']"))
+        let formationGroup = document.getElementById("formations")
+        let updateList = Array.from(document.querySelectorAll("[id^='formation,']"))
 
         json.forEach(formation => {
           if (formation != null && formation["controlCar"] != null) {
@@ -197,7 +204,7 @@ async function updateRail(svg, lite = false) {
             if (group == null) {
               group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
               group.id = id
-              svg.appendChild(group)
+              formationGroup.appendChild(group)
             } else {
               updateList = updateList.filter(n => n !== group)
             }
@@ -222,7 +229,9 @@ async function updateRail(svg, lite = false) {
             text.setAttribute('y', String(posZ + 2))
             text.setAttribute('font-size', "8")
             text.setAttribute('font-weight', "bold")
-            text.setAttribute('fill', "black")
+            text.setAttribute('fill', "white")
+            text.setAttribute('stroke', "black")
+            text.setAttribute('stroke-width', "0.35px")
             group.appendChild(text)
           }
         });
@@ -231,6 +240,50 @@ async function updateRail(svg, lite = false) {
       }))
 }
 
+function updateRailState(svg, json) {
+  json.forEach(railCore => {
+    let pos = railCore["pos"];
+    let id = "rail," + pos[0] + "," + pos[1] + "," + pos[2] + ","
+    let isTrainOnRail = railCore["isTrainOnRail"]
+    let isStraightRail = railCore["railMaps"].every(railMap => railMap["isNotActive"] === undefined)
+
+    let group = document.getElementById(id)
+    if (group != null && isStraightRail) {
+    } else {
+      let newGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      newGroup.id = id
+      newGroup.setAttribute('stroke-width', '1.5px');
+      railCore["railMaps"].sort(railMap => railMap["isNotActive"] === true ? -1 : 1).forEach(railMap => {
+        let startRP = railMap["startRP"];
+        let endRP = railMap["endRP"];
+        if (startRP != null && endRP != null) {
+          let isNotActive = railMap["isNotActive"] === true;
+          let startPosX = startRP["posX"]
+          let startPosZ = startRP["posZ"]
+          let endPosX = endRP["posX"]
+          let endPosZ = endRP["posZ"]
+          let line = createLine(startPosX, startPosZ, endPosX, endPosZ)
+          if (!isStraightRail) {
+            let color = isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white'
+            if (line.getAttribute('stroke') !== color) {
+              line.setAttribute('stroke', color)
+            }
+          }
+          newGroup.appendChild(line)
+        }
+      });
+      document.getElementById("rails").appendChild(newGroup)
+      if (group != null) {
+        group.remove()
+      }
+      group = newGroup
+    }
+    let color = isTrainOnRail ? 'red' : 'white'
+    if (group.getAttribute('stroke') !== color) {
+      group.setAttribute('stroke', color)
+    }
+  });
+}
 
 function getSignalColor(signalLevel) {
   switch (signalLevel) {

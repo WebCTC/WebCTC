@@ -10,6 +10,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
@@ -17,10 +18,13 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.signal.SignalCacheUpdate
+import org.webctc.cache.waypoint.WayPointCacheData
+import org.webctc.command.CommandWebCTC
 import org.webctc.plugin.PluginManager
 import org.webctc.router.DefaultRouter
 import org.webctc.router.RouterManager
 import org.webctc.router.api.*
+import java.time.Duration
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
@@ -39,7 +43,13 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
-        PluginManager.registerPlugin { install(Compression) }
+        PluginManager.registerPlugin {
+            install(Compression)
+            install(WebSockets) {
+                pingPeriod = Duration.ofSeconds(15)
+                timeout = Duration.ofSeconds(5)
+            }
+        }
 
         RouterManager.registerRouter("/api", ApiRouter())
         RouterManager.registerRouter("/api/formations", FormationsRouter())

@@ -1,10 +1,17 @@
 package org.webctc.cache.rail
 
+import io.ktor.websocket.*
 import jp.ngt.rtm.rail.BlockLargeRailCore
 import jp.ngt.rtm.rail.TileEntityLargeRailCore
+import kotlinx.coroutines.channels.onFailure
+import kotlinx.coroutines.channels.trySendBlocking
+import net.minecraft.server.MinecraftServer
 import org.webctc.WebCTCCore
 import org.webctc.cache.Pos
+import org.webctc.router.WebCTCRouter
+import org.webctc.router.api.RailRouter
 import org.webctc.router.api.toMutableMap
+import kotlin.concurrent.thread
 
 class RailCacheUpdate {
     fun execute() {
@@ -26,10 +33,25 @@ class RailCacheUpdate {
                 .forEach {
                     coreList[Pos(it.xCoord, it.yCoord, it.zCoord)] = it.toMutableMap()
                 }
-            RailCacheData.railMapCache = coreList
-            WebCTCCore.INSTANCE.railData.markDirty()
+            val diff = coreList.filter { RailCacheData.railMapCache[it.key] != it.value }
+            if (diff.isNotEmpty()) {
+                val json = WebCTCRouter.gson.toJson(diff.values)
+                RailRouter.connections.forEach {
+                    thread {
+                        try {
+                            it.session.outgoing.trySendBlocking(Frame.Text(json)).onFailure { e ->
+                                MinecraftServer.getServer().logWarning(e?.message)
+                            }
+                        } catch (e: Exception) {
+                            MinecraftServer.getServer().logWarning(e.message)
+                        }
+                    }
+                }
+                RailCacheData.railMapCache = coreList
+                WebCTCCore.INSTANCE.railData.markDirty()
+            }
         } catch (e: Exception) {
-            e.printStackTrace()
+            MinecraftServer.getServer().logWarning(e.message)
         }
     }
 }
