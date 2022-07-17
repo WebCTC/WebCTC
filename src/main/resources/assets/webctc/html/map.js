@@ -58,7 +58,7 @@ async function updateRail(svg, ws = false) {
               }
               let color = isTrainOnRail ? 'red' : 'white'
               if (group.getAttribute('stroke') !== color) {
-                group.setAttribute('stroke', 'white')
+                group.setAttribute('stroke', color)
               }
             });
 
@@ -225,14 +225,26 @@ async function updateRail(svg, ws = false) {
 
             let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.textContent = (json["name"] === "no_name" ? "" : json["name"] + " ") + json["driver"]
-            text.setAttribute('x', String(posX + 3))
-            text.setAttribute('y', String(posZ + 2))
+            text.setAttribute('x', String(posX + 5))
+            text.setAttribute('y', String(posZ + 3))
             text.setAttribute('font-size', "8")
             text.setAttribute('font-weight', "bold")
             text.setAttribute('fill', "white")
-            text.setAttribute('stroke', "black")
             text.setAttribute('stroke-width', "0.35px")
-            group.appendChild(text)
+            group.appendChild(text);
+
+
+            let bbox = text.getBBox();
+            let background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            background.setAttribute('x', String(bbox.x))
+            background.setAttribute('y', String(bbox.y))
+            background.setAttribute('width', String(bbox.width))
+            background.setAttribute('height', String(bbox.height))
+            background.setAttribute('fill', "#000000")
+            background.setAttribute('fill-opacity', "0.5")
+            background.setAttribute('rx', "1px")
+            background.setAttribute('ry', "1px")
+            group.insertBefore(background, text);
           }
         });
 
@@ -264,9 +276,10 @@ function updateRailState(svg, json) {
           let endPosZ = endRP["posZ"]
           let line = createLine(startPosX, startPosZ, endPosX, endPosZ)
           if (!isStraightRail) {
-            let color = isTrainOnRail ? 'red' : isNotActive ? 'gray' : 'white'
-            if (line.getAttribute('stroke') !== color) {
-              line.setAttribute('stroke', color)
+            if (isNotActive) {
+              line.setAttribute('stroke', 'gray')
+            } else {
+              line.removeAttribute('stroke')
             }
           }
           newGroup.appendChild(line)
