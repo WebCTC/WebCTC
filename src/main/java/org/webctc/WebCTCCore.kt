@@ -18,8 +18,6 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.signal.SignalCacheUpdate
-import org.webctc.cache.waypoint.WayPointCacheData
-import org.webctc.command.CommandWebCTC
 import org.webctc.plugin.PluginManager
 import org.webctc.router.DefaultRouter
 import org.webctc.router.RouterManager
