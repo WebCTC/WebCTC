@@ -52,7 +52,7 @@ repositories {
 }
 
 dependencies {
-    embed 'org.danilopianini:gson-extras:0.2.4'
+    embed 'org.danilopianini:gson-extras:0.6.0'
 
     embed "io.ktor:ktor-server-core-jvm:$ktor_version"
     embed "io.ktor:ktor-server-websockets-jvm:$ktor_version"
