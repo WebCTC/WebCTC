@@ -18,6 +18,8 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.signal.SignalCacheUpdate
+import org.webctc.cache.waypoint.WayPointCacheData
+import org.webctc.command.CommandWebCTC
 import org.webctc.plugin.PluginManager
 import org.webctc.router.DefaultRouter
 import org.webctc.router.RouterManager
@@ -30,6 +32,7 @@ class WebCTCCore {
     lateinit var applicationEngine: ApplicationEngine
     lateinit var railData: WorldSavedData
     lateinit var signalData: WorldSavedData
+    lateinit var wayPointData: WorldSavedData
     lateinit var railCacheUpdate: RailCacheUpdate
     lateinit var signalCacheUpdate: SignalCacheUpdate
 
@@ -54,10 +57,16 @@ class WebCTCCore {
         RouterManager.registerRouter("/api/trains", TrainsRouter())
         RouterManager.registerRouter("/api/rails", RailRouter())
         RouterManager.registerRouter("/api/signals", SignalRouter())
+        RouterManager.registerRouter("/api/waypoints", WayPointRouter())
     }
 
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
+    }
+
+    @Mod.EventHandler
+    fun handleServerStaring(event: FMLServerStartingEvent) {
+        event.registerServerCommand(CommandWebCTC())
     }
 
     @Mod.EventHandler
@@ -79,7 +88,12 @@ class WebCTCCore {
         }
         this.signalData = signalData
 
-
+        var wayPointData = world.mapStorage.loadData(WayPointCacheData::class.java, "webctc_waypointcache")
+        if (wayPointData == null) {
+            wayPointData = WayPointCacheData("webctc_waypointcache")
+            world.mapStorage.setData("webctc_waypointcache", wayPointData)
+        }
+        this.wayPointData = wayPointData
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
             PluginManager.pluginList.forEach { it(this) }
             routing {
