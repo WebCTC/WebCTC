@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.6.21'
+    ext.kotlin_version = '1.7.10'
     ext.ktor_version = '2.0.1'
     ext.logback_version = "1.2.3"
     repositories {
@@ -62,8 +62,7 @@ dependencies {
     embed "io.ktor:ktor-server-netty-jvm:$ktor_version"
     embed "io.ktor:ktor-server-compression:$ktor_version"
 
-    api "curse.maven:ngtlib-288989:2940833"
-    api "curse.maven:realtrainmod-288988:3039063"
+    api "com.github.Kai-Z-JP:KaizPatchX:feb5341b"
 }
 
 processResources {
