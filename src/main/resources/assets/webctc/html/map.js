@@ -4,7 +4,9 @@ const protocol = location.protocol;
 const RAIL_DATA_URL = `${protocol}//${host}/api/rails/`
 const SIGNAL_DATA_URL = `${protocol}//${host}/api/signals/`
 const FORMATION_DATA_URL = `${protocol}//${host}/api/formations/`
-const TRAIN_DATA_URL = `${protocol}//${host}/api/trains/`
+const WAYPOINT_DATA_URL = `${protocol}//${host}/api/waypoints/`
+
+var pzInstance
 
 async function updateRail(svg, ws = false) {
   return await Promise.resolve()
@@ -191,12 +193,11 @@ async function updateRail(svg, ws = false) {
 
           updateList.forEach(n => n.remove());
         })
-      fetch(FORMATION_DATA_URL)
-        .then(res => res.json())
-        .then(json => {
-          let formationGroup = document.getElementById("formations")
+      let formationGroup = document.getElementById("formations")
+      if (formationGroup != null) {
+        fetch(FORMATION_DATA_URL).then(res => res.json()).then(json => {
           let updateList = Array.from(document.querySelectorAll("[id^='formation,']"))
-
+          let updateList2 = Array.from(document.querySelectorAll("[id^='formation-li,']"))
           json.forEach(formation => {
             if (formation != null && formation["controlCar"] != null) {
               let id = "formation," + formation["id"] + ","
@@ -225,7 +226,8 @@ async function updateRail(svg, ws = false) {
               group.appendChild(rect)
 
               let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-              text.textContent = (json["name"] === "no_name" ? "" : json["name"] + " ") + json["driver"]
+              let textContent = Math.round(json["speed"] * 72) + "km/h " + (json["name"] === "no_name" ? "" : json["name"] + " ") + json["driver"]
+              text.textContent = textContent
               text.setAttribute('x', String(posX + 5))
               text.setAttribute('y', String(posZ + 3))
               text.setAttribute('font-size', "8")
@@ -246,14 +248,78 @@ async function updateRail(svg, ws = false) {
               background.setAttribute('rx', "1px")
               background.setAttribute('ry', "1px")
               group.insertBefore(background, text);
+
+              if (trackingFormationId === formation["id"]) {
+                console.log(pzInstance.getTransform());
+                let scale = pzInstance.getTransform()["scale"];
+                pzInstance.moveTo((-posX) * scale + window.innerWidth / 2, (-posZ) * scale + (window.innerHeight - 80) / 2)
+              }
+
+              let fli = updateFormationListItem(formation["id"], textContent)
+              updateList2 = updateList2.filter(n => n !== fli)
             }
           });
-
           updateList.forEach(n => n.remove());
+          updateList2.forEach(n => n.remove());
+        }).catch(err => {
         })
-        .catch(err => {
+      }
+
+      let wayPointsGroup = document.getElementById("waypoints")
+      if (wayPointsGroup != null && !ws) {
+        fetch(WAYPOINT_DATA_URL).then(res => res.json()).then(json => {
+          json.forEach(waypoint => {
+            let group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+            wayPointsGroup.appendChild(group)
+
+            let title = document.createElementNS('http://www.w3.org/2000/svg', 'title')
+            title.textContent = `ID: ${waypoint["identifyName"]}`
+            group.appendChild(title)
+
+            let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.textContent = waypoint["displayName"]
+            text.setAttribute('x', waypoint["pos"]["x"])
+            text.setAttribute('y', waypoint["pos"]["z"])
+            text.setAttribute('font-size', "8")
+            text.setAttribute('font-weight', "bold")
+            text.setAttribute('fill', "white")
+            text.setAttribute('stroke-width', "0.35px")
+            text.setAttribute('text-anchor', "middle")
+            group.appendChild(text);
+
+
+            let bbox = text.getBBox();
+            let background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            background.setAttribute('x', String(bbox.x - 2))
+            background.setAttribute('y', String(bbox.y))
+            background.setAttribute('width', String(bbox.width + 4))
+            background.setAttribute('height', String(bbox.height))
+            background.setAttribute('fill', "#000000")
+            background.setAttribute('fill-opacity', "0.8")
+            background.setAttribute('rx', "2px")
+            background.setAttribute('ry', "2px")
+            group.insertBefore(background, text);
+          })
         })
+      }
     })
+}
+
+let trackingFormationId = -1;
+
+function updateFormationListItem(fId, text) {
+  let id = "formation-li," + fId + ","
+  let li = document.getElementById(id)
+  if (li == null) {
+    li = document.createElement("li")
+    li.id = id
+    document.getElementById("formation-list").appendChild(li)
+  }
+  li.className = "list-group-item"
+  li.innerText = text
+  li.style.background = trackingFormationId === fId ? "LIGHTBLUE" : "WHITE"
+  li.onclick = () => trackingFormationId = (trackingFormationId === fId ? -1 : fId)
+  return li;
 }
 
 function updateRailState(svg, json) {
