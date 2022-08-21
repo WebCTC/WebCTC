@@ -86,8 +86,8 @@ fun RailMap.toMutableMap(): IRailMapData {
             this.endRP,
             this.length,
             NeighborPos(
-                this.startRP.getNeighborPos(),
-                this.endRP.getNeighborPos()
+                this.startRP.getNeighborPosData(),
+                this.endRP.getNeighborPosData()
             ),
         )
 }
@@ -98,14 +98,14 @@ fun RailMapSwitch.toMutableMap(): IRailMapData {
         this.endRP,
         this.length,
         NeighborPos(
-            this.startRP.getNeighborPos(),
-            this.endRP.getNeighborPos()
+            this.startRP.getNeighborPosData(),
+            this.endRP.getNeighborPosData()
         ),
         !isOpenField[this].toString().toBoolean()
     )
 }
 
-fun RailPosition.getNeighborPos(): Pos {
+fun RailPosition.getNeighborPosData(): Pos {
     return Pos(
         MathHelper.floor_double(this.posX + RailPosition.REVISION[this.direction.toInt()][0]),
         this.blockY,
