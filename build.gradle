@@ -62,7 +62,7 @@ dependencies {
     embed "io.ktor:ktor-server-netty-jvm:$ktor_version"
     embed "io.ktor:ktor-server-compression:$ktor_version"
 
-    api "com.github.Kai-Z-JP:KaizPatchX:feb5341b"
+    api "com.github.Kai-Z-JP:KaizPatchX:v1.5.1"
 }
 
 processResources {
