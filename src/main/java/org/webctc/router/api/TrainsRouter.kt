@@ -18,7 +18,7 @@ class TrainsRouter : WebCTCRouter() {
             this.call.respondText(ContentType.Application.Json) {
                 gson.toJson(
                     WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
-                        .filterIsInstance<EntityTrainBase>().map(jp.ngt.rtm.entity.train.EntityTrainBase::toMutableMap)
+                        .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toMutableMap)
                 )
             }
         }
@@ -58,6 +58,11 @@ fun EntityTrainBase.toMutableMap(): MutableMap<String, Any?> {
         (EntityTrainBase::class.java.getDeclaredMethod("getByteArray")
             .apply { isAccessible = true }.invoke(this))
     jsonMap["name"] = this.resourceState.name
-
+    jsonMap["customButton"] = this.modelSet.config.customButtons.mapIndexed { i, list ->
+        val value = this.resourceState.dataMap.getInt("Button$i")
+        val text = if (list.size > value) list[value] else null
+        mapOf("value" to value, "text" to text)
+    }.toList()
+    jsonMap["dataMap"] = this.resourceState.dataMap.entries.map { it.key to it.value.get() }.toMap()
     return jsonMap
 }
