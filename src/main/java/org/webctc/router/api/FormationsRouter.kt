@@ -18,7 +18,7 @@ class FormationsRouter : WebCTCRouter() {
         get("/") {
             this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             this.call.respondText(ContentType.Application.Json) {
-                gson.toJson(this@FormationsRouter.getServerFormationManager().formations.values.map { it?.toMutableMap() })
+                gson.toJson(this@FormationsRouter.getServerFormationManager().formations.values.mapNotNull { it.toMutableMap() })
             }
         }
         get("/{FormationID}") {
@@ -52,14 +52,13 @@ fun Formation.toMutableMap(): MutableMap<String, Any?> {
     val jsonMap = mutableMapOf<String, Any?>()
 
     jsonMap["id"] = this.id
-    jsonMap["entries"] = this.entries
-        .mapNotNull {
-            mutableMapOf<String, Any?>(
-                "train" to (it.train?.entityId ?: 0),
-                "entryId" to it.entryId,
-                "dir" to it.dir
-            )
-        }
+    jsonMap["entries"] = this.entries?.mapNotNull {
+        mapOf<String, Any>(
+            "train" to (it.train?.entityId ?: 0),
+            "entryId" to it.entryId,
+            "dir" to it.dir
+        )
+    } ?: emptyList<Map<String, Any>>()
     val controlCar = Formation::class.java.getDeclaredMethod("getControlCar")
         .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
     jsonMap["controlCar"] = controlCar?.toMutableMap()
