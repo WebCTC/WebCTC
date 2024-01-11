@@ -35,6 +35,7 @@ kotlin {
             }
         }
     }
+
 }
 
 val wrappersVersion = extra["kotlin.wrappers.version"] as String
@@ -56,18 +57,20 @@ dependencies {
     implementation(kotlinWrp("mui-icons-material"))
 }
 
-tasks.named("compileKotlinJs") {
-    doFirst {
-        File(project.projectDir, "src/main/resources/index.html").writeText(
-            createHTMLDocument().html {
-                head {
-                    meta(charset = "utf-8")
-                    title("Viewer | WebCTC")
-                }
-                body {
-                    script(src = "front.js") { }
-                }
-            }.serialize(true)
-        )
-    }
+tasks.named("processResources") {
+    dependsOn("createSPAHtml")
+}
+
+task("createSPAHtml") {
+    File(project.projectDir, "src/main/resources/index.html").writeText(
+        createHTMLDocument().html {
+            head {
+                meta(charset = "utf-8")
+                title("Viewer | WebCTC")
+            }
+            body {
+                script(src = "front.js") { }
+            }
+        }.serialize(true)
+    )
 }
