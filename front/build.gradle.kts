@@ -24,7 +24,7 @@ repositories {
 }
 
 kotlin {
-    js() {
+    js {
         binaries.executable()
         browser {
             commonWebpackConfig {
@@ -56,6 +56,8 @@ dependencies {
     implementation(kotlinWrp("emotion"))
     implementation(kotlinWrp("mui-material"))
     implementation(kotlinWrp("mui-icons-material"))
+
+    implementation(npm("panzoom", "9.4.0"))
 }
 
 tasks.named("processResources") {
