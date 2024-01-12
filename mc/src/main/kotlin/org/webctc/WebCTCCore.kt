@@ -6,13 +6,18 @@ import cpw.mods.fml.common.event.*
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
 import cpw.mods.fml.common.gameevent.TickEvent
 import io.ktor.serialization.kotlinx.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
@@ -22,6 +27,9 @@ import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.signal.SignalCacheUpdate
 import org.webctc.cache.waypoint.WayPointCacheData
 import org.webctc.command.CommandWebCTC
+import org.webctc.common.types.rail.IRailMapData
+import org.webctc.common.types.rail.RailMapData
+import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.plugin.PluginManager
 import org.webctc.router.DefaultRouter
 import org.webctc.router.RouterManager
@@ -52,6 +60,17 @@ class WebCTCCore {
                 pingPeriod = Duration.ofSeconds(15)
                 timeout = Duration.ofSeconds(5)
                 contentConverter = KotlinxWebsocketSerializationConverter(Json)
+            }
+            install(ContentNegotiation) {
+                json(Json {
+                    serializersModule = SerializersModule {
+                        polymorphic(IRailMapData::class) {
+                            subclass(RailMapData::class)
+                            subclass(RailMapSwitchData::class)
+                        }
+                    }
+                    ignoreUnknownKeys = true
+                })
             }
         }
 

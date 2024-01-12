@@ -15,7 +15,8 @@ import net.minecraft.util.MathHelper
 import org.webctc.WebCTCCore
 import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.toWebCTC
-import org.webctc.common.types.*
+import org.webctc.common.types.Pos
+import org.webctc.common.types.rail.*
 import org.webctc.router.WebCTCRouter
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -27,11 +28,11 @@ class RailRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            this.call.respond { RailCacheData.railMapCache.values }
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            call.respond(RailCacheData.railMapCache.values)
         }
         get("/rail") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             val x = call.request.queryParameters["x"]?.toIntOrNull()
             val y = call.request.queryParameters["y"]?.toIntOrNull()
             val z = call.request.queryParameters["z"]?.toIntOrNull()
@@ -39,7 +40,11 @@ class RailRouter : WebCTCRouter() {
             if (x != null && y != null && z != null) {
                 railCore = WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z) as? TileEntityLargeRailCore
             }
-            this.call.respond { railCore?.toMutableMap() }
+            if (railCore == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(railCore.toMutableMap())
+            }
         }
         webSocket("/railsocket") {
             val thisConnection = Connection(this)

@@ -1,4 +1,4 @@
-package org.webctc.common.types
+package org.webctc.common.types.rail
 
 import kotlinx.serialization.Serializable
 

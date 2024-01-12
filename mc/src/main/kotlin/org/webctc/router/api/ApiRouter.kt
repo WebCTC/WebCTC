@@ -9,18 +9,24 @@ class ApiRouter : AbstractRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
+            val req = this.context.request
+            val scheme = req.local.scheme
+            val removeHost = req.local.remoteHost
+            val uri = req.local.uri
             this.call.respondText {
-                "This is WebCTC API. \n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}formations/\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}formations/<formationId>\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}formations/<formationId>/trains\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}trains/\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}trains/<entityId>\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}rails/\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}rails/rail?x=<x>&y=<y>&z=<z>\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}signals/\n" +
-                        "http://${this.context.request.local.remoteHost}${this.context.request.local.uri}signals/signal?x=<x>&y=<y>&z=<z>\n".trimIndent()
+                """
+                This is WebCTC API. 
+                http://$removeHost${uri}
+                http://$removeHost${uri}formations/
+                http://$removeHost${uri}formations/<formationId>
+                http://$removeHost${uri}formations/<formationId>/trains
+                http://$removeHost${uri}trains/
+                http://$removeHost${uri}trains/<entityId>
+                http://$removeHost${uri}rails/
+                http://$removeHost${uri}rails/rail?x=<x>&y=<y>&z=<z>
+                http://$removeHost${uri}signals/
+                http://$removeHost${uri}signals/signal?x=<x>&y=<y>&z=<z>
+                """.trimIndent()
             }
         }
     }

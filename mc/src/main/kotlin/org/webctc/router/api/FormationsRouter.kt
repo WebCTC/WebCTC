@@ -16,24 +16,32 @@ class FormationsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            this.call.respond {
-                (this@FormationsRouter.getServerFormationManager().formations.values.mapNotNull { it.toMutableMap() })
-            }
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            call.respond(getServerFormationManager().formations.values.mapNotNull { it.toMutableMap() })
         }
         get("/{FormationID}") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            val formationId = this.call.parameters["FormationID"]!!.toLong()
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val formationId = call.parameters["FormationID"]!!.toLong()
             val formation = this@FormationsRouter.getServerFormationManager().getFormation(formationId)
 
-            this.call.respond { formation?.toMutableMap() }
+            if (formation == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(formation.toMutableMap())
+            }
         }
         get("/{FormationID}/trains") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            val formationId = this.call.parameters["FormationID"]!!.toLong()
-            val formation = this@FormationsRouter.getServerFormationManager().getFormation(formationId)
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val formationId = call.parameters["FormationID"]!!.toLong()
+            val formation = getServerFormationManager().getFormation(formationId)
 
-            this.call.respond { formation?.entries?.mapNotNull { it.train.toMutableMap() } }
+            val trains = formation?.entries?.mapNotNull { it.train.toMutableMap() }
+
+            if (trains == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(trains)
+            }
         }
     }
 

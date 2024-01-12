@@ -3,7 +3,7 @@ package org.webctc.cache
 import jp.ngt.rtm.rail.util.RailPosition
 import net.minecraft.nbt.NBTTagCompound
 import org.webctc.common.types.Pos
-import org.webctc.common.types.WebCTCRailPosition
+import org.webctc.common.types.rail.WebCTCRailPosition
 
 class PosUtils {
     companion object {

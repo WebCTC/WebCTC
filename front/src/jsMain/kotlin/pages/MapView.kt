@@ -1,32 +1,74 @@
 package pages
 
+import components.LargeRail
 import emotion.react.Global
 import emotion.react.styles
 import emotion.styled.styled
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import js.objects.jso
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import org.webctc.common.types.rail.IRailMapData
+import org.webctc.common.types.rail.LargeRailData
+import org.webctc.common.types.rail.RailMapData
+import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.common.types.signal.SignalData
 import panzoom
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
+import react.dom.svg.ReactSVG.circle
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.path
 import react.dom.svg.ReactSVG.svg
-import react.useEffect
+import react.useEffectOnce
+import react.useState
 import web.cssom.*
 import web.dom.document
 
 val client = HttpClient(Js) {
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            serializersModule = SerializersModule {
+                polymorphic(IRailMapData::class) {
+                    subclass(RailMapData::class)
+                    subclass(RailMapSwitchData::class)
+                }
+            }
+            ignoreUnknownKeys = true
+        })
     }
 }
 
 val MapView = FC<Props> {
+    var railList by useState(mutableListOf<LargeRailData>())
+    var signalList by useState(mutableListOf<SignalData>())
+
+    useEffectOnce {
+        val map = document.getElementById("mtx")!!
+        panzoom(map, jso { smoothScroll = false })
+
+        MainScope().launch {
+            railList = client.get("http://localhost:8080/api/rails/") {
+                accept(ContentType.Application.Json)
+            }.body()
+            signalList = client.get("http://localhost:8080/api/signals/") {
+                accept(ContentType.Application.Json)
+            }.body()
+        }
+    }
+
     Header {
         LogoContainer {
             Logo {
@@ -42,10 +84,25 @@ val MapView = FC<Props> {
     }
 
     MapSVG {
-        id = "map"
-        xmlns = "http://www.w3.org/2000/svg"
         g {
             id = "mtx"
+            g {
+                railList.forEach { LargeRail { largeRailData = it } }
+            }
+            g {
+                signalList.forEach {
+                    circle {
+                        id = "signal,${it.pos}"
+                        stroke = "white"
+                        cx = it.pos.x.toDouble()
+                        cy = it.pos.z.toDouble()
+                        r = 1.5
+                        stroke = "lightgray"
+                        strokeWidth = 0.5
+                        fill = getSignalColor(it.signalLevel).toString()
+                    }
+                }
+            }
         }
     }
 
@@ -58,11 +115,6 @@ val MapView = FC<Props> {
                 overflowY = Overflow.hidden
             }
         }
-    }
-
-    useEffect {
-        val map = document.getElementById("mtx")!!
-        panzoom(map, jso { smoothScroll = false })
     }
 }
 
@@ -89,4 +141,16 @@ val Logo = svg.styled {
 val MapSVG = svg.styled {
     height = 100.vh - 80.px
     width = 100.pct
+}
+
+fun getSignalColor(signalLevel: Int): Color {
+    return when (signalLevel) {
+        0 -> Color("transparent")
+        1 -> rgb(2045, 0, 0)
+        2 -> rgb(255, 153, 0)
+        3 -> rgb(255, 204, 0)
+        4 -> rgb(155, 255, 0)
+        5 -> rgb(51, 204, 0)
+        else -> rgb(51, 102, 255)
+    }
 }

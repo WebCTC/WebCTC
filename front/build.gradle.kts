@@ -3,7 +3,7 @@ import kotlinx.html.dom.createHTMLDocument
 import kotlinx.html.dom.serialize
 
 plugins {
-    kotlin("js")
+    kotlin("multiplatform")
 }
 
 buildscript {
@@ -15,13 +15,18 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlinx:kotlinx-html-jvm:$kotlinxHtmlVersion")
     }
-
 }
 
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
 }
+
+val wrappersVersion = extra["kotlin.wrappers.version"] as String
+val ktorVersion = extra["ktor.version"] as String
+fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
+fun ktorCl(target: String) = ktor("client-$target")
+fun kotlinWrp(target: String) = "org.jetbrains.kotlin-wrappers:kotlin-$target"
 
 kotlin {
     js {
@@ -34,40 +39,37 @@ kotlin {
             }
         }
     }
+    sourceSets {
+        val jsMain by getting {
+            dependencies {
+                implementation(ktorCl("js"))
+                implementation(ktorCl("websockets"))
+                implementation(ktorCl("content-negotiation"))
+                implementation(ktor("serialization-kotlinx-json"))
+
+                implementation(project.dependencies.enforcedPlatform(kotlinWrp("wrappers-bom:$wrappersVersion")))
+                implementation(kotlinWrp("react"))
+                implementation(kotlinWrp("react-dom"))
+                implementation(kotlinWrp("react-router-dom"))
+
+                implementation(kotlinWrp("emotion"))
+                implementation(kotlinWrp("mui-material"))
+                implementation(kotlinWrp("mui-icons-material"))
+
+                implementation(npm("panzoom", "9.4.0"))
+
+                implementation(project(":common"))
+            }
+        }
+    }
 }
 
-val wrappersVersion = extra["kotlin.wrappers.version"] as String
-val ktorVersion = extra["ktor.version"] as String
-fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
-fun ktorCl(target: String) = ktor("client-$target")
-fun kotlinWrp(target: String) = "org.jetbrains.kotlin-wrappers:kotlin-$target"
-
-dependencies {
-    implementation(ktorCl("js"))
-    implementation(ktorCl("websockets"))
-    implementation(ktorCl("content-negotiation"))
-    implementation(ktor("serialization-kotlinx-json"))
-
-    implementation(enforcedPlatform(kotlinWrp("wrappers-bom:$wrappersVersion")))
-    implementation(kotlinWrp("react"))
-    implementation(kotlinWrp("react-dom"))
-    implementation(kotlinWrp("react-router-dom"))
-
-    implementation(kotlinWrp("emotion"))
-    implementation(kotlinWrp("mui-material"))
-    implementation(kotlinWrp("mui-icons-material"))
-
-    implementation(npm("panzoom", "9.4.0"))
-
-    implementation(project(":common"))
-}
-
-tasks.named("processResources") {
+tasks.named("jsProcessResources") {
     dependsOn("createSPAHtml")
 }
 
 task("createSPAHtml") {
-    File(project.projectDir, "src/main/resources/index.html").writeText(
+    File(project.projectDir, "src/jsMain/resources/index.html").writeText(
         createHTMLDocument().html {
             head {
                 meta(charset = "utf-8")

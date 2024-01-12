@@ -54,6 +54,7 @@ dependencies {
     embed(ktorSev("content-negotiation"))
     embed(ktor("serialization-kotlinx-json"))
 
+    embed("ch.qos.logback:logback-classic:1.4.14")
 
     embed(project(":common"))
 

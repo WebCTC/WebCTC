@@ -4,6 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Pos(val x: Int, val y: Int, val z: Int) {
+    override fun toString(): String {
+        return "$x,$y,$z"
+    }
+
     override fun hashCode(): Int {
         return (this.y + this.z * 31) * 31 + this.x
     }

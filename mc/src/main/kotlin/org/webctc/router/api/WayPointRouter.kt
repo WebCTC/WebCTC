@@ -11,8 +11,8 @@ class WayPointRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            this.call.respond { WayPointCacheData.wayPointCache.values }
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            call.respond(WayPointCacheData.wayPointCache.values)
         }
     }
 }

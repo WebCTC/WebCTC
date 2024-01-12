@@ -14,18 +14,22 @@ class TrainsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            this.call.respond {
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            call.respond(
                 WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
                     .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toMutableMap)
-            }
+            )
         }
         get("/{EntityId}") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            val eId = this.call.parameters["EntityId"]?.toInt()
+            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
+            val eId = call.parameters["EntityId"]?.toInt()
             val entity = eId?.let { WebCTCCore.INSTANCE.server.entityWorld.getEntityByID(it) }
 
-            this.call.respond { entity?.let { (it as? EntityTrainBase)?.toMutableMap() } }
+            if (entity == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(entity.let { (it as EntityTrainBase).toMutableMap() })
+            }
         }
     }
 }
