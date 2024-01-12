@@ -36,9 +36,9 @@ val embed = configurations.create("embed") {
 }
 
 val ktorVersion = extra["ktor.version"] as String
-dependencies {
-    fun ktorSev(name: String) = "io.ktor:ktor-server-$name-jvm:$ktorVersion"
+fun ktorSev(name: String) = "io.ktor:ktor-server-$name:$ktorVersion"
 
+dependencies {
     embed("org.danilopianini:gson-extras:0.2.4")
 
     embed(ktorSev("core"))
@@ -48,7 +48,6 @@ dependencies {
     embed(ktorSev("host-common"))
     embed(ktorSev("status-pages"))
     embed(ktorSev("websockets"))
-
 
     api("com.github.Kai-Z-JP:KaizPatchX:-SNAPSHOT:dev")
 }

@@ -2,7 +2,6 @@ import kotlinx.html.*
 import kotlinx.html.dom.createHTMLDocument
 import kotlinx.html.dom.serialize
 
-
 plugins {
     kotlin("js")
 }
@@ -25,7 +24,7 @@ repositories {
 }
 
 kotlin {
-    js(IR) {
+    js() {
         binaries.executable()
         browser {
             commonWebpackConfig {
@@ -35,17 +34,19 @@ kotlin {
             }
         }
     }
-
 }
 
 val wrappersVersion = extra["kotlin.wrappers.version"] as String
 val ktorVersion = extra["ktor.version"] as String
-
-fun ktorCl(target: String) = "io.ktor:ktor-client-$target:$ktorVersion"
+fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
+fun ktorCl(target: String) = ktor("client-$target")
 fun kotlinWrp(target: String) = "org.jetbrains.kotlin-wrappers:kotlin-$target"
 
 dependencies {
     implementation(ktorCl("js"))
+    implementation(ktorCl("websockets"))
+    implementation(ktorCl("content-negotiation"))
+    implementation(ktor("serialization-kotlinx-json"))
 
     implementation(enforcedPlatform(kotlinWrp("wrappers-bom:$wrappersVersion")))
     implementation(kotlinWrp("react"))

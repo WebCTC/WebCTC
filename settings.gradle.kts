@@ -1,6 +1,7 @@
 pluginManagement {
     repositories {
         mavenCentral()
+        gradlePluginPortal()
         maven(url = "https://maven.minecraftforge.net/")
         maven(url = "https://plugins.gradle.org/m2/")
     }
@@ -9,6 +10,7 @@ pluginManagement {
         val kotlinVersion = extra["kotlin.version"] as String
 
         kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
     }
 
     resolutionStrategy {
