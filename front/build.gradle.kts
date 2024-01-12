@@ -58,6 +58,8 @@ dependencies {
     implementation(kotlinWrp("mui-icons-material"))
 
     implementation(npm("panzoom", "9.4.0"))
+
+    implementation(project(":common"))
 }
 
 tasks.named("processResources") {
@@ -72,7 +74,7 @@ task("createSPAHtml") {
                 title("Viewer | WebCTC")
             }
             body {
-                script(src = "front.js") { }
+                script(src = "${project.name}.js") { }
             }
         }.serialize(true)
     )

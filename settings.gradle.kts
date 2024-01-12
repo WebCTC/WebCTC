@@ -10,6 +10,8 @@ pluginManagement {
         val kotlinVersion = extra["kotlin.version"] as String
 
         kotlin("jvm") version kotlinVersion
+        kotlin("multiplatform") version kotlinVersion
+        kotlin("js") version kotlinVersion
         kotlin("plugin.serialization") version kotlinVersion
     }
 
@@ -24,3 +26,5 @@ pluginManagement {
 
 rootProject.name = "WebCTC"
 include("front")
+include("mc")
+include("common")
