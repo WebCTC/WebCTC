@@ -144,32 +144,20 @@ val MapView = FC<Props> {
             id = "mtx"
             g {
                 stroke = "white"
-                railList.forEach {
-                    WRail { largeRailData = it }
-                }
+                railList.forEach { WRail { largeRailData = it } }
             }
             g {
                 stroke = "lightgray"
                 strokeWidth = 0.5
-                signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }.forEach { (key, signals) ->
-                    WSignalGroup {
-                        this.signals = signals
-                    }
-                }
+                signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }
+                    .forEach { (key, signals) -> WSignalGroup { this.signals = signals } }
             }
             g {
-                formationList
-                    .filter { it.controlCar != null }
-                    .forEach {
-                        WFormation {
-                            formation = it
-                        }
-                    }
+                formationList.filter { it.controlCar != null }
+                    .forEach { WFormation { formation = it } }
             }
             g {
-                waypointList.forEach {
-                    WWayPoint { wayPoint = it }
-                }
+                waypointList.forEach { WWayPoint { wayPoint = it } }
             }
         }
     }
