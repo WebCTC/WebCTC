@@ -54,23 +54,25 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
+        val jsonPreset = Json {
+            serializersModule = SerializersModule {
+                polymorphic(IRailMapData::class) {
+                    subclass(RailMapData::class)
+                    subclass(RailMapSwitchData::class)
+                }
+            }
+            ignoreUnknownKeys = true
+        }
+
         PluginManager.registerPlugin {
             install(Compression)
             install(WebSockets) {
                 pingPeriod = Duration.ofSeconds(15)
                 timeout = Duration.ofSeconds(5)
-                contentConverter = KotlinxWebsocketSerializationConverter(Json)
+                contentConverter = KotlinxWebsocketSerializationConverter(jsonPreset)
             }
             install(ContentNegotiation) {
-                json(Json {
-                    serializersModule = SerializersModule {
-                        polymorphic(IRailMapData::class) {
-                            subclass(RailMapData::class)
-                            subclass(RailMapSwitchData::class)
-                        }
-                    }
-                    ignoreUnknownKeys = true
-                })
+                json(jsonPreset)
             }
         }
 

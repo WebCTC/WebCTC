@@ -39,6 +39,9 @@ class RailCacheUpdate {
                 }
                 RailCacheData.railMapCache = coreList
                 WebCTCCore.INSTANCE.railData.markDirty()
+            } else if (RailCacheData.railMapCache.any { !coreList.contains(it.key) }) {
+                RailCacheData.railMapCache = coreList
+                WebCTCCore.INSTANCE.railData.markDirty()
             }
         } catch (e: Exception) {
             MinecraftServer.getServer().logWarning(e.message)

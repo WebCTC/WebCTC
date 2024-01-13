@@ -1,6 +1,7 @@
 package pages
 
 import components.LargeRail
+import components.SignalGroup
 import emotion.react.Global
 import emotion.react.styles
 import emotion.styled.styled
@@ -8,16 +9,20 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import js.objects.jso
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import org.webctc.common.types.WayPoint
 import org.webctc.common.types.rail.IRailMapData
 import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.rail.RailMapData
@@ -28,46 +33,52 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
-import react.dom.svg.ReactSVG.circle
+import react.dom.html.ReactHTML.title
 import react.dom.svg.ReactSVG.g
-import react.dom.svg.ReactSVG.line
 import react.dom.svg.ReactSVG.path
-import react.dom.svg.ReactSVG.polyline
+import react.dom.svg.ReactSVG.rect
 import react.dom.svg.ReactSVG.svg
+import react.dom.svg.ReactSVG.text
 import react.useEffectOnce
 import react.useState
 import web.cssom.*
 import web.dom.document
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 val client = HttpClient(Js) {
-    install(ContentNegotiation) {
-        json(Json {
-            serializersModule = SerializersModule {
-                polymorphic(IRailMapData::class) {
-                    subclass(RailMapData::class)
-                    subclass(RailMapSwitchData::class)
-                }
+    val jsonPreset = Json {
+        serializersModule = SerializersModule {
+            polymorphic(IRailMapData::class) {
+                subclass(RailMapData::class)
+                subclass(RailMapSwitchData::class)
             }
-            ignoreUnknownKeys = true
-        })
+        }
+        ignoreUnknownKeys = true
+    }
+
+    install(ContentNegotiation) {
+        json(jsonPreset)
+    }
+    install(WebSockets) {
+        contentConverter = KotlinxWebsocketSerializationConverter(jsonPreset)
     }
 }
 
 val MapView = FC<Props> {
-    var railList by useState(mutableListOf<LargeRailData>())
+    var (railList, setRailList) = useState(mutableListOf<LargeRailData>())
     var signalList by useState(mutableListOf<SignalData>())
+    var formationList by useState(mutableListOf<JsonObject>())
+    var waypointList by useState(mutableListOf<WayPoint>())
 
     useEffectOnce {
         val map = document.getElementById("mtx")!!
         panzoom(map, jso { smoothScroll = false })
 
         MainScope().launch {
-            railList = client.get("http://localhost:8080/api/rails/") {
+            val resList = client.get("http://localhost:8080/api/rails/") {
                 accept(ContentType.Application.Json)
-            }.body()
+            }.body<MutableList<LargeRailData>>()
+
+            setRailList { resList }
         }
 
         MainScope().launch {
@@ -76,7 +87,25 @@ val MapView = FC<Props> {
             }.body()
         }
 
+        MainScope().launch {
+            waypointList = client.get("http://localhost:8080/api/waypoints/") {
+                accept(ContentType.Application.Json)
+            }.body()
+        }
 
+        MainScope().launch {
+            client.webSocket("ws://localhost:8080/api/rails/railsocket") {
+                while (true) {
+                    val updatedRails = receiveDeserialized<List<LargeRailData>>()
+
+                    setRailList {
+                        it.filterNot { rail -> updatedRails.any { it.pos.contentEquals(rail.pos) } }
+                            .toMutableList()
+                            .apply { addAll(updatedRails) }
+                    }
+                }
+            }
+        }
     }
 
     Header {
@@ -106,63 +135,36 @@ val MapView = FC<Props> {
                 stroke = "lightgray"
                 strokeWidth = 0.5
                 signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }.forEach { (key, signals) ->
-                    val sortedSignals = signals.sortedBy { it.pos.y }
-                    val bottomSignal = sortedSignals.first()
-                    val rotation = bottomSignal.rotation
-                    val cos = cos((270 + rotation) * (PI / 180))
-                    val sin = sin((270 + rotation) * (PI / 180))
-
-                    line {
-                        x1 = bottomSignal.pos.x.toDouble() - (signals.size - 1) * 3.5 * cos
-                        y1 = bottomSignal.pos.z.toDouble() + (signals.size - 1) * 3.5 * sin
-                        x2 = bottomSignal.pos.x.toDouble() + 4.0 * cos
-                        y2 = bottomSignal.pos.z.toDouble() - 4.0 * sin
+                    SignalGroup {
+                        this.signals = signals
                     }
-                    line {
-                        x1 = bottomSignal.pos.x.toDouble() + 4.0 * cos + 1.5 * sin
-                        y1 = bottomSignal.pos.z.toDouble() + 1.5 * cos - 4.0 * sin
-                        x2 = bottomSignal.pos.x.toDouble() + 4.0 * cos - 1.5 * sin
-                        y2 = bottomSignal.pos.z.toDouble() - 1.5 * cos - 4.0 * sin
-                    }
-
-
-                    sortedSignals.forEachIndexed { index, signal ->
-                        val blockDirection = signal.blockDirection
-                        val blockDirectionRotation = (signal.blockDirection * 90).let {
-                            if (it > 180) it - 360 else it
+                }
+            }
+            g {
+                waypointList.forEach {
+                    g {
+                        rect {
+                            x = (it.pos.x - 2 - 4 * it.displayName.length).toDouble()
+                            y = it.pos.z.toDouble() - 8.0
+                            width = 8.0 * it.displayName.length + 4
+                            height = 10.0
+                            fill = "black"
+                            fillOpacity = "0.8"
+                            rx = 2.0
+                            ry = 2.0
                         }
-                        val isLeft = rotation > blockDirectionRotation
-                        val isRight = rotation < blockDirectionRotation
+                        text {
+                            +it.displayName
+                            x = it.pos.x.toDouble()
+                            y = it.pos.z.toDouble()
+                            fill = "white"
+                            fontSize = 8.0
+                            fontWeight = "bold"
+                            textAnchor = "middle"
 
-                        val offsetCx = (
-                                (if (isLeft) 3.0 else if (isRight) -3.0 else 0.0)
-                                ) * sin + (
-                                -index * 3.5 - if (isLeft || isRight) 1.0 else 0.0
-                                ) * cos
-                        val offsetCy = (if (isLeft) 3.0 else if (isRight) -3.0 else 0.0) * cos + (
-                                index * 3.5 + if (isLeft || isRight) 1.0 else 0.0
-                                ) * sin
-
-                        val cxValue = signal.pos.x.toDouble() + offsetCx
-                        val cyValue = signal.pos.z.toDouble() + offsetCy
-
-                        if (isLeft || isRight) {
-                            polyline {
-                                fill = "none"
-                                points = listOf(
-                                    "$cxValue,$cyValue",
-                                    "${cxValue + 3.0 * cos},${cyValue - 3.0 * sin}",
-                                    "${cxValue + 3.0 * cos - (if (isLeft) 3.0 else -3.0) * sin},${cyValue - 3.0 * sin - (if (isLeft) 3.0 else -3.0) * cos}"
-                                ).joinToString(" ")
-                            }
                         }
-
-                        circle {
-                            id = "signal,${signal.pos}"
-                            cx = cxValue
-                            cy = cyValue
-                            r = 1.5
-                            fill = getSignalColor(signal.signalLevel).toString()
+                        title {
+                            +it.identifyName
                         }
                     }
                 }
@@ -206,16 +208,4 @@ val Logo = svg.styled {
 val MapSVG = svg.styled {
     height = 100.vh - 80.px
     width = 100.pct
-}
-
-fun getSignalColor(signalLevel: Int): Color {
-    return when (signalLevel) {
-        0 -> Color("darkslategray")
-        1 -> rgb(2045, 0, 0)
-        2 -> rgb(255, 153, 0)
-        3 -> rgb(255, 204, 0)
-        4 -> rgb(155, 255, 0)
-        5 -> rgb(51, 204, 0)
-        else -> rgb(51, 102, 255)
-    }
 }
