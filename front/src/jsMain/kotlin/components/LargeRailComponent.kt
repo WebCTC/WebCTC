@@ -16,7 +16,9 @@ val LargeRail = FC<LargeRailProps> { props ->
 
     g {
         val isTrainOnRail = rail.isTrainOnRail
-        stroke = if (isTrainOnRail) "red" else "white"
+        if (isTrainOnRail) {
+            stroke = "red"
+        }
         id = "rail,${rail.pos.joinToString(",")}"
         rail.railMaps.forEach {
             val isNotActive = it is RailMapSwitchData && it.isNotActive

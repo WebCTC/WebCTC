@@ -30,12 +30,17 @@ import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
 import react.dom.svg.ReactSVG.circle
 import react.dom.svg.ReactSVG.g
+import react.dom.svg.ReactSVG.line
 import react.dom.svg.ReactSVG.path
+import react.dom.svg.ReactSVG.polyline
 import react.dom.svg.ReactSVG.svg
 import react.useEffectOnce
 import react.useState
 import web.cssom.*
 import web.dom.document
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 val client = HttpClient(Js) {
     install(ContentNegotiation) {
@@ -63,10 +68,15 @@ val MapView = FC<Props> {
             railList = client.get("http://localhost:8080/api/rails/") {
                 accept(ContentType.Application.Json)
             }.body()
+        }
+
+        MainScope().launch {
             signalList = client.get("http://localhost:8080/api/signals/") {
                 accept(ContentType.Application.Json)
             }.body()
         }
+
+
     }
 
     Header {
@@ -87,19 +97,73 @@ val MapView = FC<Props> {
         g {
             id = "mtx"
             g {
-                railList.forEach { LargeRail { largeRailData = it } }
+                stroke = "white"
+                railList.forEach {
+                    LargeRail { largeRailData = it }
+                }
             }
             g {
-                signalList.forEach {
-                    circle {
-                        id = "signal,${it.pos}"
-                        stroke = "white"
-                        cx = it.pos.x.toDouble()
-                        cy = it.pos.z.toDouble()
-                        r = 1.5
-                        stroke = "lightgray"
-                        strokeWidth = 0.5
-                        fill = getSignalColor(it.signalLevel).toString()
+                stroke = "lightgray"
+                strokeWidth = 0.5
+                signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }.forEach { (key, signals) ->
+                    val sortedSignals = signals.sortedBy { it.pos.y }
+                    val bottomSignal = sortedSignals.first()
+                    val rotation = bottomSignal.rotation
+                    val cos = cos((270 + rotation) * (PI / 180))
+                    val sin = sin((270 + rotation) * (PI / 180))
+
+                    line {
+                        x1 = bottomSignal.pos.x.toDouble() - (signals.size - 1) * 3.5 * cos
+                        y1 = bottomSignal.pos.z.toDouble() + (signals.size - 1) * 3.5 * sin
+                        x2 = bottomSignal.pos.x.toDouble() + 4.0 * cos
+                        y2 = bottomSignal.pos.z.toDouble() - 4.0 * sin
+                    }
+                    line {
+                        x1 = bottomSignal.pos.x.toDouble() + 4.0 * cos + 1.5 * sin
+                        y1 = bottomSignal.pos.z.toDouble() + 1.5 * cos - 4.0 * sin
+                        x2 = bottomSignal.pos.x.toDouble() + 4.0 * cos - 1.5 * sin
+                        y2 = bottomSignal.pos.z.toDouble() - 1.5 * cos - 4.0 * sin
+                    }
+
+
+                    sortedSignals.forEachIndexed { index, signal ->
+                        val blockDirection = signal.blockDirection
+                        val blockDirectionRotation = (signal.blockDirection * 90).let {
+                            if (it > 180) it - 360 else it
+                        }
+                        val isLeft = rotation > blockDirectionRotation
+                        val isRight = rotation < blockDirectionRotation
+
+                        val offsetCx = (
+                                (if (isLeft) 3.0 else if (isRight) -3.0 else 0.0)
+                                ) * sin + (
+                                -index * 3.5 - if (isLeft || isRight) 1.0 else 0.0
+                                ) * cos
+                        val offsetCy = (if (isLeft) 3.0 else if (isRight) -3.0 else 0.0) * cos + (
+                                index * 3.5 + if (isLeft || isRight) 1.0 else 0.0
+                                ) * sin
+
+                        val cxValue = signal.pos.x.toDouble() + offsetCx
+                        val cyValue = signal.pos.z.toDouble() + offsetCy
+
+                        if (isLeft || isRight) {
+                            polyline {
+                                fill = "none"
+                                points = listOf(
+                                    "$cxValue,$cyValue",
+                                    "${cxValue + 3.0 * cos},${cyValue - 3.0 * sin}",
+                                    "${cxValue + 3.0 * cos - (if (isLeft) 3.0 else -3.0) * sin},${cyValue - 3.0 * sin - (if (isLeft) 3.0 else -3.0) * cos}"
+                                ).joinToString(" ")
+                            }
+                        }
+
+                        circle {
+                            id = "signal,${signal.pos}"
+                            cx = cxValue
+                            cy = cyValue
+                            r = 1.5
+                            fill = getSignalColor(signal.signalLevel).toString()
+                        }
                     }
                 }
             }
@@ -115,6 +179,7 @@ val MapView = FC<Props> {
                 overflowY = Overflow.hidden
             }
         }
+
     }
 }
 
@@ -145,7 +210,7 @@ val MapSVG = svg.styled {
 
 fun getSignalColor(signalLevel: Int): Color {
     return when (signalLevel) {
-        0 -> Color("transparent")
+        0 -> Color("darkslategray")
         1 -> rgb(2045, 0, 0)
         2 -> rgb(255, 153, 0)
         3 -> rgb(255, 204, 0)
