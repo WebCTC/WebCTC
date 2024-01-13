@@ -9,7 +9,7 @@ import net.minecraft.server.MinecraftServer
 import org.webctc.WebCTCCore
 import org.webctc.common.types.Pos
 import org.webctc.router.api.RailRouter
-import org.webctc.router.api.toMutableMap
+import org.webctc.router.api.toData
 
 class RailCacheUpdate {
     fun execute() {
@@ -24,7 +24,7 @@ class RailCacheUpdate {
                     world.chunkProvider.loadChunk(key.x / 16, key.z / 16)
                 }
             world.loadedTileEntityList.toMutableList().filterIsInstance<TileEntityLargeRailCore>().forEach {
-                coreList[Pos(it.xCoord, it.yCoord, it.zCoord)] = it.toMutableMap()
+                coreList[Pos(it.xCoord, it.yCoord, it.zCoord)] = it.toData()
             }
             val diff = coreList.filter { RailCacheData.railMapCache[it.key] != it.value }
             if (diff.isNotEmpty()) {

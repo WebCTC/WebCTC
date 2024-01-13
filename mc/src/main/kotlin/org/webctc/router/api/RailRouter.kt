@@ -43,7 +43,7 @@ class RailRouter : WebCTCRouter() {
             if (railCore == null) {
                 call.respond(HttpStatusCode.NotFound)
             } else {
-                call.respond(railCore.toMutableMap())
+                call.respond(railCore.toData())
             }
         }
         webSocket("/railsocket") {
@@ -60,7 +60,7 @@ class RailRouter : WebCTCRouter() {
     }
 }
 
-fun TileEntityLargeRailCore.toMutableMap(): LargeRailData {
+fun TileEntityLargeRailCore.toData(): LargeRailData {
     return LargeRailData(
         this.startPoint,
         this.isTrainOnRail,
@@ -72,16 +72,16 @@ fun TileEntityLargeRailCore.getNeighborRailMaps(): List<IRailMapData> {
     if (this is TileEntityLargeRailSwitchCore) {
         this.switch.onBlockChanged(worldObj)
     }
-    return this.allRailMaps.map { it.toMutableMap() }
+    return this.allRailMaps.map { it.toData() }
 }
 
 private val isOpenField = RailMapSwitch::class.java.getDeclaredField("isOpen").apply {
     isAccessible = true
 }
 
-fun RailMap.toMutableMap(): IRailMapData {
+fun RailMap.toData(): IRailMapData {
     return if (this is RailMapSwitch)
-        this.toMutableMap()
+        this.toData()
     else
         RailMapData(
             this.startRP.toWebCTC(),
@@ -94,7 +94,7 @@ fun RailMap.toMutableMap(): IRailMapData {
         )
 }
 
-fun RailMapSwitch.toMutableMap(): IRailMapData {
+fun RailMapSwitch.toData(): IRailMapData {
     return RailMapSwitchData(
         this.startRP.toWebCTC(),
         this.endRP.toWebCTC(),

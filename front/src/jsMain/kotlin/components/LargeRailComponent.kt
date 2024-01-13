@@ -11,8 +11,8 @@ external interface LargeRailProps : Props {
     var largeRailData: LargeRailData
 }
 
-val LargeRail = FC<LargeRailProps> { props ->
-    val rail = props.largeRailData
+val WRail = FC<LargeRailProps> {
+    val rail = it.largeRailData
 
     g {
         val isTrainOnRail = rail.isTrainOnRail

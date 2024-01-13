@@ -22,7 +22,7 @@ external interface SignalGroupProps : Props {
     var signals: List<SignalData>
 }
 
-val Signal = FC<SignalProps> {
+val WSignal = FC<SignalProps> {
     val signal = it.signal
     circle {
         id = "signal,${signal.pos}"
@@ -34,7 +34,7 @@ val Signal = FC<SignalProps> {
 }
 
 
-val SignalGroup = FC<SignalGroupProps> {
+val WSignalGroup = FC<SignalGroupProps> {
     val signals = it.signals
     val sortedSignals = signals.sortedBy { it.pos.y }
     val baseSignal = sortedSignals.first()
@@ -84,7 +84,7 @@ val SignalGroup = FC<SignalGroupProps> {
             }
         }
 
-        Signal {
+        WSignal {
             this.signal = signal
             cx = cxValue
             cy = cyValue

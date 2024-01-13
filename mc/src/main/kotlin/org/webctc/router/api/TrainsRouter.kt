@@ -8,6 +8,8 @@ import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.parts.EntityFloor
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import org.webctc.WebCTCCore
+import org.webctc.common.types.trains.CustomButtonData
+import org.webctc.common.types.trains.TrainData
 import org.webctc.router.WebCTCRouter
 
 class TrainsRouter : WebCTCRouter() {
@@ -17,7 +19,7 @@ class TrainsRouter : WebCTCRouter() {
             call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             call.respond(
                 WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
-                    .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toMutableMap)
+                    .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toData)
             )
         }
         get("/{EntityId}") {
@@ -28,41 +30,38 @@ class TrainsRouter : WebCTCRouter() {
             if (entity == null) {
                 call.respond(HttpStatusCode.NotFound)
             } else {
-                call.respond(entity.let { (it as EntityTrainBase).toMutableMap() })
+                call.respond(entity.let { (it as EntityTrainBase).toData() })
             }
         }
     }
 }
 
-fun EntityTrainBase.toMutableMap(): MutableMap<String, Any?> {
-    val jsonMap = mutableMapOf<String, Any?>()
-
-    jsonMap["formation"] = this.formation?.id
-    jsonMap["id"] = this.entityId
-    jsonMap["speed"] = this.speed
-    jsonMap["notch"] = this.notch
-    jsonMap["modelName"] = this.modelName
-    jsonMap["isControlCar"] = this.isControlCar
-    jsonMap["signal"] = this.signal
-    jsonMap["driver"] = this.riddenByEntity?.commandSenderName ?: ""
-    jsonMap["passengers"] =
+fun EntityTrainBase.toData(): TrainData {
+    return TrainData(
+        this.formation?.id,
+        this.entityId,
+        this.speed,
+        this.notch,
+        this.modelName,
+        this.isControlCar,
+        this.signal,
+        this.riddenByEntity?.commandSenderName ?: "",
         EntityVehicleBase::class.java.getDeclaredField("vehicleFloors")
             .apply { isAccessible = true }.get(this)
             ?.let { vehicleFloors ->
                 (vehicleFloors as List<*>)
-                    .filterIsInstance(EntityFloor::class.java)
+                    .filterIsInstance<EntityFloor>()
                     .map { entityFloor -> entityFloor.riddenByEntity?.commandSenderName }
-            }
-    jsonMap["pos"] = arrayOf(this.posX, this.posY, this.posZ)
-    jsonMap["trainStateData"] =
-        (EntityTrainBase::class.java.getDeclaredMethod("getByteArray")
-            .apply { isAccessible = true }.invoke(this))
-    jsonMap["name"] = this.resourceState.name
-    jsonMap["customButton"] = this.modelSet.config.customButtons.mapIndexed { i, list ->
-        val value = this.resourceState.dataMap.getInt("Button$i")
-        val text = if (list.size > value) list[value] else null
-        mapOf("value" to value, "text" to text)
-    }.toList()
-    jsonMap["dataMap"] = this.resourceState.dataMap.entries.map { it.key to it.value.get() }.toMap()
-    return jsonMap
+            } ?: listOf(),
+        listOf(this.posX, this.posY, this.posZ),
+        ((EntityTrainBase::class.java.getDeclaredMethod("getByteArray")
+            .apply { isAccessible = true }.invoke(this)) as ByteArray),
+        this.resourceState.name,
+        this.modelSet.config.customButtons.mapIndexed { i, list ->
+            val value = this.resourceState.dataMap.getInt("Button$i")
+            val text = if (list.size > value) list[value] else null
+            CustomButtonData(value, text)
+        },
+//        this.resourceState.dataMap.entries.map { it.key to it.value.get() }.toMap()
+    )
 }

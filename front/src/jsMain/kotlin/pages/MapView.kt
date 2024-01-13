@@ -1,7 +1,9 @@
 package pages
 
-import components.LargeRail
-import components.SignalGroup
+import components.WFormation
+import components.WRail
+import components.WSignalGroup
+import components.WWayPoint
 import emotion.react.Global
 import emotion.react.styles
 import emotion.styled.styled
@@ -18,7 +20,6 @@ import js.objects.jso
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -28,21 +29,21 @@ import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.common.types.signal.SignalData
+import org.webctc.common.types.trains.FormationData
 import panzoom
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.title
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.path
-import react.dom.svg.ReactSVG.rect
 import react.dom.svg.ReactSVG.svg
-import react.dom.svg.ReactSVG.text
 import react.useEffectOnce
 import react.useState
 import web.cssom.*
 import web.dom.document
+import web.timers.setInterval
+import kotlin.time.Duration.Companion.seconds
 
 val client = HttpClient(Js) {
     val jsonPreset = Json {
@@ -66,35 +67,51 @@ val client = HttpClient(Js) {
 val MapView = FC<Props> {
     var (railList, setRailList) = useState(mutableListOf<LargeRailData>())
     var signalList by useState(mutableListOf<SignalData>())
-    var formationList by useState(mutableListOf<JsonObject>())
+    var formationList by useState(mutableListOf<FormationData>())
     var waypointList by useState(mutableListOf<WayPoint>())
 
     useEffectOnce {
         val map = document.getElementById("mtx")!!
         panzoom(map, jso { smoothScroll = false })
 
+        val schema = "http"
+        val host = "localhost"
+        val port = 8080
+        val ip = "$host:$port"
+        val baseUrl = "$schema://$ip"
+
         MainScope().launch {
-            val resList = client.get("http://localhost:8080/api/rails/") {
+            val resList = client.get("$baseUrl/api/rails/") {
                 accept(ContentType.Application.Json)
             }.body<MutableList<LargeRailData>>()
 
             setRailList { resList }
         }
 
+        setInterval(3.seconds) {
+            MainScope().launch {
+                signalList = client.get("$baseUrl/api/signals/") {
+                    accept(ContentType.Application.Json)
+                }.body()
+            }
+        }
+
+        setInterval(3.seconds) {
+            MainScope().launch {
+                formationList = client.get("$baseUrl/api/formations/") {
+                    accept(ContentType.Application.Json)
+                }.body()
+            }
+        }
+
         MainScope().launch {
-            signalList = client.get("http://localhost:8080/api/signals/") {
+            waypointList = client.get("$baseUrl/api/waypoints/") {
                 accept(ContentType.Application.Json)
             }.body()
         }
 
         MainScope().launch {
-            waypointList = client.get("http://localhost:8080/api/waypoints/") {
-                accept(ContentType.Application.Json)
-            }.body()
-        }
-
-        MainScope().launch {
-            client.webSocket("ws://localhost:8080/api/rails/railsocket") {
+            client.webSocket(path = "/api/rails/railsocket", port = port) {
                 while (true) {
                     val updatedRails = receiveDeserialized<List<LargeRailData>>()
 
@@ -128,45 +145,30 @@ val MapView = FC<Props> {
             g {
                 stroke = "white"
                 railList.forEach {
-                    LargeRail { largeRailData = it }
+                    WRail { largeRailData = it }
                 }
             }
             g {
                 stroke = "lightgray"
                 strokeWidth = 0.5
                 signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }.forEach { (key, signals) ->
-                    SignalGroup {
+                    WSignalGroup {
                         this.signals = signals
                     }
                 }
             }
             g {
-                waypointList.forEach {
-                    g {
-                        rect {
-                            x = (it.pos.x - 2 - 4 * it.displayName.length).toDouble()
-                            y = it.pos.z.toDouble() - 8.0
-                            width = 8.0 * it.displayName.length + 4
-                            height = 10.0
-                            fill = "black"
-                            fillOpacity = "0.8"
-                            rx = 2.0
-                            ry = 2.0
-                        }
-                        text {
-                            +it.displayName
-                            x = it.pos.x.toDouble()
-                            y = it.pos.z.toDouble()
-                            fill = "white"
-                            fontSize = 8.0
-                            fontWeight = "bold"
-                            textAnchor = "middle"
-
-                        }
-                        title {
-                            +it.identifyName
+                formationList
+                    .filter { it.controlCar != null }
+                    .forEach {
+                        WFormation {
+                            formation = it
                         }
                     }
+            }
+            g {
+                waypointList.forEach {
+                    WWayPoint { wayPoint = it }
                 }
             }
         }

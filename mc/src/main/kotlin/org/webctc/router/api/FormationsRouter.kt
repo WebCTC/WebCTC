@@ -10,6 +10,8 @@ import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.util.Formation
 import jp.ngt.rtm.entity.train.util.FormationManager
 import net.minecraft.entity.player.EntityPlayer
+import org.webctc.common.types.trains.FormationData
+import org.webctc.common.types.trains.FormationEntityData
 import org.webctc.router.WebCTCRouter
 
 class FormationsRouter : WebCTCRouter() {
@@ -17,7 +19,12 @@ class FormationsRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
             call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            call.respond(getServerFormationManager().formations.values.mapNotNull { it.toMutableMap() })
+            try {
+                println(getServerFormationManager().formations.values.mapNotNull { it.toData() })
+                call.respond(getServerFormationManager().formations.values.mapNotNull { it.toData() })
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         get("/{FormationID}") {
             call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
@@ -27,7 +34,7 @@ class FormationsRouter : WebCTCRouter() {
             if (formation == null) {
                 call.respond(HttpStatusCode.NotFound)
             } else {
-                call.respond(formation.toMutableMap())
+                call.respond(formation.toData())
             }
         }
         get("/{FormationID}/trains") {
@@ -35,7 +42,7 @@ class FormationsRouter : WebCTCRouter() {
             val formationId = call.parameters["FormationID"]!!.toLong()
             val formation = getServerFormationManager().getFormation(formationId)
 
-            val trains = formation?.entries?.mapNotNull { it.train.toMutableMap() }
+            val trains = formation?.entries?.mapNotNull { it.train.toData() }
 
             if (trains == null) {
                 call.respond(HttpStatusCode.NotFound)
@@ -52,26 +59,27 @@ class FormationsRouter : WebCTCRouter() {
     }
 }
 
-fun Formation.toMutableMap(): MutableMap<String, Any?> {
-    val jsonMap = mutableMapOf<String, Any?>()
+fun Formation.toData(): FormationData {
 
-    jsonMap["id"] = this.id
-    jsonMap["entries"] = this.entries?.mapNotNull {
-        mapOf<String, Any>(
-            "train" to (it.train?.entityId ?: 0),
-            "entryId" to it.entryId,
-            "dir" to it.dir
-        )
-    } ?: emptyList<Map<String, Any>>()
     val controlCar = Formation::class.java.getDeclaredMethod("getControlCar")
         .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
-    jsonMap["controlCar"] = controlCar?.toMutableMap()
 
     val driver = controlCar?.riddenByEntity as? EntityPlayer
-    jsonMap["driver"] = driver?.commandSenderName
-    jsonMap["direction"] = Formation::class.java.getDeclaredField("direction")
-        .apply { isAccessible = true }.getByte(this)
-    jsonMap["speed"] = controlCar?.speed ?: 0f
+    return FormationData(
 
-    return jsonMap
+        this.id,
+        this.entries?.mapNotNull {
+            FormationEntityData(
+                it.train?.entityId ?: 0,
+                it.entryId,
+                it.dir
+            )
+        } ?: listOf(),
+        controlCar?.toData(),
+        driver?.commandSenderName ?: "",
+        Formation::class.java.getDeclaredField("direction")
+            .apply { isAccessible = true }.getByte(this),
+        controlCar?.speed ?: 0f
+    )
+
 }
