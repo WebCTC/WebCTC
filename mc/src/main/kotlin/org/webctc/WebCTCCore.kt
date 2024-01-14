@@ -31,7 +31,6 @@ import org.webctc.common.types.rail.IRailMapData
 import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.plugin.PluginManager
-import org.webctc.router.DefaultRouter
 import org.webctc.router.RouterManager
 import org.webctc.router.api.*
 import java.time.Duration
@@ -76,6 +75,7 @@ class WebCTCCore {
             }
         }
 
+        RouterManager.registerRouter("/", SpaRouter())
         RouterManager.registerRouter("/api", ApiRouter())
         RouterManager.registerRouter("/api/formations", FormationsRouter())
         RouterManager.registerRouter("/api/trains", TrainsRouter())
@@ -121,7 +121,6 @@ class WebCTCCore {
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
             PluginManager.pluginList.forEach { it(this) }
             routing {
-                this.route("/", DefaultRouter().install(this))
                 RouterManager.routerMap.forEach { (path, router) -> this.route(path, router.install(this)) }
             }
         }.start()

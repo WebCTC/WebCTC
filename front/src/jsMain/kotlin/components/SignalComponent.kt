@@ -58,12 +58,13 @@ val WSignalGroup = FC<SignalGroupProps> {
         y2 = basePosZ.toDouble() - 1.5 * cos - 4.0 * sin
     }
 
+    val length = sortedSignals.size
 
     sortedSignals.forEachIndexed { index, signal ->
         val blockDirectionRotation = (signal.blockDirection * 90)
         val diff = (rotation - blockDirectionRotation + 360) % 360
-        val isLeft = diff > 180 && diff != 0.0.toFloat()
-        val isRight = diff < 180 && diff != 0.0.toFloat()
+        val isLeft = diff < 180 && diff != 0.0.toFloat() && length > 1
+        val isRight = diff > 180 && diff != 0.0.toFloat() && length > 1
 
         val offsetCx = ((if (isLeft) 3.0 else if (isRight) -3.0 else 0.0)) * sin +
                 (-index * 3.5 - if (isLeft || isRight) 1.0 else 0.0) * cos
