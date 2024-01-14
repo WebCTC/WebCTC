@@ -19,12 +19,7 @@ class FormationsRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
             call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
-            try {
-                println(getServerFormationManager().formations.values.mapNotNull { it.toData() })
-                call.respond(getServerFormationManager().formations.values.mapNotNull { it.toData() })
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            call.respond(getServerFormationManager().formations.values.mapNotNull { it.toData() })
         }
         get("/{FormationID}") {
             call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
