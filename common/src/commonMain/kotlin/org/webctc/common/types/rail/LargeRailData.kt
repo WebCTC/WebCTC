@@ -23,5 +23,4 @@ data class LargeRailData(val pos: IntArray, val isTrainOnRail: Boolean, val rail
         result = 31 * result + railMaps.hashCode()
         return result
     }
-
 }

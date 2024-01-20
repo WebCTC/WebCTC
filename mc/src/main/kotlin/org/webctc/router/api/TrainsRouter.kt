@@ -8,6 +8,7 @@ import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.parts.EntityFloor
 import jp.ngt.rtm.entity.vehicle.EntityVehicleBase
 import org.webctc.WebCTCCore
+import org.webctc.common.types.PosDouble
 import org.webctc.common.types.trains.CustomButtonData
 import org.webctc.common.types.trains.TrainData
 import org.webctc.router.WebCTCRouter
@@ -53,7 +54,7 @@ fun EntityTrainBase.toData(): TrainData {
                     .filterIsInstance<EntityFloor>()
                     .map { entityFloor -> entityFloor.riddenByEntity?.commandSenderName }
             } ?: listOf(),
-        listOf(this.posX, this.posY, this.posZ),
+        PosDouble(this.posX, this.posY, this.posZ),
         ((EntityTrainBase::class.java.getDeclaredMethod("getByteArray")
             .apply { isAccessible = true }.invoke(this)) as ByteArray),
         this.resourceState.name,

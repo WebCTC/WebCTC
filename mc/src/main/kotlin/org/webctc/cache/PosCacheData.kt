@@ -6,13 +6,13 @@ import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
-import org.webctc.common.types.Pos
+import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.IRailMapData
 import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
 
 abstract class PosCacheData<T>(mapName: String) : WorldSavedData(mapName) {
-    abstract fun getMapCache(): MutableMap<Pos, T>
+    abstract fun getMapCache(): MutableMap<PosInt, T>
     val gson: Gson = GsonBuilder()
         .registerTypeAdapterFactory(
             RuntimeTypeAdapterFactory

@@ -1,21 +1,22 @@
 package org.webctc.cache.signal
 
 import org.webctc.cache.PosCacheData
-import org.webctc.common.types.Pos
+import org.webctc.common.types.PosInt
+import org.webctc.common.types.signal.SignalData
 
-class SignalCacheData(mapName: String) : PosCacheData<MutableMap<String, Any?>>(mapName) {
+class SignalCacheData(mapName: String) : PosCacheData<SignalData>(mapName) {
     companion object {
-        var signalMapCache = mutableMapOf<Pos, MutableMap<String, Any?>>()
+        var signalMapCache = mutableMapOf<PosInt, SignalData>()
     }
 
-    override fun getMapCache(): MutableMap<Pos, MutableMap<String, Any?>> {
+    override fun getMapCache(): MutableMap<PosInt, SignalData> {
         return signalMapCache
     }
 
     override val TAG_NAME: String
         get() = "SignalCache"
 
-    override fun fromJson(json: String): MutableMap<String, Any?> {
-        return gson.fromJson(json, mutableMapOf<String, Any?>().javaClass)
+    override fun fromJson(json: String): SignalData {
+        return gson.fromJson(json, SignalData::class.java)
     }
 }

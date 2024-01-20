@@ -8,11 +8,14 @@ import cpw.mods.fml.common.gameevent.TickEvent
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import io.ktor.server.websocket.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -21,6 +24,7 @@ import kotlinx.serialization.modules.subclass
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import net.minecraftforge.common.config.Configuration
+import org.webctc.cache.auth.CredentialData
 import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
@@ -31,9 +35,14 @@ import org.webctc.common.types.rail.IRailMapData
 import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.plugin.PluginManager
+import org.webctc.plugin.webauthn.WebAuthnChallenge
+import org.webctc.router.AuthRouter
 import org.webctc.router.RouterManager
+import org.webctc.router.SpaRouter
 import org.webctc.router.api.*
+import java.security.SecureRandom
 import java.time.Duration
+import java.util.*
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
@@ -44,6 +53,7 @@ class WebCTCCore {
     lateinit var wayPointData: WorldSavedData
     lateinit var railCacheUpdate: RailCacheUpdate
     lateinit var signalCacheUpdate: SignalCacheUpdate
+    lateinit var credentialData: WorldSavedData
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
@@ -53,25 +63,38 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
-        val jsonPreset = Json {
-            serializersModule = SerializersModule {
-                polymorphic(IRailMapData::class) {
-                    subclass(RailMapData::class)
-                    subclass(RailMapSwitchData::class)
-                }
-            }
-            ignoreUnknownKeys = true
-        }
 
         PluginManager.registerPlugin {
             install(Compression)
             install(WebSockets) {
                 pingPeriod = Duration.ofSeconds(15)
                 timeout = Duration.ofSeconds(5)
-                contentConverter = KotlinxWebsocketSerializationConverter(jsonPreset)
+                contentConverter = KotlinxWebsocketSerializationConverter(kotlinxJson)
             }
             install(ContentNegotiation) {
-                json(jsonPreset)
+                json(kotlinxJson)
+            }
+            val secretEncryptKey = SecureRandom.getInstanceStrong().generateSeed(16)
+            val secretSignKey = SecureRandom.getInstanceStrong().generateSeed(16)
+            install(Sessions) {
+                cookie<UserSession>("user-session", SessionStorageMemory()) {
+                    cookie.path = "/"
+                    cookie.maxAgeInSeconds = 60 * 60 * 6
+                    transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
+                }
+                cookie<WebAuthnChallenge>("webauthn-challenge", SessionStorageMemory()) {
+                    transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
+                }
+            }
+            install(Authentication) {
+                session<UserSession>("auth-session") {
+                    validate { session ->
+                        if (session.uuid.toString().isNotEmpty()) session else null
+                    }
+                    challenge {
+                        call.respondRedirect("/login")
+                    }
+                }
             }
         }
 
@@ -82,7 +105,10 @@ class WebCTCCore {
         RouterManager.registerRouter("/api/rails", RailRouter())
         RouterManager.registerRouter("/api/signals", SignalRouter())
         RouterManager.registerRouter("/api/waypoints", WayPointRouter())
+        RouterManager.registerRouter("/auth", AuthRouter())
     }
+
+    data class UserSession(val id: String, val uuid: UUID) : Principal
 
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
@@ -118,10 +144,19 @@ class WebCTCCore {
             world.mapStorage.setData("webctc_waypointcache", wayPointData)
         }
         this.wayPointData = wayPointData
+
+        val credentialData = world.mapStorage.loadData(CredentialData::class.java, "webctc_webauthn_credential")
+        if (credentialData == null) {
+            this.credentialData = CredentialData("webctc_webauthn_credential")
+            world.mapStorage.setData("webctc_webauthn_credential", this.credentialData)
+        } else {
+            this.credentialData = credentialData
+        }
+
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
             PluginManager.pluginList.forEach { it(this) }
             routing {
-                RouterManager.routerMap.forEach { (path, router) -> this.route(path, router.install(this)) }
+                RouterManager.routerMap.forEach { (path, router) -> route(path, router.install(this)) }
             }
         }.start()
 
@@ -155,4 +190,15 @@ class WebCTCCore {
         @Mod.Instance
         lateinit var INSTANCE: WebCTCCore
     }
+}
+
+
+val kotlinxJson = Json {
+    serializersModule = SerializersModule {
+        polymorphic(IRailMapData::class) {
+            subclass(RailMapData::class)
+            subclass(RailMapSwitchData::class)
+        }
+    }
+    ignoreUnknownKeys = true
 }

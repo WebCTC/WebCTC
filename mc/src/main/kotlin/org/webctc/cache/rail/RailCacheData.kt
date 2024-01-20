@@ -1,15 +1,15 @@
 package org.webctc.cache.rail
 
 import org.webctc.cache.PosCacheData
-import org.webctc.common.types.Pos
+import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.LargeRailData
 
 class RailCacheData(mapName: String) : PosCacheData<LargeRailData>(mapName) {
     companion object {
-        var railMapCache = mutableMapOf<Pos, LargeRailData>()
+        var railMapCache = mutableMapOf<PosInt, LargeRailData>()
     }
 
-    override fun getMapCache(): MutableMap<Pos, LargeRailData> {
+    override fun getMapCache(): MutableMap<PosInt, LargeRailData> {
         return railMapCache
     }
 

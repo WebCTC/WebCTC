@@ -3,8 +3,8 @@ package org.webctc.cache.signal
 import jp.ngt.rtm.electric.BlockSignal
 import jp.ngt.rtm.electric.TileEntitySignal
 import org.webctc.WebCTCCore
-import org.webctc.common.types.Pos
-import org.webctc.router.api.toMutableMap
+import org.webctc.common.types.PosInt
+import org.webctc.router.api.toDataClass
 
 class SignalCacheUpdate {
     fun execute() {
@@ -24,7 +24,7 @@ class SignalCacheUpdate {
             world.loadedTileEntityList.toMutableList()
                 .filterIsInstance<TileEntitySignal>()
                 .forEach {
-                    coreList[Pos(it.xCoord, it.yCoord, it.zCoord)] = it.toMutableMap()
+                    coreList[PosInt(it.xCoord, it.yCoord, it.zCoord)] = it.toDataClass()
                 }
             SignalCacheData.signalMapCache = coreList
             WebCTCCore.INSTANCE.signalData.markDirty()

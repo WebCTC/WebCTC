@@ -1,6 +1,7 @@
 package org.webctc.common.types.trains
 
 import kotlinx.serialization.Serializable
+import org.webctc.common.types.PosDouble
 
 @Serializable
 data class TrainData(
@@ -13,7 +14,7 @@ data class TrainData(
     val signal: Int,
     val driver: String,
     val passengers: List<String?>,
-    val pos: List<Double>,
+    val pos: PosDouble,
     val trainStateData: ByteArray,
     val name: String,
     val customButton: List<CustomButtonData>,

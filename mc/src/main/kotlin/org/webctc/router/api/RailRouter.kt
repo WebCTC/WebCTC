@@ -15,7 +15,7 @@ import net.minecraft.util.MathHelper
 import org.webctc.WebCTCCore
 import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.toWebCTC
-import org.webctc.common.types.Pos
+import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.*
 import org.webctc.router.WebCTCRouter
 import java.util.*
@@ -107,8 +107,8 @@ fun RailMapSwitch.toData(): IRailMapData {
     )
 }
 
-fun RailPosition.getNeighborPosData(): Pos {
-    return Pos(
+fun RailPosition.getNeighborPosData(): PosInt {
+    return PosInt(
         MathHelper.floor_double(this.posX + RailPosition.REVISION[this.direction.toInt()][0]),
         this.blockY,
         MathHelper.floor_double(this.posZ + RailPosition.REVISION[this.direction.toInt()][1])

@@ -19,8 +19,8 @@ val WFormation = FC<FormationProps> {
     g {
         val controlCar = formation.controlCar!!
         val pos = controlCar.pos
-        val posX = pos[0]
-        val posZ = pos[2]
+        val posX = pos.x
+        val posZ = pos.z
         val doorState = controlCar.trainStateData[4] != 0.toByte()
 
         rect {

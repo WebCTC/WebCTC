@@ -10,15 +10,17 @@ import react.dom.svg.ReactSVG.text
 
 external interface WayPointProps : Props {
     var wayPoint: WayPoint
+    var scale: Double
 }
 
 val WWayPoint = FC<WayPointProps> {
     val wayPoint = it.wayPoint
     val pos = wayPoint.pos
     g {
+        transform = "translate(${pos.x} ${pos.z}) scale(${2 / it.scale})"
         rect {
-            x = (pos.x - 2 - 4 * wayPoint.displayName.length).toDouble()
-            y = pos.z.toDouble() - 8.0
+            x = (-2 - 4 * wayPoint.displayName.length).toDouble()
+            y = -8.0
             width = 8.0 * wayPoint.displayName.length + 4
             height = 10.0
             fill = "black"
@@ -28,8 +30,6 @@ val WWayPoint = FC<WayPointProps> {
         }
         text {
             +wayPoint.displayName
-            x = pos.x.toDouble()
-            y = pos.z.toDouble()
             fill = "white"
             fontSize = 8.0
             fontWeight = "bold"

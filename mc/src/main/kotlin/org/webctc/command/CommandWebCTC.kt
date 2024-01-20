@@ -2,26 +2,29 @@ package org.webctc.command
 
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
-import net.minecraft.entity.player.EntityPlayerMP
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.event.ClickEvent
 import net.minecraft.util.ChatComponentText
 import org.webctc.WebCTCCore
 import org.webctc.cache.waypoint.WayPointCacheData
-import org.webctc.common.types.Pos
+import org.webctc.common.types.PosInt
 import org.webctc.common.types.WayPoint
+import org.webctc.router.PlayerSessionManager
 
 class CommandWebCTC : CommandBase() {
+
     override fun getCommandName() = "webctc"
 
     override fun getCommandUsage(sender: ICommandSender) = "/webctc waypoint create <identifier> <displayName>"
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        if (sender is EntityPlayerMP) {
+        if (sender is EntityPlayer) {
             if (args.isNotEmpty()) {
                 when (args[0]) {
                     "waypoint" -> {
                         if (args.size >= 2) {
                             if (args[1] == "create" && args.size >= 4) {
-                                val pos = Pos(sender.posX.toInt(), sender.posY.toInt(), sender.posZ.toInt())
+                                val pos = PosInt(sender.posX.toInt(), sender.posY.toInt(), sender.posZ.toInt())
                                 val waypoint = WayPoint(args[2], args.drop(3).joinToString(" "), pos)
                                 WayPointCacheData.wayPointCache[args[2]] = waypoint
                                 WebCTCCore.INSTANCE.wayPointData.markDirty()
@@ -37,6 +40,16 @@ class CommandWebCTC : CommandBase() {
                             }
                         }
                     }
+
+                    "auth" -> {
+                        val sessionKey = PlayerSessionManager.createSession(sender)
+                        val text = ChatComponentText("URL: ")
+                        val url = ChatComponentText("http://localhost:8080/auth/mc-session-login?key=$sessionKey")
+                        url.chatStyle.chatClickEvent =
+                            ClickEvent(ClickEvent.Action.OPEN_URL, url.chatComponentText_TextValue)
+                        text.appendSibling(url)
+                        sender.addChatMessage(text)
+                    }
                 }
             }
         } else {
@@ -46,7 +59,7 @@ class CommandWebCTC : CommandBase() {
 
     override fun addTabCompletionOptions(sender: ICommandSender, args: Array<String>): List<String>? {
         return when (args.size) {
-            1 -> listOf("waypoint")
+            1 -> listOf("auth", "waypoint")
             2 -> if (args[0] == "waypoint") listOf("create", "delete").filter { it.startsWith(args[1]) } else null
             3 -> if (args[1] == "delete") WayPointCacheData.wayPointCache.keys.filter { it.startsWith(args[2]) } else null
             else -> null
