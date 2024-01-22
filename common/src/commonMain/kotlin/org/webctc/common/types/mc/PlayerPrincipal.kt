@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class PlayerPrinciple(
+data class PlayerPrincipal(
     val name: String,
     val uuid: String,
 )

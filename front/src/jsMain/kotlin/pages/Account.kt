@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import mui.icons.material.Add
 import mui.material.*
 import mui.system.Breakpoint
-import org.webctc.common.types.mc.PlayerPrinciple
+import org.webctc.common.types.mc.PlayerPrincipal
 import org.webctc.common.types.mc.PlayerProfile
 import org.webctc.common.types.webauthn.WebAuthnRegistration
 import org.webctc.common.types.webauthn.WebAuthnRegistrationOption
@@ -47,10 +47,10 @@ val Account = FC<Props> {
 
     useEffectOnce {
         MainScope().launch {
-            val playerPrinciple: PlayerPrinciple = client.get("/auth/profile").body()
-            val uuid = playerPrinciple.uuid
+            val playerPrincipal: PlayerPrincipal = client.get("/auth/profile").body()
+            val uuid = playerPrincipal.uuid
             playerUuid = uuid
-            playerName = playerPrinciple.name.ifEmpty {
+            playerName = playerPrincipal.name.ifEmpty {
                 val playerProfile: PlayerProfile = client.get("https://mc-heads.net/minecraft/profile/$uuid").body()
                 playerProfile.name
             }

@@ -8,7 +8,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import net.minecraft.entity.player.EntityPlayer
 import org.webctc.WebCTCCore
-import org.webctc.common.types.mc.PlayerPrinciple
+import org.webctc.common.types.mc.PlayerPrincipal
 import org.webctc.plugin.webauthn.authChallenge
 import org.webctc.plugin.webauthn.authenticate
 import org.webctc.plugin.webauthn.challenge
@@ -37,7 +37,7 @@ class AuthRouter : WebCTCRouter() {
             authenticate("auth-session") {
                 get("/profile") {
                     val principal = call.principal<WebCTCCore.UserSession>()!!
-                    val profile = PlayerPrinciple(principal.id, principal.uuid.toString())
+                    val profile = PlayerPrincipal(principal.id, principal.uuid.toString())
                     call.respond(profile)
                 }
 

@@ -57,7 +57,6 @@ kotlin {
                 implementation(kotlinWrp("mui-icons-material"))
 
                 implementation(npm("panzoom", "9.4.0"))
-                implementation(npm("base64url", "3.0.1"))
 
                 implementation(project(":common"))
             }
