@@ -147,8 +147,6 @@ val RailGroupDetail = FC<RailGroupDetailProps> {
                                     }
                                 }
                             }
-                            onMouseEnter = { hoveringRailPos = pos }
-                            onMouseLeave = { hoveringRailPos = null }
                         }
                     }
                 }
