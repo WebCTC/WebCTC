@@ -17,14 +17,12 @@ class TrainsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             call.respond(
                 WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
                     .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toData)
             )
         }
         get("/{EntityId}") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             val eId = call.parameters["EntityId"]?.toInt()
             val entity = eId?.let { WebCTCCore.INSTANCE.server.entityWorld.getEntityByID(it) }
 

@@ -59,6 +59,7 @@ kotlin {
                 implementation(npm("panzoom", "9.4.0"))
 
                 implementation(project(":common"))
+                implementation("app.softwork:kotlinx-uuid-core:0.0.22")
             }
         }
     }

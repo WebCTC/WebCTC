@@ -16,16 +16,16 @@ class ApiRouter : AbstractRouter() {
             this.call.respondText {
                 """
                 This is WebCTC API. 
-                http://$removeHost${uri}
-                http://$removeHost${uri}formations/
-                http://$removeHost${uri}formations/<formationId>
-                http://$removeHost${uri}formations/<formationId>/trains
-                http://$removeHost${uri}trains/
-                http://$removeHost${uri}trains/<entityId>
-                http://$removeHost${uri}rails/
-                http://$removeHost${uri}rails/rail?x=<x>&y=<y>&z=<z>
-                http://$removeHost${uri}signals/
-                http://$removeHost${uri}signals/signal?x=<x>&y=<y>&z=<z>
+                $scheme://$removeHost${uri}
+                $scheme://$removeHost${uri}formations/
+                $scheme://$removeHost${uri}formations/<formationId>
+                $scheme://$removeHost${uri}formations/<formationId>/trains
+                $scheme://$removeHost${uri}trains/
+                $scheme://$removeHost${uri}trains/<entityId>
+                $scheme://$removeHost${uri}rails/
+                $scheme://$removeHost${uri}rails/rail?x=<x>&y=<y>&z=<z>
+                $scheme://$removeHost${uri}signals/
+                $scheme://$removeHost${uri}signals/signal?x=<x>&y=<y>&z=<z>
                 """.trimIndent()
             }
         }

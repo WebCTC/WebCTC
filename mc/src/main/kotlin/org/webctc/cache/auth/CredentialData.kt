@@ -9,10 +9,10 @@ import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.attestation.statement.AttestationStatement
 import kotlinx.serialization.Serializable
+import kotlinx.uuid.UUID
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
-import java.util.*
 
 class CredentialData(mapName: String) : WorldSavedData(mapName) {
     companion object {

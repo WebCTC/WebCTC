@@ -11,15 +11,15 @@ import com.webauthn4j.util.Base64UrlUtil
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.uuid.UUID
+import kotlinx.uuid.fromString
 import org.webctc.WebCTCCore
 import org.webctc.cache.auth.CredentialData
 import org.webctc.common.types.webauthn.*
-import java.util.*
 
 
 data class WebAuthnChallenge(val base64Value: String)
@@ -29,10 +29,9 @@ fun Route.challenge(path: String) {
         val challenge = DefaultChallenge()
         val base64Challenge = Base64UrlUtil.encodeToString(challenge.value)
 
-        val scheme = call.request.origin.scheme
-        val host = call.request.origin.serverHost
-        val port = call.request.origin.serverPort
-        val origin = Origin.create("$scheme://$host:$port")
+
+        val headerOrigin = call.request.header(HttpHeaders.Origin) ?: return@post
+        val origin = Origin.create(headerOrigin)
 
         val session = call.principal<WebCTCCore.UserSession>()
 
@@ -63,10 +62,8 @@ fun Route.authChallenge(path: String) {
         val challenge = DefaultChallenge()
         val base64Challenge = Base64UrlUtil.encodeToString(challenge.value)
 
-        val scheme = call.request.origin.scheme
-        val host = call.request.origin.serverHost
-        val port = call.request.origin.serverPort
-        val origin = Origin.create("$scheme://$host:$port")
+        val headerOrigin = call.request.header(HttpHeaders.Origin) ?: return@post
+        val origin = Origin.create(headerOrigin)
 
         val webAuthnPublicKey = WebAuthnAuthenticationOption(
             base64Challenge,
@@ -82,57 +79,60 @@ val webAuthnManager = WebAuthnManager.createNonStrictWebAuthnManager()
 
 fun Route.register(path: String) {
     post(path) {
-        val session = call.principal<WebCTCCore.UserSession>()!!
-        val challenge = call.sessions.get<WebAuthnChallenge>()!!
-        call.sessions.clear<WebAuthnChallenge>()
+        try {
+            val session = call.principal<WebCTCCore.UserSession>()!!
+            val challenge = call.sessions.get<WebAuthnChallenge>()!!
+            call.sessions.clear<WebAuthnChallenge>()
 
-        val registration = call.receive<WebAuthnRegistration>()
+            val registration = call.receive<WebAuthnRegistration>()
 
-        val registrationRequest = RegistrationRequest(
-            Base64UrlUtil.decode(registration.attestationObject),
-            Base64UrlUtil.decode(registration.clientDataJSON)
-        )
+            val registrationRequest = RegistrationRequest(
+                Base64UrlUtil.decode(registration.attestationObject),
+                Base64UrlUtil.decode(registration.clientDataJSON)
+            )
 
-        val scheme = call.request.origin.scheme
-        val host = call.request.origin.serverHost
-        val port = call.request.origin.serverPort
-        val origin = Origin.create("$scheme://$host:$port")
+            val headerOrigin = call.request.header(HttpHeaders.Origin) ?: return@post
+            val origin = Origin.create(headerOrigin)
 
-        val registrationParams = RegistrationParameters(
-            ServerProperty(
-                origin,
-                origin.host!!,
-                DefaultChallenge(challenge.base64Value),
-                null
-            ),
-            listOf(
-                PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.ES256),
-                PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.RS256),
-            ),
-            true
-        )
+            val registrationParams = RegistrationParameters(
+                ServerProperty(
+                    origin,
+                    origin.host!!,
+                    DefaultChallenge(challenge.base64Value),
+                    null
+                ),
+                listOf(
+                    PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.ES256),
+                    PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.RS256),
+                ),
+                true
+            )
 
-        val registrationData = webAuthnManager.parse(registrationRequest)
-        webAuthnManager.validate(registrationData, registrationParams)
+            val registrationData = webAuthnManager.parse(registrationRequest)
+            webAuthnManager.validate(registrationData, registrationParams)
 
-        val authenticator = AuthenticatorImpl(
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
-            registrationData.attestationObject!!.attestationStatement,
-            registrationData.attestationObject!!.authenticatorData.signCount
-        )
+            val authenticator = AuthenticatorImpl(
+                registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
+                registrationData.attestationObject!!.attestationStatement,
+                registrationData.attestationObject!!.authenticatorData.signCount
+            )
 
-        val uuid = UUID.fromString(session.uuid.toString())
+            val uuid = UUID(session.uuid.toString())
 
-        CredentialData.registerAuthenticator(uuid, authenticator)
-        WebCTCCore.INSTANCE.credentialData.markDirty()
+            CredentialData.registerAuthenticator(uuid, authenticator)
+            WebCTCCore.INSTANCE.credentialData.markDirty()
 
-        call.respond(HttpStatusCode.OK)
+            call.respond(HttpStatusCode.OK)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            call.respond(HttpStatusCode.Unauthorized)
+        }
     }
 }
 
 fun Route.authenticate(path: String) {
     post(path) {
-
         try {
             val challenge = call.sessions.get<WebAuthnChallenge>()!!
             call.sessions.clear<WebAuthnChallenge>()
@@ -149,7 +149,7 @@ fun Route.authenticate(path: String) {
             }
 
             val authenticatorContainer = CredentialData.searchCredential(
-                UUID.fromString(uuid),
+                UUID(uuid),
                 authentication.id.let { Base64UrlUtil.decode(it) }
             )
 
@@ -166,10 +166,8 @@ fun Route.authenticate(path: String) {
                 Base64UrlUtil.decode(authentication.signature),
             )
 
-            val scheme = call.request.origin.scheme
-            val host = call.request.origin.serverHost
-            val port = call.request.origin.serverPort
-            val origin = Origin.create("$scheme://$host:$port")
+            val headerOrigin = call.request.header(HttpHeaders.Origin) ?: return@post
+            val origin = Origin.create(headerOrigin)
 
             val authenticationParams = AuthenticationParameters(
                 ServerProperty(
@@ -189,7 +187,7 @@ fun Route.authenticate(path: String) {
             authenticatorContainer.incrementSignCount()
             WebCTCCore.INSTANCE.credentialData.markDirty()
 
-            call.sessions.set(WebCTCCore.UserSession("", UUID.fromString(uuid)))
+            call.sessions.set(WebCTCCore.UserSession("", UUID(uuid)))
 
             call.respond(HttpStatusCode.OK)
         } catch (e: Exception) {

@@ -3,8 +3,6 @@ package org.webctc
 import cpw.mods.fml.common.FMLCommonHandler
 import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.*
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.TickEvent
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -21,14 +19,14 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import kotlinx.uuid.UUID
 import net.minecraft.server.MinecraftServer
-import net.minecraft.world.WorldSavedData
+import net.minecraft.util.EnumChatFormatting.*
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.common.config.Configuration
 import org.webctc.cache.auth.CredentialData
 import org.webctc.cache.rail.RailCacheData
-import org.webctc.cache.rail.RailCacheUpdate
 import org.webctc.cache.signal.SignalCacheData
-import org.webctc.cache.signal.SignalCacheUpdate
 import org.webctc.cache.waypoint.WayPointCacheData
 import org.webctc.command.CommandWebCTC
 import org.webctc.common.types.rail.IRailMapData
@@ -36,29 +34,31 @@ import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.plugin.PluginManager
 import org.webctc.plugin.webauthn.WebAuthnChallenge
+import org.webctc.railgroup.RailGroupData
 import org.webctc.router.AuthRouter
 import org.webctc.router.RouterManager
 import org.webctc.router.SpaRouter
 import org.webctc.router.api.*
 import java.security.SecureRandom
 import java.time.Duration
-import java.util.*
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
     lateinit var server: MinecraftServer
     lateinit var applicationEngine: ApplicationEngine
-    lateinit var railData: WorldSavedData
-    lateinit var signalData: WorldSavedData
-    lateinit var wayPointData: WorldSavedData
-    lateinit var railCacheUpdate: RailCacheUpdate
-    lateinit var signalCacheUpdate: SignalCacheUpdate
-    lateinit var credentialData: WorldSavedData
+    lateinit var railData: RailCacheData
+    lateinit var signalData: SignalCacheData
+    lateinit var wayPointData: WayPointCacheData
+    lateinit var credentialData: CredentialData
+    lateinit var railGroupData: RailGroupData
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
         WebCTCConfig.preInit(Configuration(event.suggestedConfigurationFile))
-        FMLCommonHandler.instance().bus().register(this)
+
+        val eventHandler = WebCTCEventHandler()
+        FMLCommonHandler.instance().bus().register(eventHandler)
+        MinecraftForge.EVENT_BUS.register(eventHandler)
     }
 
     @Mod.EventHandler
@@ -105,6 +105,7 @@ class WebCTCCore {
         RouterManager.registerRouter("/api/rails", RailRouter())
         RouterManager.registerRouter("/api/signals", SignalRouter())
         RouterManager.registerRouter("/api/waypoints", WayPointRouter())
+        RouterManager.registerRouter("/api/railgroups", RailGroupRouter())
         RouterManager.registerRouter("/auth", AuthRouter())
     }
 
@@ -129,28 +130,36 @@ class WebCTCCore {
             railData = RailCacheData("webctc_railcache")
             world.mapStorage.setData("webctc_railcache", railData)
         }
-        this.railData = railData
+        this.railData = railData as RailCacheData
 
         var signalData = world.mapStorage.loadData(SignalCacheData::class.java, "webctc_signalcache")
         if (signalData == null) {
             signalData = SignalCacheData("webctc_signalcache")
             world.mapStorage.setData("webctc_signalcache", signalData)
         }
-        this.signalData = signalData
+        this.signalData = signalData as SignalCacheData
 
         var wayPointData = world.mapStorage.loadData(WayPointCacheData::class.java, "webctc_waypointcache")
         if (wayPointData == null) {
             wayPointData = WayPointCacheData("webctc_waypointcache")
             world.mapStorage.setData("webctc_waypointcache", wayPointData)
         }
-        this.wayPointData = wayPointData
+        this.wayPointData = wayPointData as WayPointCacheData
 
         val credentialData = world.mapStorage.loadData(CredentialData::class.java, "webctc_webauthn_credential")
         if (credentialData == null) {
             this.credentialData = CredentialData("webctc_webauthn_credential")
             world.mapStorage.setData("webctc_webauthn_credential", this.credentialData)
         } else {
-            this.credentialData = credentialData
+            this.credentialData = credentialData as CredentialData
+        }
+
+        val railGroupData = world.mapStorage.loadData(RailGroupData::class.java, "webctcex_railgroup")
+        if (railGroupData == null) {
+            this.railGroupData = RailGroupData("webctcex_railgroup")
+            world.mapStorage.setData("webctcex_railgroup", this.railGroupData)
+        } else {
+            this.railGroupData = railGroupData as RailGroupData
         }
 
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {
@@ -160,8 +169,6 @@ class WebCTCCore {
             }
         }.start()
 
-        railCacheUpdate = RailCacheUpdate()
-        signalCacheUpdate = SignalCacheUpdate()
     }
 
     @Mod.EventHandler
@@ -171,21 +178,11 @@ class WebCTCCore {
         signalData.markDirty()
     }
 
-    private var tickCount = 0
-
-    @SubscribeEvent
-    fun onServerTick(event: TickEvent.ServerTickEvent) {
-        tickCount++
-        if (tickCount == 20 && event.phase.equals(TickEvent.Phase.END)) {
-            railCacheUpdate.execute()
-            signalCacheUpdate.execute()
-            tickCount = 0
-        }
-    }
-
     companion object {
         const val MODID = "webctc"
         const val VERSION = "0.5.0"
+
+        val IN_CHAT_LOGO = "${GRAY}[${GREEN}Web${WHITE}CTC${GRAY}]"
 
         @Mod.Instance
         lateinit var INSTANCE: WebCTCCore

@@ -17,10 +17,5 @@ data class LargeRailData(val pos: IntArray, val isTrainOnRail: Boolean, val rail
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = pos.contentHashCode()
-        result = 31 * result + isTrainOnRail.hashCode()
-        result = 31 * result + railMaps.hashCode()
-        return result
-    }
+    override fun hashCode() = pos.contentHashCode()
 }

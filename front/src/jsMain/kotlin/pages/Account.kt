@@ -21,11 +21,15 @@ import org.webctc.common.types.mc.PlayerPrincipal
 import org.webctc.common.types.mc.PlayerProfile
 import org.webctc.common.types.webauthn.WebAuthnRegistration
 import org.webctc.common.types.webauthn.WebAuthnRegistrationOption
-import react.*
+import react.FC
+import react.Props
+import react.create
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.img
 import react.dom.html.ReactHTML.p
+import react.useState
+import utils.useData
 import web.authn.AuthenticatorAttestationResponse
 import web.authn.PublicKeyCredential
 import web.authn.PublicKeyCredentialParameters
@@ -39,23 +43,14 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 val Account = FC<Props> {
-    var playerUuid by useState<String>()
-    var playerName by useState<String>()
+
+    val playerPrincipal by useData<PlayerPrincipal>("/auth/profile")
+    val playerUuid = playerPrincipal?.uuid
+
+    val playerProfile by useData<PlayerProfile>(playerUuid?.let { "https://mc-heads.net/minecraft/profile/$it" })
 
     var passkeyResult by useState<String>()
     var passkeyDialogOpen by useState(false)
-
-    useEffectOnce {
-        MainScope().launch {
-            val playerPrincipal: PlayerPrincipal = client.get("/auth/profile").body()
-            val uuid = playerPrincipal.uuid
-            playerUuid = uuid
-            playerName = playerPrincipal.name.ifEmpty {
-                val playerProfile: PlayerProfile = client.get("https://mc-heads.net/minecraft/profile/$uuid").body()
-                playerProfile.name
-            }
-        }
-    }
 
     CssBaseline {}
     Header {}
@@ -95,7 +90,7 @@ val Account = FC<Props> {
                     SkeletonSpan {
                         prefix = "MCID"
                         width = 10.rem
-                        text = playerName
+                        text = playerProfile?.name
                     }
                 }
                 p {

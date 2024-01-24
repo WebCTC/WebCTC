@@ -18,11 +18,9 @@ class FormationsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             call.respond(getServerFormationManager().formations.values.mapNotNull { it.toData() })
         }
         get("/{FormationID}") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             val formationId = call.parameters["FormationID"]!!.toLong()
             val formation = this@FormationsRouter.getServerFormationManager().getFormation(formationId)
 
@@ -33,7 +31,6 @@ class FormationsRouter : WebCTCRouter() {
             }
         }
         get("/{FormationID}/trains") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             val formationId = call.parameters["FormationID"]!!.toLong()
             val formation = getServerFormationManager().getFormation(formationId)
 

@@ -14,7 +14,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.util.MathHelper
 import org.webctc.WebCTCCore
 import org.webctc.cache.rail.RailCacheData
-import org.webctc.cache.toWebCTC
+import org.webctc.cache.toDataClass
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.*
 import org.webctc.router.WebCTCRouter
@@ -28,11 +28,9 @@ class RailRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             call.respond(RailCacheData.railMapCache.values)
         }
         get("/rail") {
-            call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             val x = call.request.queryParameters["x"]?.toIntOrNull()
             val y = call.request.queryParameters["y"]?.toIntOrNull()
             val z = call.request.queryParameters["z"]?.toIntOrNull()
@@ -84,8 +82,8 @@ fun RailMap.toData(): IRailMapData {
         this.toData()
     else
         RailMapData(
-            this.startRP.toWebCTC(),
-            this.endRP.toWebCTC(),
+            this.startRP.toDataClass(),
+            this.endRP.toDataClass(),
             this.length,
             NeighborPos(
                 this.startRP.getNeighborPosData(),
@@ -96,8 +94,8 @@ fun RailMap.toData(): IRailMapData {
 
 fun RailMapSwitch.toData(): IRailMapData {
     return RailMapSwitchData(
-        this.startRP.toWebCTC(),
-        this.endRP.toWebCTC(),
+        this.startRP.toDataClass(),
+        this.endRP.toDataClass(),
         this.length,
         NeighborPos(
             this.startRP.getNeighborPosData(),

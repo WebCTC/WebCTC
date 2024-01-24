@@ -5,12 +5,8 @@ import net.minecraft.nbt.NBTTagCompound
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.WebCTCRailPosition
 
-class PosUtils {
-    companion object {
-        fun readFromNBT(tag: NBTTagCompound): PosInt {
-            return PosInt(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"))
-        }
-    }
+fun PosInt.Companion.readFromNBT(tag: NBTTagCompound): PosInt {
+    return PosInt(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"))
 }
 
 fun PosInt.writeToNBT(): NBTTagCompound {
@@ -21,7 +17,7 @@ fun PosInt.writeToNBT(): NBTTagCompound {
     return tag
 }
 
-fun RailPosition.toWebCTC(): WebCTCRailPosition {
+fun RailPosition.toDataClass(): WebCTCRailPosition {
     return WebCTCRailPosition(
         this.blockX,
         this.blockY,

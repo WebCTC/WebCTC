@@ -1,17 +1,11 @@
 package pages
 
-import client
 import components.*
 import emotion.react.Global
 import emotion.react.css
 import emotion.react.styles
 import emotion.styled.styled
-import io.ktor.client.call.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.client.request.*
 import js.objects.jso
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import module.panzoom
 import mui.material.CssBaseline
 import org.webctc.common.types.WayPoint
@@ -23,49 +17,27 @@ import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.svg
+import utils.useIntervalListData
+import utils.useListData
+import utils.useListDataWithWebsocket
 import web.cssom.*
 import web.svg.SVGElement
-import web.timers.clearInterval
-import web.timers.setInterval
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
 val interval = 3.seconds
 
 val MapView = FC<Props> {
-    val (railList, setRailList) = useState(listOf<LargeRailData>())
-    var signalList by useState(listOf<SignalData>())
-    var formationList by useState(listOf<FormationData>())
-    var waypointList by useState(listOf<WayPoint>())
+    val railList by useListDataWithWebsocket<LargeRailData>("/api/rails/", "/api/rails/railsocket") { a, b ->
+        a.pos.contentEquals(b.pos)
+    }
+    val signalList by useIntervalListData<SignalData>("api/signals/", interval)
+    val formationList by useIntervalListData<FormationData>("api/formations/", interval)
+    val waypointList by useListData<WayPoint>("api/waypoints/")
 
     val mtxRef = useRef<SVGElement>()
 
     var scale by useState(1.0)
-
-    val fetchRails = {
-        MainScope().launch {
-            val railList: List<LargeRailData> = client.get("/api/rails/").body()
-            setRailList(railList)
-        }
-    }
-
-    val updateSignals = {
-        MainScope().launch {
-            signalList = client.get("/api/signals/").body()
-        }
-    }
-
-    val updateFormations = {
-        MainScope().launch {
-            formationList = client.get("/api/formations/").body()
-        }
-    }
-
-    val fetchWayPoints = {
-        MainScope().launch {
-            waypointList = client.get("/api/waypoints/").body()
-        }
-    }
 
     useEffectOnce {
         val mtx = mtxRef.current!!
@@ -75,33 +47,7 @@ val MapView = FC<Props> {
             return@on {}
         }
 
-        fetchRails()
-        updateSignals()
-        updateFormations()
-        fetchWayPoints()
-
-        setInterval(interval) {
-            updateSignals()
-            updateFormations()
-        }.let {
-            cleanup {
-                clearInterval(it)
-            }
-        }
-
-        MainScope().launch {
-            client.webSocket("/api/rails/railsocket") {
-                while (true) {
-                    val updatedRails = receiveDeserialized<List<LargeRailData>>()
-
-                    setRailList {
-                        it.filterNot { rail -> updatedRails.any { it.pos.contentEquals(rail.pos) } }
-                            .toMutableList()
-                            .apply { addAll(updatedRails) }
-                    }
-                }
-            }
-        }
+        return@useEffectOnce
     }
 
     CssBaseline {}

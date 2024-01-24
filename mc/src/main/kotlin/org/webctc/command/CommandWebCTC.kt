@@ -5,6 +5,7 @@ import net.minecraft.command.ICommandSender
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.event.ClickEvent
 import net.minecraft.util.ChatComponentText
+import org.webctc.WebCTCConfig
 import org.webctc.WebCTCCore
 import org.webctc.cache.waypoint.WayPointCacheData
 import org.webctc.common.types.PosInt
@@ -44,7 +45,14 @@ class CommandWebCTC : CommandBase() {
                     "auth" -> {
                         val sessionKey = PlayerSessionManager.createSession(sender)
                         val text = ChatComponentText("URL: ")
-                        val url = ChatComponentText("http://localhost:8080/auth/mc-session-login?key=$sessionKey")
+                        val isHttps = WebCTCConfig.accessUrl.startsWith("https://")
+                        val port = WebCTCConfig.accessPort
+                        val origin = buildString {
+                            append(WebCTCConfig.accessUrl)
+                            if (!(port == 80 && !isHttps || port == 443 && isHttps)) append(":$port")
+                        }
+
+                        val url = ChatComponentText("$origin/auth/mc-session-login?key=$sessionKey")
                         url.chatStyle.chatClickEvent =
                             ClickEvent(ClickEvent.Action.OPEN_URL, url.chatComponentText_TextValue)
                         text.appendSibling(url)

@@ -62,6 +62,7 @@ dependencies {
     embed("ch.qos.logback:logback-classic:1.4.14")
 
     embed(project(":common"))
+    embed("app.softwork:kotlinx-uuid-core:0.0.22")
 
     api("com.github.Kai-Z-JP:KaizPatchX:-SNAPSHOT:dev")
 }

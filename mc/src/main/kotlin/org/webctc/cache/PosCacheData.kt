@@ -1,53 +1,45 @@
 package org.webctc.cache
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.serializer
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
 import org.webctc.common.types.PosInt
-import org.webctc.common.types.rail.IRailMapData
-import org.webctc.common.types.rail.RailMapData
-import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.kotlinxJson
+import org.webctc.railgroup.toList
+import org.webctc.railgroup.toNBTTagList
+import kotlin.reflect.KClass
 
-abstract class PosCacheData<T>(mapName: String) : WorldSavedData(mapName) {
+@OptIn(InternalSerializationApi::class)
+abstract class PosCacheData<T : Any>(mapName: String, private val clazz: KClass<T>) : WorldSavedData(mapName) {
     abstract fun getMapCache(): MutableMap<PosInt, T>
-    val gson: Gson = GsonBuilder()
-        .registerTypeAdapterFactory(
-            RuntimeTypeAdapterFactory
-                .of(IRailMapData::class.java)
-                .registerSubtype(RailMapData::class.java)
-                .registerSubtype(RailMapSwitchData::class.java)
-        )
-        .serializeNulls()
-        .disableHtmlEscaping()
-        .create()
 
     abstract val TAG_NAME: String
 
     override fun readFromNBT(nbt: NBTTagCompound) {
         getMapCache().clear()
-        val tagList = nbt.getTagList(TAG_NAME, 10)
-        for (i in 0 until tagList.tagCount()) {
-            val tag = tagList.getCompoundTagAt(i)
-            val pos = PosUtils.readFromNBT(tag.getCompoundTag("pos"))
-            val json = this.fromJson(tag.getString("json"))
-            json?.let { getMapCache()[pos] = it }
+        nbt.getTagList(TAG_NAME, 10).toList().forEach { tag ->
+            val pos = PosInt.readFromNBT(tag.getCompoundTag("pos"))
+            val json = tag.getString("json")
+            json.let { getMapCache()[pos] = this.fromJson(it) }
         }
     }
 
-    abstract fun fromJson(json: String): T
+    private fun fromJson(json: String): T {
+        return kotlinxJson.decodeFromString(clazz.serializer(), json)
+    }
 
+    private fun toJson(json: T): String {
+        return kotlinxJson.encodeToString(clazz.serializer(), json)
+    }
 
     override fun writeToNBT(nbt: NBTTagCompound) {
-        val tagList = NBTTagList()
-        getMapCache().forEach {
-            val tag = NBTTagCompound()
-            tag.setTag("pos", it.key.writeToNBT())
-            tag.setString("json", gson.toJson(it.value))
-            tagList.appendTag(tag)
-        }
+        val tagList = getMapCache().map {
+            NBTTagCompound().apply {
+                setTag("pos", it.key.writeToNBT())
+                setString("json", toJson(it.value))
+            }
+        }.toNBTTagList()
         nbt.setTag(TAG_NAME, tagList)
     }
 }
