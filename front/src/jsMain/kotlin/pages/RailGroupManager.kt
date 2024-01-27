@@ -164,16 +164,17 @@ val RailGroupManager = FC {
                     List {
                         dense = true
                         disablePadding = true
-                        railGroups.forEach { rg ->
-                            ListItemButton {
-                                selected = rg.uuid == activeRailGroupUUID
-                                onClick = { activeRailGroupUUID = rg.uuid }
-                                ListItemText {
-                                    primary = ReactNode(rg.name)
-                                    secondary = ReactNode("${rg.railPosList.size} rails")
+                        railGroups.sortedBy { it.name }
+                            .forEach { rg ->
+                                ListItemButton {
+                                    selected = rg.uuid == activeRailGroupUUID
+                                    onClick = { activeRailGroupUUID = rg.uuid }
+                                    ListItemText {
+                                        primary = ReactNode(rg.name)
+                                        secondary = ReactNode("${rg.railPosList.size} rails")
+                                    }
                                 }
                             }
-                        }
                     }
                 }
             }
