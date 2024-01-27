@@ -9,10 +9,10 @@ import org.webctc.common.types.PosInt
 data class RailGroup(
     val uuid: UUID = UUID.generateUUID(),
     var name: String = "Default Name",
-    val railPosList: MutableList<PosInt> = mutableListOf(),
-    val rsPosList: MutableList<PosInt> = mutableListOf(),
-    val nextRailGroupList: MutableList<UUID> = mutableListOf(),
-    val displayPosList: MutableList<PosInt> = mutableListOf(),
+    val railPosList: MutableSet<PosInt> = mutableSetOf(),
+    val rsPosList: MutableSet<PosInt> = mutableSetOf(),
+    val nextRailGroupList: MutableSet<UUID> = mutableSetOf(),
+    val displayPosList: MutableSet<PosInt> = mutableSetOf(),
     var signalLevel: Int = 0
 ) {
     fun updateBy(other: RailGroup) {

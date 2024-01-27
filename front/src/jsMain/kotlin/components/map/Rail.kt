@@ -1,4 +1,4 @@
-package components
+package components.map
 
 import emotion.react.css
 import org.webctc.common.types.rail.LargeRailData
@@ -28,7 +28,7 @@ val WRail = FC<LargeRailProps> {
         if (isTrainOnRail) {
             stroke = "red"
         }
-        id = "rail,${rail.pos.joinToString(",")}"
+        id = "rail,${rail.pos}"
         rail.railMaps.forEach {
             val isNotActive = it is RailMapSwitchData && it.isNotActive
             line {
@@ -49,7 +49,7 @@ val WRailHover = FC<LargeRailClickableProps> {
 
     g {
         stroke = it.color
-        id = "rail,${rail.pos.joinToString(",")}"
+        id = "rail,${rail.pos}"
         css {
             cursor = Cursor.pointer
             hover {

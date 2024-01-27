@@ -70,22 +70,22 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
     val railPosList = nbt.getTagList("railPosTagList", 10)
         .toList()
         .map { PosInt.readFromNBT(it) }
-        .toMutableList()
+        .toMutableSet()
 
     val rsPosList = nbt.getTagList("rsPosTagList", 10)
         .toList()
         .map { PosInt.readFromNBT(it) }
-        .toMutableList()
+        .toMutableSet()
 
     val nextRailGroupList = nbt.getTagList("nextRailGroupTagList", 8)
         .toStringList()
         .map { UUID(it) }
-        .toMutableList()
+        .toMutableSet()
 
     val displayPosList = nbt.getTagList("displayPosTagList", 10)
         .toList()
         .map { PosInt.readFromNBT(it) }
-        .toMutableList()
+        .toMutableSet()
 
     val railGroup = RailGroup(
         uuid,

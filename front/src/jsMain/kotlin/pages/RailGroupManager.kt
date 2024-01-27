@@ -1,7 +1,11 @@
 package pages
 
 import client
-import components.*
+import components.Header
+import components.map.WRailHover
+import components.map.WSignalGroup
+import components.map.WWayPoint
+import components.railgroup.RailGroupDetail
 import emotion.react.Global
 import emotion.react.css
 import emotion.react.styles
@@ -20,7 +24,6 @@ import org.webctc.common.types.WayPoint
 import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
-import org.webctc.common.types.toPosInt
 import react.*
 import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
@@ -37,7 +40,7 @@ val RailGroupManager = FC<Props> {
     val signalList by useListData<SignalData>("/api/signals/")
     val waypointList by useListData<WayPoint>("/api/waypoints/")
     val (railGroups, setRailGroups) = useListData<RailGroup>("/api/railgroups/")
-    var selectedRails by useState(listOf<PosInt>())
+    var selectedRails by useState<Collection<PosInt>>(setOf())
 
     var isShiftKeyDown by useState(false)
 
@@ -114,10 +117,13 @@ val RailGroupManager = FC<Props> {
                             WRailHover {
                                 largeRailData = it
                                 onClick = {
-                                    selectedRails = selectedRails.toMutableList().apply {
-                                        if (!isShiftKeyDown) clear()
-                                        if (size == 1 && first() == it.pos.toPosInt()) return@apply clear()
-                                        add(it.pos.toPosInt())
+                                    selectedRails = selectedRails.toMutableSet().apply {
+                                        if (size == 1 && first() == it.pos) {
+                                            clear()
+                                        } else {
+                                            if (!isShiftKeyDown) clear()
+                                            add(it.pos)
+                                        }
                                     }
                                 }
                             }
@@ -158,7 +164,7 @@ val RailGroupManager = FC<Props> {
                         variant = ButtonVariant.contained
                     }
                 }
-                Card {
+                Paper {
                     sx {
                         flex = number(1.0)
                         marginBlock = 8.px
@@ -185,6 +191,7 @@ val RailGroupManager = FC<Props> {
                     flex = number(1.0)
                     background = Color("silver")
                     paddingInline = 16.px
+                    overflowY = Auto.auto
                 }
                 h1 {
                     +"Detail"

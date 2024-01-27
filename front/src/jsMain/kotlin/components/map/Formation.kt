@@ -1,4 +1,4 @@
-package components
+package components.map
 
 import org.webctc.common.types.trains.FormationData
 import react.FC

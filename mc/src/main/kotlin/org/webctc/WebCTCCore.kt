@@ -125,17 +125,17 @@ class WebCTCCore {
         server = MinecraftServer.getServer()
         val world = server.entityWorld
 
-        var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache")
+        var railData = world.mapStorage.loadData(RailCacheData::class.java, "webctc_railcache_v2")
         if (railData == null) {
-            railData = RailCacheData("webctc_railcache")
-            world.mapStorage.setData("webctc_railcache", railData)
+            railData = RailCacheData("webctc_railcache_v2")
+            world.mapStorage.setData("webctc_railcache_v2", railData)
         }
         this.railData = railData as RailCacheData
 
-        var signalData = world.mapStorage.loadData(SignalCacheData::class.java, "webctc_signalcache")
+        var signalData = world.mapStorage.loadData(SignalCacheData::class.java, "webctc_signalcache_v2")
         if (signalData == null) {
-            signalData = SignalCacheData("webctc_signalcache")
-            world.mapStorage.setData("webctc_signalcache", signalData)
+            signalData = SignalCacheData("webctc_signalcache_v2")
+            world.mapStorage.setData("webctc_signalcache_v2", signalData)
         }
         this.signalData = signalData as SignalCacheData
 

@@ -17,6 +17,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.toDataClass
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.*
+import org.webctc.common.types.toPosInt
 import org.webctc.router.WebCTCRouter
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -60,7 +61,7 @@ class RailRouter : WebCTCRouter() {
 
 fun TileEntityLargeRailCore.toData(): LargeRailData {
     return LargeRailData(
-        this.startPoint,
+        this.startPoint.toPosInt(),
         this.isTrainOnRail,
         this.getNeighborRailMaps()
     )

@@ -8,7 +8,9 @@ data class PosInt(val x: Int, val y: Int, val z: Int) {
         return "$x,$y,$z"
     }
 
-    companion object
+    companion object {
+        val ZERO = PosInt(0, 0, 0)
+    }
 }
 
 fun IntArray.toPosInt(): PosInt {

@@ -1,6 +1,10 @@
 package pages
 
-import components.*
+import components.Header
+import components.map.WFormation
+import components.map.WRail
+import components.map.WSignalGroup
+import components.map.WWayPoint
 import emotion.react.Global
 import emotion.react.css
 import emotion.react.styles
@@ -29,7 +33,7 @@ val interval = 3.seconds
 
 val MapView = FC<Props> {
     val railList by useListDataWithWebsocket<LargeRailData>("/api/rails/", "/api/rails/railsocket") { a, b ->
-        a.pos.contentEquals(b.pos)
+        a.pos == b.pos
     }
     val signalList by useIntervalListData<SignalData>("api/signals/", interval)
     val formationList by useIntervalListData<FormationData>("api/formations/", interval)
