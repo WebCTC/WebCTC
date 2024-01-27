@@ -29,7 +29,8 @@ abstract class PosCacheData<T : Any>(mapName: String, private val clazz: KClass<
         nbt.getTagList(TAG_NAME, 10).toList().forEach { tag ->
             val pos = PosInt.readFromNBT(tag.getCompoundTag("pos"))
             val json = tag.getString("json")
-            json.let { getMapCache()[pos] = this.fromJson(it) }
+            val value = this.fromJson(json)
+            getMapCache()[pos] = value
         }
     }
 

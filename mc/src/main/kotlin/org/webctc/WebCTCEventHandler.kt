@@ -55,16 +55,15 @@ class WebCTCEventHandler {
             val pos = PosInt(core.xCoord, core.yCoord, core.zCoord)
             val usedByWebCTC = RailGroupData.railGroupList.map { it.railPosList }.flatten().any { it == pos }
             if (usedByWebCTC) {
-                event.player.addChatComponentMessage(
-                    ChatComponentText("${RED}This rail is managed by WebCTC(RailGroup).")
-                )
+                val player = event.player
+                player.addChatComponentMessage(ChatComponentText("${RED}This rail is managed by WebCTC(RailGroup)."))
 
                 val uuids = RailGroupData.railGroupList
                     .filter { it.railPosList.contains(pos) }
                     .map(RailGroup::uuid)
                     .joinToString(transform = UUID::toString)
 
-                event.player.addChatComponentMessage(
+                player.addChatComponentMessage(
                     ChatComponentText("${RED}If you want to break this rail, first remove it from $uuids.")
                 )
                 event.isCanceled = true
@@ -86,7 +85,6 @@ class WebCTCEventHandler {
             }
             RailGroupData.railGroupList.forEach { it.update() }
         }
-
     }
 }
 
@@ -97,9 +95,7 @@ fun PlayerInteractEvent.targetBlock(): Block {
 fun Connection.trySendBlockPos(player: EntityPlayer, pos: PosInt) {
     MainScope().launch(Dispatchers.IO) {
         session.sendSerialized(pos)
-        player.addChatComponentMessage(
-            ChatComponentText("${WebCTCCore.IN_CHAT_LOGO} $WHITE$pos was sent to web client.")
-        )
+        player.addChatComponentMessage(ChatComponentText("${WebCTCCore.IN_CHAT_LOGO} $WHITE$pos was sent to web client."))
         player.playSoundAtEntity("random.bow", 0.5f, 0.4f / (Random().nextFloat() * 0.4f + 0.8f))
     }
 }

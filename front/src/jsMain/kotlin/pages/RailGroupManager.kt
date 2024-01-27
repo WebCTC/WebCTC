@@ -25,11 +25,9 @@ import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
 import react.*
-import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.svg.ReactSVG.g
-import react.dom.svg.ReactSVG.svg
 import utils.useListData
 import web.cssom.*
 import web.svg.SVGElement
@@ -99,16 +97,13 @@ val RailGroupManager = FC {
 
         Header {}
 
-        div {
-            css {
+        Box {
+            sx {
                 display = Display.flex
                 flex = number(1.0)
                 overflowY = Auto.auto
             }
-            svg {
-                css {
-                    flex = number(1.0)
-                }
+            MapSVG {
                 g {
                     ref = mtxRef
                     g {
@@ -133,13 +128,12 @@ val RailGroupManager = FC {
                         stroke = "lightgray"
                         strokeWidth = 0.5
                         signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }
-                            .forEach { (key, signals) -> WSignalGroup { this.signals = signals } }
+                            .forEach { (_, signals) -> WSignalGroup { this.signals = signals } }
                     }
                     g {
                         waypointList.forEach {
                             WWayPoint {
                                 wayPoint = it
-                                this.scale = scale
                             }
                         }
                     }
@@ -210,9 +204,6 @@ val RailGroupManager = FC {
 
     Global {
         styles {
-            body {
-                backgroundColor = Color("darkslategray")
-            }
             selectedRails.forEach {
                 "g#rail\\,${it.x}\\,${it.y}\\,${it.z}" {
                     set(CustomPropertyName("stroke"), "lightblue")

@@ -42,8 +42,6 @@ fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
 fun ktorSv(name: String) = ktor("server-$name")
 
 dependencies {
-    embed("org.danilopianini:gson-extras:0.2.4")
-
     embed(ktorSv("core"))
     embed(ktorSv("netty"))
     embed(ktorSv("compression"))

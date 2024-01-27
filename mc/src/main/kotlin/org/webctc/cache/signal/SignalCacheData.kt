@@ -25,22 +25,17 @@ class SignalCacheData(mapName: String) : PosCacheData<SignalData>(mapName, Signa
         try {
             val coreList = signalMapCache
                 .filter {
-                    !world.chunkProvider.chunkExists(
-                        it.key.x / 16,
-                        it.key.z / 16
-                    ) || world.getBlock(
-                        it.key.x,
-                        it.key.y,
-                        it.key.z
-                    ) is BlockSignal
-                }.toMutableMap()
-            world.loadedTileEntityList.toMutableList()
-                .filterIsInstance<TileEntitySignal>()
-                .forEach {
-                    coreList[PosInt(it.xCoord, it.yCoord, it.zCoord)] = it.toDataClass()
+                    !world.getChunkFromBlockCoords(it.key.x, it.key.z).isChunkLoaded
+                            || world.getBlock(it.key.x, it.key.y, it.key.z) is BlockSignal
+                }.toMutableMap().apply {
+                    world.loadedTileEntityList
+                        .toMutableList()
+                        .filterIsInstance<TileEntitySignal>()
+                        .associate { PosInt(it.xCoord, it.yCoord, it.zCoord) to it.toDataClass() }
+                        .let { this.putAll(it) }
                 }
             signalMapCache = coreList
-            WebCTCCore.INSTANCE.signalData.markDirty()
+            this.markDirty()
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -12,15 +12,14 @@ import io.ktor.http.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.uuid.UUID
-import mui.material.Box
-import mui.material.Button
-import mui.material.ButtonColor
-import mui.material.ButtonVariant
+import mui.icons.material.Delete
+import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
 import react.FC
 import react.Props
+import react.create
 import react.useState
 import web.cssom.*
 
@@ -100,11 +99,13 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
         BoxPosIntList {
             title = "RedStone Pos"
             stateInstance = rsPossStateInstance
+            wsPath = "/api/railgroups/BlockPosConnection"
         }
 
         BoxPosIntList {
             title = "Display Pos"
             stateInstance = displayPossStateInstance
+            wsPath = "/api/railgroups/SignalPosConnection"
         }
 
         Box {
@@ -120,6 +121,24 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                     variant = ButtonVariant.outlined
                     onClick = {
                         nextRailGroups = nextRailGroups.toMutableSet().apply {
+                        }
+                    }
+                    disabled = true
+                }
+            }
+            Paper {
+                List {
+                    disablePadding = true
+                    nextRailGroups.forEach { uuid ->
+                        ListItem {
+                            secondaryAction = IconButton.create {
+                                Delete {}
+                                onClick = { nextRailGroups = nextRailGroups - uuid }
+                            }
+
+                            ListItemText {
+                                +uuid.toString()
+                            }
                         }
                     }
                 }

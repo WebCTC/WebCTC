@@ -10,14 +10,14 @@ import react.dom.svg.ReactSVG.text
 
 external interface WayPointProps : Props {
     var wayPoint: WayPoint
-    var scale: Double
+    var scale: Double?
 }
 
 val WWayPoint = FC<WayPointProps> {
     val wayPoint = it.wayPoint
     val pos = wayPoint.pos
     g {
-        transform = "translate(${pos.x} ${pos.z}) scale(${2 / it.scale})"
+        transform = "translate(${pos.x} ${pos.z}) scale(${2 / (it.scale ?: 1.0)})"
         rect {
             x = (-2 - 4 * wayPoint.displayName.length).toDouble()
             y = -8.0

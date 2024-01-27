@@ -1,5 +1,8 @@
 package components.railgroup.detail
 
+import js.objects.jso
+import kotlinx.uuid.UUID
+import kotlinx.uuid.generateUUID
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
@@ -16,12 +19,15 @@ import kotlin.reflect.KProperty1
 external interface PosIntListProps : Props {
     var title: String
     var stateInstance: StateInstance<Set<PosInt>>
+    var wsPath: String
 }
 
 val BoxPosIntList = FC<PosIntListProps> { props ->
     val title = props.title
     val (list, setter) = props.stateInstance
+    val wsPath = props.wsPath
 
+    var open by useState<UUID?> { null }
 
     Box {
         Box {
@@ -40,8 +46,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
                 Button {
                     +"Receive"
                     variant = ButtonVariant.outlined
-                    onClick = {
-                    }
+                    onClick = { open = UUID.generateUUID() }
                 }
                 Button {
                     +"Add"
@@ -77,11 +82,22 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
             }
         }
     }
+
+    DialogReceivePos {
+        this.title = title
+        this.wsPath = wsPath
+        this.uuid = open
+        this.onSave = { list ->
+            open = null
+            setter { it + list }
+        }
+        this.key = open?.toString()
+    }
 }
 
 external interface ListItemPosIntProps : Props {
     var pos: PosInt
-    var onChange: (prev: PosInt, new: PosInt) -> Unit
+    var onChange: ((prev: PosInt, new: PosInt) -> Unit)?
 }
 
 val ListItemPosInt = FC<ListItemPosIntProps> {
@@ -106,7 +122,7 @@ val ListItemPosInt = FC<ListItemPosIntProps> {
 external interface TextFieldPosIntProps : Props {
     var pos: PosInt
     var prop: KProperty1<PosInt, Int>
-    var onChange: (PosInt, PosInt) -> Unit
+    var onChange: ((PosInt, PosInt) -> Unit)?
 }
 
 private val TextFieldPosInt = FC<TextFieldPosIntProps> {
@@ -118,18 +134,19 @@ private val TextFieldPosInt = FC<TextFieldPosIntProps> {
         defaultValue = prop.get(pos)
         type = InputType.number
         label = ReactNode(prop.name)
-        onBlur = { focusEvent ->
-            val event = focusEvent.unsafeCast<FocusEvent<HTMLInputElement>>()
-            val target = event.target
-            val axisValue = target.value.toIntOrNull() ?: 0
-            if (axisValue != prop.get(pos)) {
-                pos.copy(
-                    x = if (prop.name == "x") axisValue else pos.x,
-                    y = if (prop.name == "y") axisValue else pos.y,
-                    z = if (prop.name == "z") axisValue else pos.z
-                ).also {
-                    println("onChange: $it")
-                    onChange(pos, it)
+        if (onChange == null) {
+            inputProps = jso { this.unsafeCast<InputBaseProps>().apply { readOnly = true } }
+        } else {
+            onBlur = { focusEvent ->
+                val event = focusEvent.unsafeCast<FocusEvent<HTMLInputElement>>()
+                val target = event.target
+                val axisValue = target.value.toIntOrNull() ?: 0
+                if (axisValue != prop.get(pos)) {
+                    pos.copy(
+                        x = if (prop.name == "x") axisValue else pos.x,
+                        y = if (prop.name == "y") axisValue else pos.y,
+                        z = if (prop.name == "z") axisValue else pos.z
+                    ).also { onChange(pos, it) }
                     target.value = axisValue.toString()
                 }
             }

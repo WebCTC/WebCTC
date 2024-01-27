@@ -29,16 +29,20 @@ class RailCacheData(mapName: String) : PosCacheData<LargeRailData>(mapName, Larg
         val world = WebCTCCore.INSTANCE.server.entityWorld
         try {
             val coreList = railMapCache
-                .filter { !world.chunkProvider.chunkExists(it.key.x / 16, it.key.z / 16) }.toMutableMap()
-            coreList
-                .filter { it.value.isTrainOnRail }
-                .filter { !world.chunkProvider.chunkExists(it.key.x / 16, it.key.z / 16) }
-                .forEach { (key) ->
-                    world.chunkProvider.loadChunk(key.x / 16, key.z / 16)
+                .filter { !world.getChunkFromBlockCoords(it.key.x, it.key.z).isChunkLoaded }
+                .toMutableMap().also {
+                    it
+                        .filter { it.value.isTrainOnRail }
+                        .filter { !world.getChunkFromBlockCoords(it.key.x, it.key.z).isChunkLoaded }
+                        .forEach { (key) -> world.chunkProvider.loadChunk(key.x / 16, key.z / 16) }
+                }.apply {
+                    world.loadedTileEntityList
+                        .toMutableList()
+                        .filterIsInstance<TileEntityLargeRailCore>()
+                        .associate { PosInt(it.xCoord, it.yCoord, it.zCoord) to it.toData() }
+                        .let { this.putAll(it) }
                 }
-            world.loadedTileEntityList.toMutableList().filterIsInstance<TileEntityLargeRailCore>().forEach {
-                coreList[PosInt(it.xCoord, it.yCoord, it.zCoord)] = it.toData()
-            }
+
             val diff = coreList.filter { railMapCache[it.key] != it.value }
             if (diff.isNotEmpty()) {
                 RailRouter.connections.forEach {
@@ -51,10 +55,10 @@ class RailCacheData(mapName: String) : PosCacheData<LargeRailData>(mapName, Larg
                     }
                 }
                 railMapCache = coreList
-                WebCTCCore.INSTANCE.railData.markDirty()
+                this.markDirty()
             } else if (railMapCache.any { !coreList.contains(it.key) }) {
                 railMapCache = coreList
-                WebCTCCore.INSTANCE.railData.markDirty()
+                this.markDirty()
             }
         } catch (e: Exception) {
             MinecraftServer.getServer().logWarning(e.message)

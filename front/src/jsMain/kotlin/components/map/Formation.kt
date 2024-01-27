@@ -28,7 +28,7 @@ val WFormation = FC<FormationProps> {
             y = posZ - 3
             width = 6.0
             height = 6.0
-            fill = if (doorState) "gray" else "yellow"
+            fill = if (doorState) "lightgray" else "yellow"
             stroke = "gray"
         }
 
