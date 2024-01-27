@@ -7,7 +7,6 @@ import components.map.WSignalGroup
 import components.map.WWayPoint
 import components.railgroup.RailGroupDetail
 import emotion.react.Global
-import emotion.react.css
 import emotion.react.styles
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -25,7 +24,6 @@ import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
 import react.*
-import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.svg.ReactSVG.g
 import utils.useListData
@@ -88,8 +86,8 @@ val RailGroupManager = FC {
 
     CssBaseline {}
 
-    div {
-        css {
+    Box {
+        sx {
             height = 100.vh
             display = Display.flex
             flexDirection = FlexDirection.column
@@ -141,7 +139,6 @@ val RailGroupManager = FC {
             }
             Box {
                 sx {
-                    flex = number(1.0)
                     background = Color("whitesmoke")
                     paddingInline = 16.px
                     display = Display.flex
@@ -181,8 +178,8 @@ val RailGroupManager = FC {
                 }
             }
             Box {
-                css {
-                    flex = number(1.0)
+                sx {
+                    width = 25.pct
                     background = Color("silver")
                     paddingInline = 16.px
                     overflowY = Auto.auto

@@ -156,6 +156,5 @@ val MapView = FC {
 }
 
 val MapSVG = svg.styled {
-    flex = number(1.0)
     backgroundColor = Color("darkslategray")
 }
