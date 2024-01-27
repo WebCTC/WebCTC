@@ -59,8 +59,6 @@ dependencies {
 
     embed("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
 
-    embed("ch.qos.logback:logback-classic:1.4.14")
-
     embed(project(":common"))
     embed("app.softwork:kotlinx-uuid-core:0.0.22")
 
