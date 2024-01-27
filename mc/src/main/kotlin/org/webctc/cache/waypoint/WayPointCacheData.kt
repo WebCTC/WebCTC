@@ -3,7 +3,7 @@ package org.webctc.cache.waypoint
 import org.webctc.cache.CacheData
 import org.webctc.common.types.WayPoint
 
-class WayPointCacheData(mapName: String) : CacheData<WayPoint>(mapName) {
+class WayPointCacheData(mapName: String) : CacheData<WayPoint>(mapName, WayPoint::class) {
     companion object {
         var wayPointCache = mutableMapOf<String, WayPoint>()
     }

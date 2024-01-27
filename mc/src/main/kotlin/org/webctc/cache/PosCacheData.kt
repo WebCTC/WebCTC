@@ -16,6 +16,14 @@ abstract class PosCacheData<T : Any>(mapName: String, private val clazz: KClass<
 
     abstract val TAG_NAME: String
 
+    private fun fromJson(json: String): T {
+        return kotlinxJson.decodeFromString(clazz.serializer(), json)
+    }
+
+    private fun toJson(json: T): String {
+        return kotlinxJson.encodeToString(clazz.serializer(), json)
+    }
+
     override fun readFromNBT(nbt: NBTTagCompound) {
         getMapCache().clear()
         nbt.getTagList(TAG_NAME, 10).toList().forEach { tag ->
@@ -23,14 +31,6 @@ abstract class PosCacheData<T : Any>(mapName: String, private val clazz: KClass<
             val json = tag.getString("json")
             json.let { getMapCache()[pos] = this.fromJson(it) }
         }
-    }
-
-    private fun fromJson(json: String): T {
-        return kotlinxJson.decodeFromString(clazz.serializer(), json)
-    }
-
-    private fun toJson(json: T): String {
-        return kotlinxJson.encodeToString(clazz.serializer(), json)
     }
 
     override fun writeToNBT(nbt: NBTTagCompound) {

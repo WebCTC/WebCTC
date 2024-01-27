@@ -16,7 +16,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.uuid.UUID
-import kotlinx.uuid.fromString
 import org.webctc.WebCTCCore
 import org.webctc.cache.auth.CredentialData
 import org.webctc.common.types.webauthn.*
@@ -37,7 +36,7 @@ fun Route.challenge(path: String) {
 
         val query = call.request.queryParameters
 
-        val uuid = session?.uuid ?: UUID.fromString(query["uuid"]!!)
+        val uuid = session?.uuid ?: UUID(query["uuid"]!!)
 
         val webAuthnPublicKey = WebAuthnRegistrationOption(
             base64Challenge,

@@ -8,7 +8,7 @@ import net.minecraft.util.ChatComponentText
 import org.webctc.WebCTCConfig
 import org.webctc.WebCTCCore
 import org.webctc.cache.waypoint.WayPointCacheData
-import org.webctc.common.types.PosInt
+import org.webctc.common.types.PosDouble
 import org.webctc.common.types.WayPoint
 import org.webctc.router.PlayerSessionManager
 
@@ -25,7 +25,7 @@ class CommandWebCTC : CommandBase() {
                     "waypoint" -> {
                         if (args.size >= 2) {
                             if (args[1] == "create" && args.size >= 4) {
-                                val pos = PosInt(sender.posX.toInt(), sender.posY.toInt(), sender.posZ.toInt())
+                                val pos = PosDouble(sender.posX, sender.posY, sender.posZ)
                                 val waypoint = WayPoint(args[2], args.drop(3).joinToString(" "), pos)
                                 WayPointCacheData.wayPointCache[args[2]] = waypoint
                                 WebCTCCore.INSTANCE.wayPointData.markDirty()
