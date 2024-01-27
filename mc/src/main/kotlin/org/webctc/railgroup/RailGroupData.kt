@@ -8,7 +8,6 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
 import org.webctc.common.types.railgroup.RailGroup
 
-
 class RailGroupData(mapName: String) : WorldSavedData(mapName) {
     override fun readFromNBT(nbt: NBTTagCompound) {
         railGroupList.clear()
