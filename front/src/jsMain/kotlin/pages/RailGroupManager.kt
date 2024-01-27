@@ -35,7 +35,7 @@ import web.cssom.*
 import web.svg.SVGElement
 
 
-val RailGroupManager = FC<Props> {
+val RailGroupManager = FC {
     val railList by useListData<LargeRailData>("/api/rails/")
     val signalList by useListData<SignalData>("/api/signals/")
     val waypointList by useListData<WayPoint>("/api/waypoints/")

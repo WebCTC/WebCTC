@@ -19,7 +19,6 @@ import mui.system.sx
 import org.webctc.common.types.webauthn.WebAuthnAuthentication
 import org.webctc.common.types.webauthn.WebAuthnAuthenticationOption
 import react.FC
-import react.Props
 import react.create
 import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.h1
@@ -33,7 +32,7 @@ import web.cssom.Color
 import web.cssom.px
 import web.navigator.navigator
 
-val Login = FC<Props> {
+val Login = FC {
     var errorText by useState("")
 
     CssBaseline {}

@@ -16,11 +16,14 @@ import org.webctc.common.types.WayPoint
 import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.trains.FormationData
-import react.*
+import react.FC
 import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.div
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.svg
+import react.useEffectOnce
+import react.useRef
+import react.useState
 import utils.useIntervalListData
 import utils.useListData
 import utils.useListDataWithWebsocket
@@ -31,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 
 val interval = 3.seconds
 
-val MapView = FC<Props> {
+val MapView = FC {
     val railList by useListDataWithWebsocket<LargeRailData>("/api/rails/", "/api/rails/railsocket") { a, b ->
         a.pos == b.pos
     }

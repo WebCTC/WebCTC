@@ -4,10 +4,9 @@ import components.Header
 import mui.material.Container
 import mui.material.CssBaseline
 import react.FC
-import react.Props
 import react.dom.html.ReactHTML.h1
 
-val FallBack = FC<Props> {
+val FallBack = FC {
     CssBaseline {}
     Header {}
     Container {

@@ -26,7 +26,6 @@ import org.webctc.common.types.mc.PlayerProfile
 import org.webctc.common.types.webauthn.WebAuthnRegistration
 import org.webctc.common.types.webauthn.WebAuthnRegistrationOption
 import react.FC
-import react.Props
 import react.create
 import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.h1
@@ -61,7 +60,7 @@ inline var GridProps.md: Any?
         asDynamic().md = value
     }
 
-val Account = FC<Props> {
+val Account = FC {
 
     val playerPrincipal by useData<PlayerPrincipal>("/auth/profile")
     val playerUuid = playerPrincipal?.uuid
