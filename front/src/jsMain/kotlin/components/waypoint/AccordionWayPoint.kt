@@ -115,7 +115,7 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
             }
 
             Box {
-                +"Station Range"
+                +"Station Geofence"
                 Box {
                     when (range) {
                         is CircleRange -> {
