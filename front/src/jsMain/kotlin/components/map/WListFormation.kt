@@ -75,7 +75,7 @@ fun getLocationString(list: List<WayPoint>, pos: PosDouble): String {
     else if (list.size == 1) {
         list.first().calculatedDisplayName(pos)
     } else if (list.any { it.range.contains(pos) }) {
-        list.first { it.range.contains(pos) }.calculatedDisplayName(pos)
+        list.first { it.range.contains(pos) }.displayName
     } else {
         list.createUniquePairList()
             .filter { (a, b) -> pos.isInsideSegment2D(a.pos, b.pos) }
@@ -96,6 +96,6 @@ fun WayPoint.calculatedDisplayName(pos: PosDouble): String {
     val wp = this
     return buildString {
         append(wp.displayName)
-        if (pos.distanceTo(wp.pos) > 100) append("(${pos.distanceTo(wp.pos).toInt()}m)")
+        append("(${pos.distanceTo(wp.pos).toInt()}m)")
     }
 }
