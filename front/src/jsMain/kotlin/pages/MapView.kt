@@ -36,7 +36,7 @@ val MapView = FC {
     val formationList by useIntervalListData<FormationData>("api/formations/", interval)
     val waypointList by useListData<WayPoint>("api/waypoints/")
 
-    var panzoomInstance by useState<dynamic?>(null)
+    var panzoomInstance by useState<dynamic>(null)
 
     var targetingFormationId by useState<Long?>(null)
 
@@ -156,5 +156,6 @@ val MapView = FC {
 }
 
 val MapSVG = svg.styled {
+    flex = number(1.0)
     backgroundColor = Color("darkslategray")
 }
