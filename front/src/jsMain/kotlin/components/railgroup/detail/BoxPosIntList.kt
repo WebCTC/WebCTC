@@ -8,6 +8,7 @@ import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import react.*
+import react.dom.aria.ariaReadOnly
 import react.dom.events.FocusEvent
 import web.cssom.Display
 import web.cssom.JustifyContent
@@ -135,7 +136,7 @@ private val TextFieldPosInt = FC<TextFieldPosIntProps> {
         type = InputType.number
         label = ReactNode(prop.name)
         if (onChange == null) {
-            inputProps = jso { this.unsafeCast<InputBaseProps>().apply { readOnly = true } }
+            inputProps = jso { ariaReadOnly = true }
         } else {
             onBlur = { focusEvent ->
                 val event = focusEvent.unsafeCast<FocusEvent<HTMLInputElement>>()

@@ -6,13 +6,7 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import js.objects.jso
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
-import org.webctc.common.types.rail.IRailMapData
-import org.webctc.common.types.rail.RailMapData
-import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.common.types.kotlinxJson
 import pages.*
 import react.create
 import react.dom.client.createRoot
@@ -21,21 +15,11 @@ import react.router.dom.createBrowserRouter
 import web.dom.document
 
 val client = HttpClient(Js) {
-    val jsonPreset = Json {
-        serializersModule = SerializersModule {
-            polymorphic(IRailMapData::class) {
-                subclass(RailMapData::class)
-                subclass(RailMapSwitchData::class)
-            }
-        }
-        ignoreUnknownKeys = true
-    }
-
     install(ContentNegotiation) {
-        json(jsonPreset)
+        json(kotlinxJson)
     }
     install(WebSockets) {
-        contentConverter = KotlinxWebsocketSerializationConverter(jsonPreset)
+        contentConverter = KotlinxWebsocketSerializationConverter(kotlinxJson)
     }
 }
 
@@ -58,6 +42,9 @@ fun main() {
         }, jso {
             path = "/p/railgroup"
             element = RailGroupManager.create()
+        }, jso {
+            path = "/p/waypoint"
+            element = WayPointEditor.create()
         }, jso {
             path = "/login"
             element = Login.create()

@@ -55,14 +55,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
     val sendRailGroup = {
         sending = true
 
-        val changedRailGroup = RailGroup(
-            uuid = rg.uuid,
-            name = name,
-            railPosList = railPoss.toMutableSet(),
-            rsPosList = rsPoss.toMutableSet(),
-            nextRailGroupList = nextRailGroups.toMutableSet(),
-            displayPosList = displayPoss.toMutableSet()
-        )
+        val changedRailGroup = RailGroup(rg.uuid, name, railPoss, rsPoss, nextRailGroups, displayPoss)
 
         MainScope().launch {
             client.post("/api/railgroups/update") {
@@ -144,7 +137,6 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                 }
             }
         }
-
 
         Box {
             sx {

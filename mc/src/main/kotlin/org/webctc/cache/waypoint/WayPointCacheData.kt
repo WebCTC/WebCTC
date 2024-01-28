@@ -1,7 +1,7 @@
 package org.webctc.cache.waypoint
 
 import org.webctc.cache.CacheData
-import org.webctc.common.types.WayPoint
+import org.webctc.common.types.waypoint.WayPoint
 
 class WayPointCacheData(mapName: String) : CacheData<WayPoint>(mapName, WayPoint::class) {
     companion object {

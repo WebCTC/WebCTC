@@ -11,10 +11,10 @@ import mui.material.CssBaseline
 import mui.material.List
 import mui.material.Paper
 import mui.system.sx
-import org.webctc.common.types.WayPoint
 import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.trains.FormationData
+import org.webctc.common.types.waypoint.WayPoint
 import react.*
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.svg

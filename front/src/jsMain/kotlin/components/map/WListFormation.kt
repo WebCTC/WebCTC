@@ -6,8 +6,8 @@ import mui.material.ListItemText
 import mui.material.Paper
 import mui.system.sx
 import org.webctc.common.types.PosDouble
-import org.webctc.common.types.WayPoint
 import org.webctc.common.types.trains.FormationData
+import org.webctc.common.types.waypoint.WayPoint
 import react.FC
 import react.ReactNode
 import web.cssom.Color
@@ -70,18 +70,19 @@ val ListItemFormation = FC<ListItemFormationProps> {
     }
 }
 
-fun getLocationString(waypointList: List<WayPoint>, pos: PosDouble): String {
-    val sortedWayPoints = waypointList.sortedBy { it.pos.distanceTo(pos) }
-
-    return if (waypointList.isEmpty()) ""
-    else if (waypointList.size == 1 || sortedWayPoints.first().pos.distanceTo(pos) < 100) {
-        sortedWayPoints.first().calculatedDisplayName(pos)
+fun getLocationString(list: List<WayPoint>, pos: PosDouble): String {
+    return if (list.isEmpty()) ""
+    else if (list.size == 1) {
+        list.first().calculatedDisplayName(pos)
+    } else if (list.any { it.range.contains(pos) }) {
+        list.first { it.range.contains(pos) }.calculatedDisplayName(pos)
     } else {
-        waypointList
-            .createUniquePairList()
-            .sortedBy { (a, b) -> a.pos.distanceTo(pos) + b.pos.distanceTo(pos) }
-            .first { (a, b) -> pos.isInsideSegment2D(a.pos, b.pos) }
-            .let { (a, b) -> "${a.calculatedDisplayName(pos)} - ${b.calculatedDisplayName(pos)}" }
+        list.createUniquePairList()
+            .filter { (a, b) -> pos.isInsideSegment2D(a.pos, b.pos) }
+            .filter { (a, b) -> pos.distanceToSegment(a.pos, b.pos) < a.pos.distanceTo(b.pos) }
+            .minByOrNull { (a, b) -> pos.distanceToSegment(a.pos, b.pos) }
+            ?.let { (a, b) -> "${a.calculatedDisplayName(pos)} - ${b.calculatedDisplayName(pos)}" }
+            ?: ""
     }
 }
 

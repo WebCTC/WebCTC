@@ -36,9 +36,25 @@ data class PosDouble(val x: Double, val y: Double, val z: Double) {
         return r in 0.0..1.0
     }
 
+    fun distanceToSegment(b1: PosDouble, b2: PosDouble): Double {
+        val dx = b2.x - b1.x
+        val dz = b2.z - b1.z
+        val r = ((x - b1.x) * dx + (z - b1.z) * dz) / (dx * dx + dz * dz)
+
+        return if (r in 0.0..1.0) {
+            val closestX = b1.x + r * dx
+            val closestZ = b1.z + r * dz
+            sqrt((x - closestX) * (x - closestX) + (z - closestZ) * (z - closestZ))
+        } else {
+            Double.MAX_VALUE
+        }
+    }
+
     override fun toString(): String {
         return "$x,$y,$z"
     }
 
-    companion object
+    companion object {
+        val ZERO: PosDouble = PosDouble(0.0, 0.0, 0.0)
+    }
 }

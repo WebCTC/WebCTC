@@ -60,6 +60,30 @@ inline var GridProps.md: Any?
         asDynamic().md = value
     }
 
+data class Service(
+    val name: String,
+    val description: String,
+    val path: String,
+)
+
+val serviceList = listOf(
+    Service(
+        "MapViewer",
+        "サーバ全体の線路や在線、信号などを簡易地図で俯瞰して見ることができます",
+        "/",
+    ),
+    Service(
+        "RailGroup Manager",
+        "レールをグループとして組み、在線をRSブロック/ガラスブロックでMinecraft内に設置する機構や、信号の制御を組上げることができます",
+        "/p/railgroup",
+    ),
+    Service(
+        "WayPoint Editor",
+        "WayPointを編集することができます",
+        "/p/waypoint",
+    ),
+)
+
 val Account = FC {
 
     val playerPrincipal by useData<PlayerPrincipal>("/auth/profile")
@@ -133,55 +157,28 @@ val Account = FC {
                 Grid {
                     container = true
                     spacing = responsive(3)
-                    Grid {
-                        item = true
-                        xs = 12
-                        md = 6
-                        Card {
-                            sx {
-                                height = 100.pct
-                                display = Display.flex
-                                flexDirection = FlexDirection.column
-                                justifyContent = JustifyContent.spaceBetween
-                            }
-                            CardContent {
-                                h1 { +"MapViewer" }
-                                p { +"サーバ全体の線路や在線、信号などを簡易地図で俯瞰して見ることができます" }
-                            }
-                            CardActions {
-                                Button {
-                                    +"使う"
-                                    variant = ButtonVariant.contained
-                                    color = ButtonColor.primary
-                                    onClick = {
-                                        navigate("/")
-                                    }
+                    serviceList.forEach { service ->
+                        Grid {
+                            item = true
+                            xs = 12
+                            md = 6
+                            Card {
+                                sx {
+                                    height = 100.pct
+                                    display = Display.flex
+                                    flexDirection = FlexDirection.column
+                                    justifyContent = JustifyContent.spaceBetween
                                 }
-                            }
-                        }
-                    }
-                    Grid {
-                        item = true
-                        xs = 12
-                        md = 6
-                        Card {
-                            sx {
-                                height = 100.pct
-                                display = Display.flex
-                                flexDirection = FlexDirection.column
-                                justifyContent = JustifyContent.spaceBetween
-                            }
-                            CardContent {
-                                h1 { +"RailGroup Manager" }
-                                p { +"レールをグループとして組み、在線をRSブロック/ガラスブロックでMinecraft内に設置する機構や、信号の制御を組上げることができます" }
-                            }
-                            CardActions {
-                                Button {
-                                    +"使う"
-                                    variant = ButtonVariant.contained
-                                    color = ButtonColor.primary
-                                    onClick = {
-                                        navigate("/p/railgroup")
+                                CardContent {
+                                    h1 { +service.name }
+                                    p { +service.description }
+                                }
+                                CardActions {
+                                    Button {
+                                        +"使う"
+                                        variant = ButtonVariant.contained
+                                        color = ButtonColor.primary
+                                        onClick = { navigate(service.path) }
                                     }
                                 }
                             }

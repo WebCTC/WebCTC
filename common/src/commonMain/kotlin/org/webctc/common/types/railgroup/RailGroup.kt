@@ -9,22 +9,18 @@ import org.webctc.common.types.PosInt
 data class RailGroup(
     val uuid: UUID = UUID.generateUUID(),
     var name: String = "Default Name",
-    val railPosList: MutableSet<PosInt> = mutableSetOf(),
-    val rsPosList: MutableSet<PosInt> = mutableSetOf(),
-    val nextRailGroupList: MutableSet<UUID> = mutableSetOf(),
-    val displayPosList: MutableSet<PosInt> = mutableSetOf(),
+    var railPosList: Set<PosInt> = setOf(),
+    var rsPosList: Set<PosInt> = setOf(),
+    var nextRailGroupList: Set<UUID> = setOf(),
+    var displayPosList: Set<PosInt> = setOf(),
     var signalLevel: Int = 0
 ) {
     fun updateBy(other: RailGroup) {
         this.name = other.name
-        this.railPosList.clear()
-        this.railPosList.addAll(other.railPosList)
-        this.rsPosList.clear()
-        this.rsPosList.addAll(other.rsPosList)
-        this.nextRailGroupList.clear()
-        this.nextRailGroupList.addAll(other.nextRailGroupList)
-        this.displayPosList.clear()
-        this.displayPosList.addAll(other.displayPosList)
+        this.railPosList = other.railPosList
+        this.rsPosList = other.rsPosList
+        this.nextRailGroupList = other.nextRailGroupList
+        this.displayPosList = other.displayPosList
     }
 
     override fun equals(other: Any?): Boolean = other is RailGroup && this.uuid == other.uuid

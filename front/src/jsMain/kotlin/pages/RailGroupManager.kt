@@ -19,10 +19,10 @@ import module.panzoom
 import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
-import org.webctc.common.types.WayPoint
 import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
+import org.webctc.common.types.waypoint.WayPoint
 import react.*
 import react.dom.html.ReactHTML.h1
 import react.dom.svg.ReactSVG.g

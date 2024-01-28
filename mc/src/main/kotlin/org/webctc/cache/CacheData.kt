@@ -4,7 +4,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.world.WorldSavedData
-import org.webctc.kotlinxJson
+import org.webctc.common.types.kotlinxJson
 import org.webctc.railgroup.toList
 import org.webctc.railgroup.toNBTTagList
 import kotlin.reflect.KClass

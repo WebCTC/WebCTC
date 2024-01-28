@@ -1,6 +1,15 @@
 package org.webctc.common.types
 
 import kotlinx.serialization.json.*
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import org.webctc.common.types.rail.IRailMapData
+import org.webctc.common.types.rail.RailMapData
+import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.common.types.waypoint.range.CircleRange
+import org.webctc.common.types.waypoint.range.IRange
+import org.webctc.common.types.waypoint.range.RectangleRange
 
 /**
  * KotlinでブラックボックスJson扱うための秘伝のタレ
@@ -63,3 +72,17 @@ fun JsonArray.toList() = this.map { it.jsonObject }
 fun JsonArray.toMutableList() = this.map { it.jsonObject }.toMutableList()
 
 fun String.parseToJsonElement() = Json.parseToJsonElement(this)
+
+val kotlinxJson = Json {
+    serializersModule = SerializersModule {
+        polymorphic(IRailMapData::class) {
+            subclass(RailMapData::class)
+            subclass(RailMapSwitchData::class)
+        }
+        polymorphic(IRange::class) {
+            subclass(CircleRange::class)
+            subclass(RectangleRange::class)
+        }
+    }
+    ignoreUnknownKeys = true
+}

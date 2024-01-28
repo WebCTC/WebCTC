@@ -9,7 +9,7 @@ import org.webctc.WebCTCConfig
 import org.webctc.WebCTCCore
 import org.webctc.cache.waypoint.WayPointCacheData
 import org.webctc.common.types.PosDouble
-import org.webctc.common.types.WayPoint
+import org.webctc.common.types.waypoint.WayPoint
 import org.webctc.router.PlayerSessionManager
 
 class CommandWebCTC : CommandBase() {

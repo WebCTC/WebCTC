@@ -15,10 +15,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.websocket.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import kotlinx.uuid.UUID
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.EnumChatFormatting.*
@@ -29,9 +25,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.waypoint.WayPointCacheData
 import org.webctc.command.CommandWebCTC
-import org.webctc.common.types.rail.IRailMapData
-import org.webctc.common.types.rail.RailMapData
-import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.common.types.kotlinxJson
 import org.webctc.plugin.PluginManager
 import org.webctc.plugin.webauthn.WebAuthnChallenge
 import org.webctc.railgroup.RailGroupData
@@ -187,15 +181,4 @@ class WebCTCCore {
         @Mod.Instance
         lateinit var INSTANCE: WebCTCCore
     }
-}
-
-
-val kotlinxJson = Json {
-    serializersModule = SerializersModule {
-        polymorphic(IRailMapData::class) {
-            subclass(RailMapData::class)
-            subclass(RailMapSwitchData::class)
-        }
-    }
-    ignoreUnknownKeys = true
 }
