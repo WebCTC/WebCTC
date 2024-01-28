@@ -109,9 +109,7 @@ inline fun <reified R : Any> useListDataWithWebsocket(
                 while (true) {
                     val receivedList = receiveDeserialized<List<R>>()
                     setData {
-                        it.filterNot { old -> receivedList.any { new -> equals(old, new) } }
-                            .toMutableList()
-                            .apply { addAll(receivedList) }
+                        it.filterNot { old -> receivedList.any { new -> equals(old, new) } } + receivedList
                     }
                 }
             }
