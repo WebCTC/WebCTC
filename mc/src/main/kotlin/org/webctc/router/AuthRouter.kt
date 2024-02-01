@@ -20,6 +20,8 @@ class AuthRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit {
         return {
             get("/mc-session-login") {
+                val ua = call.request.headers["User-Agent"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+                if (!ua.contains("Mozilla", ignoreCase = true)) return@get call.respond(HttpStatusCode.BadRequest)
                 call.request.queryParameters["key"]?.let {
                     PlayerSessionManager.useKey(it)
                         ?.let { (name, uuid) -> WebCTCCore.UserSession(name, uuid) }
