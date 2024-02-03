@@ -1,12 +1,11 @@
 package pages
 
 import components.Header
+import components.map.MapPanzoomSvg
 import components.map.WRail
 import components.map.WSignalGroup
 import components.map.WWayPoint
 import components.waypoint.AccordionWayPoint
-import js.objects.jso
-import module.panzoom
 import mui.material.Box
 import mui.material.CssBaseline
 import mui.material.Paper
@@ -16,23 +15,13 @@ import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.waypoint.WayPoint
 import react.FC
 import react.dom.svg.ReactSVG.g
-import react.useEffectOnce
-import react.useRef
 import utils.useListData
 import web.cssom.*
-import web.svg.SVGElement
 
 val WayPointEditor = FC {
     val railList by useListData<LargeRailData>("/api/rails/")
     val signalList by useListData<SignalData>("/api/signals/")
     var waypointList by useListData<WayPoint>("/api/waypoints/")
-
-    val mtxRef = useRef<SVGElement>()
-
-    useEffectOnce {
-        val mtx = mtxRef.current!!
-        panzoom(mtx, jso { smoothScroll = false })
-    }
 
     CssBaseline {}
 
@@ -95,21 +84,18 @@ val WayPointEditor = FC {
                     }
                 }
             }
-            MapSVG {
+            MapPanzoomSvg {
                 g {
-                    ref = mtxRef
-                    g {
-                        stroke = "white"
-                        railList.forEach { WRail { largeRailData = it } }
-                    }
-                    g {
-                        stroke = "lightgray"
-                        strokeWidth = 0.5
-                        signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }
-                            .forEach { (_, signals) -> WSignalGroup { this.signals = signals } }
-                    }
-                    g { waypointList.forEach { WWayPoint { wayPoint = it } } }
+                    stroke = "white"
+                    railList.forEach { WRail { largeRailData = it } }
                 }
+                g {
+                    stroke = "lightgray"
+                    strokeWidth = 0.5
+                    signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }
+                        .forEach { (_, signals) -> WSignalGroup { this.signals = signals } }
+                }
+                g { waypointList.forEach { WWayPoint { wayPoint = it } } }
             }
         }
     }

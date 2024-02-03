@@ -2,6 +2,7 @@ package pages
 
 import client
 import components.Header
+import components.map.MapPanzoomSvg
 import components.map.WRailHover
 import components.map.WSignalGroup
 import components.map.WWayPoint
@@ -10,12 +11,10 @@ import emotion.react.Global
 import emotion.react.styles
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import js.objects.jso
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.uuid.UUID
-import module.panzoom
 import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
@@ -23,12 +22,14 @@ import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.waypoint.WayPoint
-import react.*
+import react.FC
+import react.ReactNode
 import react.dom.html.ReactHTML.h1
 import react.dom.svg.ReactSVG.g
+import react.useEffectOnce
+import react.useState
 import utils.useListData
 import web.cssom.*
-import web.svg.SVGElement
 
 
 val RailGroupManager = FC {
@@ -43,8 +44,6 @@ val RailGroupManager = FC {
     var activeRailGroupUUID by useState<UUID?>(null)
 
     val activeRailGroup = railGroups.find { it.uuid == activeRailGroupUUID }
-
-    val mtxRef = useRef<SVGElement>()
 
     val createRailGroup = {
         MainScope().launch {
@@ -71,9 +70,6 @@ val RailGroupManager = FC {
     }
 
     useEffectOnce {
-        val mtx = mtxRef.current!!
-        panzoom(mtx, jso { smoothScroll = false })
-
         window.onkeydown = { if (it.key == "Shift") isShiftKeyDown = true }
         window.onkeyup = { if (it.key == "Shift") isShiftKeyDown = false }
 
@@ -101,38 +97,35 @@ val RailGroupManager = FC {
                 flex = number(1.0)
                 overflowY = Auto.auto
             }
-            MapSVG {
+            MapPanzoomSvg {
                 g {
-                    ref = mtxRef
-                    g {
-                        stroke = "white"
-                        railList.forEach {
-                            WRailHover {
-                                largeRailData = it
-                                onClick = {
-                                    selectedRails = selectedRails.toMutableSet().apply {
-                                        if (size == 1 && first() == it.pos) {
-                                            clear()
-                                        } else {
-                                            if (!isShiftKeyDown) clear()
-                                            add(it.pos)
-                                        }
+                    stroke = "white"
+                    railList.forEach {
+                        WRailHover {
+                            largeRailData = it
+                            onClick = {
+                                selectedRails = selectedRails.toMutableSet().apply {
+                                    if (size == 1 && first() == it.pos) {
+                                        clear()
+                                    } else {
+                                        if (!isShiftKeyDown) clear()
+                                        add(it.pos)
                                     }
                                 }
                             }
                         }
                     }
-                    g {
-                        stroke = "lightgray"
-                        strokeWidth = 0.5
-                        signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }
-                            .forEach { (_, signals) -> WSignalGroup { this.signals = signals } }
-                    }
-                    g {
-                        waypointList.forEach {
-                            WWayPoint {
-                                wayPoint = it
-                            }
+                }
+                g {
+                    stroke = "lightgray"
+                    strokeWidth = 0.5
+                    signalList.groupBy { "${it.pos.x},${it.pos.z}-${it.rotation}" }
+                        .forEach { (_, signals) -> WSignalGroup { this.signals = signals } }
+                }
+                g {
+                    waypointList.forEach {
+                        WWayPoint {
+                            wayPoint = it
                         }
                     }
                 }
