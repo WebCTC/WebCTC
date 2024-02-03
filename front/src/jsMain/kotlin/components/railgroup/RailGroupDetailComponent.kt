@@ -34,16 +34,17 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
     val nameStateInstance = useState(rg.name)
     val (name) = nameStateInstance
 
-    val railPosStateInstance = useState(rg.railPosList.toSet())
+    val railPosStateInstance = useState(rg.railPosList)
     val (railPoss) = railPosStateInstance
 
-    val rsPossStateInstance = useState(rg.rsPosList.toSet())
+    val rsPossStateInstance = useState(rg.rsPosList)
     val (rsPoss) = rsPossStateInstance
 
-    val displayPossStateInstance = useState(rg.displayPosList.toSet())
-    val (displayPoss) = displayPossStateInstance
+    var displayPoss by useState(rg.displayPosList)
 
-    var nextRailGroups by useState(rg.nextRailGroupList.toSet())
+    var nextRailGroups by useState(rg.nextRailGroupList)
+
+    var switchSetting by useState(rg.switchSetting)
 
     val (hoveringRail, setHoveringRail) = useState<PosInt?>(null)
 
@@ -52,7 +53,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
     val sendRailGroup = {
         sending = true
 
-        val changedRailGroup = RailGroup(rg.uuid, name, railPoss, rsPoss, nextRailGroups, displayPoss)
+        val changedRailGroup = RailGroup(rg.uuid, name, railPoss, rsPoss, nextRailGroups, displayPoss, switchSetting)
 
         MainScope().launch {
             client.put("/api/railgroups/${rg.uuid}") {
@@ -94,7 +95,8 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
 
         BoxPosIntList {
             title = "Display Pos"
-            stateInstance = displayPossStateInstance
+            posList = displayPoss
+            updatePosList = { displayPoss = it }
             wsPath = "/api/railgroups/ws/signal"
         }
 
@@ -135,6 +137,11 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             }
         }
 
+        BoxSwitchSetting {
+            this.switchSetting = switchSetting
+            updateSwitchSetting = { switchSetting = it }
+        }
+
         Box {
             sx {
                 display = Display.flex
@@ -147,7 +154,8 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                         rg.railPosList == railPoss &&
                         rg.rsPosList == rsPoss &&
                         rg.nextRailGroupList == nextRailGroups &&
-                        rg.displayPosList == displayPoss || sending
+                        rg.displayPosList == displayPoss &&
+                        rg.switchSetting == switchSetting || sending
                 variant = ButtonVariant.contained
             }
 

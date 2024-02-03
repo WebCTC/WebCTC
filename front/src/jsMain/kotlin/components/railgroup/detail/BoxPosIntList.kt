@@ -19,13 +19,15 @@ import kotlin.reflect.KProperty1
 
 external interface PosIntListProps : Props {
     var title: String
-    var stateInstance: StateInstance<Set<PosInt>>
     var wsPath: String
+    var posList: Set<PosInt>
+    var updatePosList: (Set<PosInt>) -> Unit
 }
 
 val BoxPosIntList = FC<PosIntListProps> { props ->
     val title = props.title
-    val (list, setter) = props.stateInstance
+    val posList = props.posList
+    val setter = props.updatePosList
     val wsPath = props.wsPath
 
     var open by useState<UUID?> { null }
@@ -41,7 +43,6 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
             Box {
                 sx {
                     display = Display.flex
-                    justifyContent = JustifyContent.flexEnd
                     gap = 8.px
                 }
                 Button {
@@ -52,30 +53,30 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
                 Button {
                     +"Add"
                     variant = ButtonVariant.outlined
-                    onClick = { setter { it + PosInt.ZERO } }
+                    onClick = { setter(posList + PosInt.ZERO) }
                 }
             }
         }
         Paper {
             List {
                 disablePadding = true
-                list.forEach { pos ->
+                posList.forEachIndexed { index, pos ->
                     ListItem {
                         sx { paddingRight = 72.px }
                         disablePadding = true
                         secondaryAction = IconButton.create {
                             Delete {}
-                            onClick = { setter { it - pos } }
+                            onClick = { setter(posList - pos) }
                         }
 
                         ListItemPosInt {
                             this.pos = pos
                             this.onChange = { new ->
-                                setter {
-                                    it.toMutableList()
-                                        .apply { this[indexOf(pos)] = new }
+                                setter(
+                                    posList.toMutableList()
+                                        .apply { this[index] = new }
                                         .toMutableSet()
-                                }
+                                )
                             }
                         }
                     }
@@ -90,7 +91,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
         this.uuid = open
         this.onSave = { list ->
             open = null
-            setter { it + list }
+            setter(posList + list)
         }
         this.key = open?.toString()
     }

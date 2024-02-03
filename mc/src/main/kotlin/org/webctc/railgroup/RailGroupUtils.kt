@@ -12,8 +12,11 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.readFromNBT
 import org.webctc.cache.writeToNBT
 import org.webctc.common.types.PosInt
+import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.common.types.railgroup.PosIntWithKey
 import org.webctc.common.types.railgroup.RailGroup
+import org.webctc.common.types.railgroup.SettingEntry
+import org.webctc.common.types.railgroup.SwitchSetting
 
 
 fun RailGroup.isTrainOnRail(): Boolean {
@@ -45,21 +48,23 @@ fun RailGroup.writeToNBT(): NBTTagCompound {
     tag.setString("name", this.name)
     tag.setString("uuid", this.uuid.toString())
 
-    railPosList.map { it.writeToNBT() }
+    railPosList.map(PosInt::writeToNBT)
         .toNBTTagList()
         .let { tag.setTag("railPosTagList", it) }
 
-    rsPosList.map { it.writeToNBT() }
+    rsPosList.map(PosIntWithKey::writeToNBT)
         .toNBTTagList()
         .let { tag.setTag("rsPosTagList", it) }
 
-    nextRailGroupList.map { it.writeToNBT() }
+    nextRailGroupList.map(UUID::writeToNBT)
         .toNBTTagList()
         .let { tag.setTag("nextRailGroupTagList", it) }
 
-    displayPosList.map { it.writeToNBT() }
+    displayPosList.map(PosInt::writeToNBT)
         .toNBTTagList()
         .let { tag.setTag("displayPosTagList", it) }
+
+    tag.setTag("switchSetting", switchSetting.writeToNBT())
 
     return tag
 }
@@ -70,23 +75,25 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
 
     val railPosList = nbt.getTagList("railPosTagList", 10)
         .toList()
-        .map { PosInt.readFromNBT(it) }
+        .map(PosInt::readFromNBT)
         .toMutableSet()
 
     val rsPosList = nbt.getTagList("rsPosTagList", 10)
         .toList()
-        .map { PosIntWithKey.readFromNBT(it) }
+        .map(PosIntWithKey::readFromNBT)
         .toMutableSet()
 
     val nextRailGroupList = nbt.getTagList("nextRailGroupTagList", 8)
         .toStringList()
-        .map { UUID(it) }
+        .map(::UUID)
         .toMutableSet()
 
     val displayPosList = nbt.getTagList("displayPosTagList", 10)
         .toList()
-        .map { PosInt.readFromNBT(it) }
+        .map(PosInt::readFromNBT)
         .toMutableSet()
+
+    val switchSetting = SwitchSetting.readFromNBT(nbt.getCompoundTag("switchSetting"))
 
     val railGroup = RailGroup(
         uuid,
@@ -94,11 +101,48 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
         railPosList,
         rsPosList,
         nextRailGroupList,
-        displayPosList
+        displayPosList,
+        switchSetting
     )
 
     return railGroup
 }
+
+fun SwitchSetting.writeToNBT(): NBTTagCompound {
+    val tag = NBTTagCompound()
+    tag.setTag("settingMap", settingMap.map(SettingEntry::writeToNBT).toNBTTagList())
+    tag.setTag("switchRsPos", switchRsPos.map(PosInt::writeToNBT).toNBTTagList())
+
+    return tag
+}
+
+fun SwitchSetting.Companion.readFromNBT(nbt: NBTTagCompound): SwitchSetting {
+    val settingMap = nbt.getTagList("settingMap", 10)
+        .toList()
+        .map(SettingEntry::readFromNBT)
+        .toSet()
+
+    val switchRsPos = nbt.getTagList("switchRsPos", 10)
+        .toList()
+        .map(PosInt::readFromNBT)
+        .toSet()
+
+    return SwitchSetting(switchRsPos, settingMap)
+}
+
+fun SettingEntry.writeToNBT(): NBTTagCompound {
+    val tag = NBTTagCompound()
+    tag.setString("key", key)
+    tag.setBoolean("value", value)
+    return tag
+}
+
+fun SettingEntry.Companion.readFromNBT(nbt: NBTTagCompound): SettingEntry {
+    val key = nbt.getString("key")
+    val value = nbt.getBoolean("value")
+    return SettingEntry(key, value)
+}
+
 
 fun RailGroup.update() {
     val isTrainOnRail = this.isTrainOnRail()
@@ -114,6 +158,22 @@ fun RailGroup.update() {
         .filterIsInstance<TileEntitySignal>()
         .filter { it.signalLevel != this.signalLevel }
         .forEach { it.setElectricity(it.xCoord, it.yCoord, it.zCoord, this.signalLevel) }
+
+    val reservedKey = RailGroupData.getReservedKey(this.uuid)
+    if (this.switchSetting.settingMap.any { reservedKey == it.key }) {
+        this.switchSetting.settingMap.find { reservedKey == it.key }?.let {
+            val world = MinecraftServer.getServer().entityWorld
+            val block = if (it.value) Blocks.redstone_block else Blocks.stained_glass
+            this.switchSetting.switchRsPos.forEach {
+                world.setBlock(it.x, it.y, it.z, block, 14, 3)
+            }
+        }
+    } else if (isTrainOnRail) {
+        this.switchSetting.switchRsPos.forEach {
+            val block = world.getBlock(it.x, it.y, it.z)
+            world.setBlock(it.x, it.y, it.z, block, 14, 3)
+        }
+    }
 
     val block = if (isTrainOnRail) Blocks.redstone_block else Blocks.stained_glass
     this.rsPosList.forEach {
@@ -131,6 +191,11 @@ fun RailGroup.update() {
     }
 }
 
+fun RailGroup.hasSwitch(): Boolean {
+    return this.railPosList.mapNotNull { RailCacheData.railMapCache[it] }
+        .any { it.railMaps.any { it is RailMapSwitchData } }
+}
+
 val TileEntitySignal.signalLevel: Int
     get() = this.javaClass.fields
         .find { it.name == "signalLevel" }
@@ -139,14 +204,14 @@ val TileEntitySignal.signalLevel: Int
 
 fun List<NBTBase>.toNBTTagList(): NBTTagList {
     return NBTTagList().apply {
-        this@toNBTTagList.forEach { this.appendTag(it) }
+        this@toNBTTagList.forEach(::appendTag)
     }
 }
 
 fun NBTTagList.toList(): List<NBTTagCompound> {
-    return (0 until this.tagCount()).map { this.getCompoundTagAt(it) }
+    return (0 until this.tagCount()).map(::getCompoundTagAt)
 }
 
 fun NBTTagList.toStringList(): List<String> {
-    return (0 until this.tagCount()).map { this.getStringTagAt(it) }
+    return (0 until this.tagCount()).map(::getStringTagAt)
 }

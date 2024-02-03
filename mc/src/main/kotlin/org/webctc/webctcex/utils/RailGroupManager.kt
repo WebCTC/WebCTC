@@ -39,5 +39,15 @@ class RailGroupManager {
         fun isReserved(uuids: Array<String>, key: String): Boolean {
             return RailGroupData.isReserved(uuids.map(::UUID).toTypedArray(), key)
         }
+
+        @JvmStatic
+        fun isLocked(uuid: String, key: String): Boolean {
+            return RailGroupData.isLocked(UUID(uuid), key)
+        }
+
+        @JvmStatic
+        fun isLocked(uuids: Array<String>, key: String): Boolean {
+            return RailGroupData.isLocked(uuids.map(::UUID).toTypedArray(), key)
+        }
     }
 }

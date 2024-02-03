@@ -63,11 +63,19 @@ fun TileEntityLargeRailCore.toData(): LargeRailData {
     return LargeRailData(
         this.startPoint.toPosInt(),
         this.isTrainOnRail,
-        this.getNeighborRailMaps()
+        this.getRailMaps(),
+        this.isConverting()
     )
 }
 
-fun TileEntityLargeRailCore.getNeighborRailMaps(): List<IRailMapData> {
+fun TileEntityLargeRailCore.isConverting(): Boolean {
+    return (this as? TileEntityLargeRailSwitchCore)?.switch?.points?.any {
+        !(it.movement == 0.toFloat() && !it.rpRoot.checkRSInput(this.worldObj) ||
+                it.movement == 1.toFloat() && it.rpRoot.checkRSInput(this.worldObj))
+    } == true
+}
+
+fun TileEntityLargeRailCore.getRailMaps(): List<IRailMapData> {
     if (this is TileEntityLargeRailSwitchCore) {
         this.switch.onBlockChanged(worldObj)
     }

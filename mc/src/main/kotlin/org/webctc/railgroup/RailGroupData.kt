@@ -5,6 +5,7 @@ import kotlinx.uuid.UUID
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
+import org.webctc.cache.rail.RailCacheData
 import org.webctc.common.types.railgroup.Lock
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.railgroup.RailGroupChain
@@ -49,7 +50,7 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
         fun reserve(uuids: Array<UUID>, key: String): Boolean {
             val railGroupChain = RailGroupChain(uuids.toLinkedHashSet(), key)
 
-            if (!railGroupChain.canLock()) {
+            if (!railGroupChain.canLock(key)) {
                 return false
             }
 
@@ -70,25 +71,55 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             lockList -= uuid
         }
 
-        fun isReserved(uuid: UUID, key: String): Boolean {
+        fun isLocked(uuid: UUID, key: String): Boolean {
             return lockList[uuid]?.key == key
         }
 
+        fun isLocked(uuids: Array<UUID>, key: String): Boolean {
+            return uuids.all { isLocked(it, key) }
+        }
+
+        fun isReserved(uuid: UUID, key: String): Boolean {
+            val lock = lockList[uuid]
+            return lock?.key == key && lock.frozenTime == 0 && !isConverting(uuid)
+        }
+
         fun isReserved(uuids: Array<UUID>, key: String): Boolean {
-            return uuids.any { lockList[it]?.key == key }
+            return uuids.all { isReserved(it, key) }
+        }
+
+        private fun isConverting(uuid: UUID): Boolean {
+            return findRailGroup(uuid)?.let { rg ->
+                return rg.railPosList
+                    .mapNotNull { RailCacheData.railMapCache[it] }
+                    .any { it.converting }
+            } ?: false
+        }
+
+        fun getReservedKey(uuid: UUID): String? {
+            return lockList[uuid]?.key
+        }
+
+        fun updateLocks() {
+            lockList.values.forEach {
+                if (it.frozenTime > 0) {
+                    it.frozenTime--
+                }
+            }
         }
 
         private fun findRailGroup(uuid: UUID): RailGroup? {
             return railGroupList.find { it.uuid == uuid }
         }
 
-        private fun RailGroupChain.canLock(): Boolean {
-            return this.chain.mapNotNull(::findRailGroup).all { it.canLock() }
+        private fun RailGroupChain.canLock(key: String): Boolean {
+            return this.chain.mapNotNull(::findRailGroup).all { it.canLock(key) }
         }
 
         private fun RailGroupChain.lock() {
             this.chain.mapNotNull(::findRailGroup).forEach {
-                lockList[it.uuid] = Lock(this.key)
+                val frozenTime = if (it.hasSwitch()) 20 else 0
+                lockList[it.uuid] = Lock(this.key, frozenTime)
             }
         }
 
@@ -109,10 +140,12 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             }
         }
 
-        private fun RailGroup.canLock(): Boolean {
+        private fun RailGroup.canLock(key: String): Boolean {
             val isTrainOnRail = this.isTrainOnRail()
-            val isReserved = this.uuid in lockList
-            val isLocked = lockList.keys
+            val isReserved = this.uuid in lockList && lockList[this.uuid]!!.key != key
+            val isLocked = lockList
+                .filterValues { it.key != key }
+                .keys
                 .mapNotNull(::findRailGroup)
                 .any { it.railPosList.any { pos -> pos in this.railPosList } }
             return !(isTrainOnRail || isReserved || isLocked)

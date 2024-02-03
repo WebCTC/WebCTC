@@ -84,6 +84,7 @@ class WebCTCEventHandler {
                 tickCount = 0
             }
             RailGroupData.railGroupList.forEach { it.update() }
+            RailGroupData.updateLocks()
         }
     }
 }

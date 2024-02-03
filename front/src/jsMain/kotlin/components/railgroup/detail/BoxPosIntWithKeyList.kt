@@ -39,7 +39,6 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
             Box {
                 sx {
                     display = Display.flex
-                    justifyContent = JustifyContent.flexEnd
                     gap = 8.px
                 }
                 Button {
@@ -57,7 +56,7 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
         Paper {
             List {
                 disablePadding = true
-                list.forEach { pos ->
+                list.forEachIndexed { index, pos ->
                     ListItem {
                         sx { paddingRight = 72.px }
                         disablePadding = true
@@ -71,7 +70,7 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
                             this.onChange = { new ->
                                 setter {
                                     it.toMutableList()
-                                        .apply { this[indexOf(pos)] = new }
+                                        .apply { this[index] = new }
                                         .toMutableSet()
                                 }
                             }
