@@ -19,6 +19,13 @@ fun IntArray.toPosInt(): PosInt {
 }
 
 @Serializable
+data class PosInt2D(val x: Int, val y: Int) {
+    override fun toString(): String {
+        return "$x,$y"
+    }
+}
+
+@Serializable
 data class PosDouble(val x: Double, val y: Double, val z: Double) {
     fun distanceTo(other: PosDouble): Double {
         val dx = x - other.x

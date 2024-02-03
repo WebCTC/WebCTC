@@ -8,6 +8,8 @@ import io.ktor.serialization.kotlinx.json.*
 import js.objects.jso
 import org.webctc.common.types.kotlinxJson
 import pages.*
+import pages.tecon.TeConEdit
+import pages.tecon.TeConList
 import react.create
 import react.dom.client.createRoot
 import react.router.RouterProvider
@@ -45,6 +47,9 @@ fun main() {
         }, jso {
             path = "/p/waypoint"
             element = WayPointEditor.create()
+        }, jso {
+            path = "/p/tecon"
+            element = TeConList.create()
         }, jso {
             path = "/login"
             element = Login.create()
