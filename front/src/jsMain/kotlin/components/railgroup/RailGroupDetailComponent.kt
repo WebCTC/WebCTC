@@ -1,10 +1,7 @@
 package components.railgroup
 
 import client
-import components.railgroup.detail.BoxPosIntList
-import components.railgroup.detail.BoxRailList
-import components.railgroup.detail.BoxRgName
-import components.railgroup.detail.BoxRgUUID
+import components.railgroup.detail.*
 import emotion.react.Global
 import emotion.react.styles
 import io.ktor.client.request.*
@@ -89,7 +86,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             this.setHoveringRail = setHoveringRail
         }
 
-        BoxPosIntList {
+        BoxPosIntWithKeyList {
             title = "RedStone Pos"
             stateInstance = rsPossStateInstance
             wsPath = "/api/railgroups/ws/block"

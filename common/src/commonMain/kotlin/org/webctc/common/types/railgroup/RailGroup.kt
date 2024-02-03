@@ -10,7 +10,7 @@ data class RailGroup(
     val uuid: UUID = UUID.generateUUID(),
     var name: String = "Default Name",
     var railPosList: Set<PosInt> = setOf(),
-    var rsPosList: Set<PosInt> = setOf(),
+    var rsPosList: Set<PosIntWithKey> = setOf(),
     var nextRailGroupList: Set<UUID> = setOf(),
     var displayPosList: Set<PosInt> = setOf(),
     var signalLevel: Int = 0
@@ -28,4 +28,19 @@ data class RailGroup(
     override fun hashCode() = uuid.hashCode()
 
     companion object
+}
+
+@Serializable
+data class PosIntWithKey(val x: Int, val y: Int, val z: Int, val key: String = "") {
+    constructor(pos: PosInt) : this(pos.x, pos.y, pos.z)
+
+    fun toPosInt(): PosInt = PosInt(x, y, z)
+
+    override fun toString(): String {
+        return "$x,$y,$z"
+    }
+
+    companion object {
+        val ZERO = PosIntWithKey(0, 0, 0)
+    }
 }

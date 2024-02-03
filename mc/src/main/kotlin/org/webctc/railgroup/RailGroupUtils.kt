@@ -12,6 +12,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.readFromNBT
 import org.webctc.cache.writeToNBT
 import org.webctc.common.types.PosInt
+import org.webctc.common.types.railgroup.PosIntWithKey
 import org.webctc.common.types.railgroup.RailGroup
 
 
@@ -74,7 +75,7 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
 
     val rsPosList = nbt.getTagList("rsPosTagList", 10)
         .toList()
-        .map { PosInt.readFromNBT(it) }
+        .map { PosIntWithKey.readFromNBT(it) }
         .toMutableSet()
 
     val nextRailGroupList = nbt.getTagList("nextRailGroupTagList", 8)
@@ -115,7 +116,15 @@ fun RailGroup.update() {
         .forEach { it.setElectricity(it.xCoord, it.yCoord, it.zCoord, this.signalLevel) }
 
     val block = if (isTrainOnRail) Blocks.redstone_block else Blocks.stained_glass
-    this.rsPosList.forEach { world.setBlock(it.x, it.y, it.z, block, 14, 3) }
+    this.rsPosList.forEach {
+        if (it.key.isEmpty()) {
+            world.setBlock(it.x, it.y, it.z, block, 14, 3)
+        } else {
+            val isReserved = RailGroupData.isReserved(this.uuid, it.key)
+            val block = if (isReserved) block else Blocks.redstone_block
+            world.setBlock(it.x, it.y, it.z, block, 14, 3)
+        }
+    }
 }
 
 val TileEntitySignal.signalLevel: Int

@@ -1,29 +1,27 @@
 package components.railgroup.detail
 
-import js.objects.jso
 import kotlinx.uuid.UUID
 import kotlinx.uuid.generateUUID
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
+import org.webctc.common.types.railgroup.PosIntWithKey
 import react.*
-import react.dom.aria.ariaReadOnly
-import react.dom.events.FocusEvent
+import react.dom.events.ChangeEvent
+import react.dom.onChange
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.px
 import web.html.HTMLInputElement
-import web.html.InputType
-import kotlin.reflect.KProperty1
 
-external interface PosIntListProps : Props {
+external interface PosIntWithKeyListProps : Props {
     var title: String
-    var stateInstance: StateInstance<Set<PosInt>>
+    var stateInstance: StateInstance<Set<PosIntWithKey>>
     var wsPath: String
 }
 
-val BoxPosIntList = FC<PosIntListProps> { props ->
+val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
     val title = props.title
     val (list, setter) = props.stateInstance
     val wsPath = props.wsPath
@@ -52,7 +50,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
                 Button {
                     +"Add"
                     variant = ButtonVariant.outlined
-                    onClick = { setter { it + PosInt.ZERO } }
+                    onClick = { setter { it + PosIntWithKey.ZERO } }
                 }
             }
         }
@@ -68,7 +66,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
                             onClick = { setter { it - pos } }
                         }
 
-                        ListItemPosInt {
+                        ListItemPosIntWithKey {
                             this.pos = pos
                             this.onChange = { new ->
                                 setter {
@@ -90,18 +88,18 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
         this.uuid = open
         this.onSave = { list ->
             open = null
-            setter { it + list }
+            setter { it + list.map(::PosIntWithKey) }
         }
         this.key = open?.toString()
     }
 }
 
-external interface ListItemPosIntProps : Props {
-    var pos: PosInt
-    var onChange: ((PosInt) -> Unit)?
+external interface ListItemPosIntWithKeyProps : Props {
+    var pos: PosIntWithKey
+    var onChange: ((PosIntWithKey) -> Unit)?
 }
 
-val ListItemPosInt = FC<ListItemPosIntProps> {
+val ListItemPosIntWithKey = FC<ListItemPosIntWithKeyProps> {
     val pos = it.pos
     val onChange = it.onChange
     Box {
@@ -112,44 +110,19 @@ val ListItemPosInt = FC<ListItemPosIntProps> {
         }
         arrayOf(PosInt::x, PosInt::y, PosInt::z).forEach {
             TextFieldPosInt {
-                this.pos = pos
+                this.pos = pos.toPosInt()
                 this.prop = it
-                this.onChange = onChange
+                this.onChange = { new -> onChange?.let { it(PosIntWithKey(new)) } }
             }
         }
-    }
-}
-
-external interface TextFieldPosIntProps : Props {
-    var pos: PosInt
-    var prop: KProperty1<PosInt, Int>
-    var onChange: ((PosInt) -> Unit)?
-}
-
-val TextFieldPosInt = FC<TextFieldPosIntProps> {
-    val pos = it.pos
-    val prop = it.prop
-    val onChange = it.onChange
-    TextField {
-        size = Size.small
-        defaultValue = prop.get(pos)
-        type = InputType.number
-        label = ReactNode(prop.name)
-        if (onChange == null) {
-            inputProps = jso { ariaReadOnly = true }
-        } else {
-            onBlur = { focusEvent ->
-                val event = focusEvent.unsafeCast<FocusEvent<HTMLInputElement>>()
-                val target = event.target
-                val axisValue = target.value.toIntOrNull() ?: 0
-                if (axisValue != prop.get(pos)) {
-                    pos.copy(
-                        x = if (prop.name == "x") axisValue else pos.x,
-                        y = if (prop.name == "y") axisValue else pos.y,
-                        z = if (prop.name == "z") axisValue else pos.z
-                    ).also(onChange)
-                    target.value = axisValue.toString()
-                }
+        TextField {
+            size = Size.small
+            label = ReactNode("Key")
+            value = pos.key ?: ""
+            this.onChange = { formEvent ->
+                val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                val new = event.target.value
+                onChange?.let { it(PosIntWithKey(pos.x, pos.y, pos.z, new)) }
             }
         }
     }
