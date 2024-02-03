@@ -125,6 +125,10 @@ fun RailGroup.update() {
             world.setBlock(it.x, it.y, it.z, block, 14, 3)
         }
     }
+
+    if (isTrainOnRail && RailGroupData.hasReleaseFlag(this.uuid)) {
+        RailGroupData.unsafeRelease(this.uuid)
+    }
 }
 
 val TileEntitySignal.signalLevel: Int

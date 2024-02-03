@@ -1,69 +1,43 @@
 package org.webctc.webctcex.utils
 
-import kotlinx.uuid.toKotlinUUID
+import kotlinx.uuid.UUID
 import org.webctc.railgroup.RailGroupData
-import java.util.*
 
 class RailGroupManager {
     companion object {
         @JvmStatic
-        fun setSignal(uuid: UUID, signal: Int) {
-            RailGroupData.setSignal(uuid.toKotlinUUID(), signal)
-        }
-
-        @JvmStatic
         fun setSignal(uuid: String, signal: Int) {
-            setSignal(UUID.fromString(uuid), signal)
-        }
-
-        @JvmStatic
-        fun isTrainOnRail(uuid: UUID): Boolean {
-            return RailGroupData.isTrainOnRail(uuid.toKotlinUUID())
+            return RailGroupData.setSignal(UUID(uuid), signal)
         }
 
         @JvmStatic
         fun isTrainOnRail(uuid: String): Boolean {
-            return isTrainOnRail(UUID.fromString(uuid))
+            return RailGroupData.isTrainOnRail(UUID(uuid))
         }
 
         @JvmStatic
-        fun reserve(uuid: UUID, key: String) {
-            RailGroupData.reserve(uuid.toKotlinUUID(), key)
+        fun reserve(uuids: Array<String>, key: String): Boolean {
+            return RailGroupData.reserve(uuids.map(::UUID).toTypedArray(), key)
         }
 
         @JvmStatic
-        fun reserve(uuid: String, key: String) {
-            reserve(UUID.fromString(uuid), key)
+        fun release(uuids: Array<String>, key: String) {
+            RailGroupData.release(uuids.map(::UUID).toTypedArray(), key)
         }
 
         @JvmStatic
-        fun release(uuid: UUID, key: String) {
-            RailGroupData.release(uuid.toKotlinUUID(), key)
-        }
-
-        @JvmStatic
-        fun release(uuid: String, key: String) {
-            release(UUID.fromString(uuid), key)
-        }
-
-        @JvmStatic
-        fun forceRelease(uuid: UUID) {
-            RailGroupData.forceRelease(uuid.toKotlinUUID())
-        }
-
-        @JvmStatic
-        fun forceRelease(uuid: String) {
-            forceRelease(UUID.fromString(uuid))
-        }
-
-        @JvmStatic
-        fun isReserved(uuid: UUID, key: String): Boolean {
-            return RailGroupData.isReserved(uuid.toKotlinUUID(), key)
+        fun unsafeRelease(uuid: String) {
+            RailGroupData.unsafeRelease(UUID(uuid))
         }
 
         @JvmStatic
         fun isReserved(uuid: String, key: String): Boolean {
-            return isReserved(UUID.fromString(uuid), key)
+            return RailGroupData.isReserved(UUID(uuid), key)
+        }
+
+        @JvmStatic
+        fun isReserved(uuids: Array<String>, key: String): Boolean {
+            return RailGroupData.isReserved(uuids.map(::UUID).toTypedArray(), key)
         }
     }
 }
