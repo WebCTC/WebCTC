@@ -58,7 +58,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
         val changedRailGroup = RailGroup(rg.uuid, name, railPoss, rsPoss, nextRailGroups, displayPoss)
 
         MainScope().launch {
-            client.post("/api/railgroups/update") {
+            client.put("/api/railgroups/${rg.uuid}") {
                 contentType(ContentType.Application.Json)
                 parameter("uuid", rg.uuid)
                 setBody(changedRailGroup)
@@ -92,13 +92,13 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
         BoxPosIntList {
             title = "RedStone Pos"
             stateInstance = rsPossStateInstance
-            wsPath = "/api/railgroups/BlockPosConnection"
+            wsPath = "/api/railgroups/ws/block"
         }
 
         BoxPosIntList {
             title = "Display Pos"
             stateInstance = displayPossStateInstance
-            wsPath = "/api/railgroups/SignalPosConnection"
+            wsPath = "/api/railgroups/ws/signal"
         }
 
         Box {

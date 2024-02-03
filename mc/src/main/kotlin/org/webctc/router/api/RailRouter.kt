@@ -28,7 +28,7 @@ class RailRouter : WebCTCRouter() {
     }
 
     override fun install(application: Route): Route.() -> Unit = {
-        get("/") {
+        get {
             call.respond(RailCacheData.railMapCache.values)
         }
         get("/rail") {
@@ -45,7 +45,7 @@ class RailRouter : WebCTCRouter() {
                 call.respond(railCore.toData())
             }
         }
-        webSocket("/railsocket") {
+        webSocket("/ws") {
             val thisConnection = Connection(this)
             try {
                 connections += thisConnection

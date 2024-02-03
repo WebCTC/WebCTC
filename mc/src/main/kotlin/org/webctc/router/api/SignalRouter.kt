@@ -15,7 +15,7 @@ import org.webctc.router.WebCTCRouter
 
 class SignalRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
-        get("/") {
+        get {
             this.call.respond(SignalCacheData.signalMapCache.values)
         }
         get("/signal") {

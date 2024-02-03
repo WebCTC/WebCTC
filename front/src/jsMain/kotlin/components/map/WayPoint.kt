@@ -1,5 +1,6 @@
 package components.map
 
+import emotion.react.css
 import org.webctc.common.types.waypoint.WayPoint
 import org.webctc.common.types.waypoint.range.CircleRange
 import org.webctc.common.types.waypoint.range.RectangleRange
@@ -10,6 +11,7 @@ import react.dom.svg.ReactSVG.circle
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.rect
 import react.dom.svg.ReactSVG.text
+import web.cssom.None
 
 external interface WayPointProps : Props {
     var wayPoint: WayPoint
@@ -22,6 +24,9 @@ val WWayPoint = FC<WayPointProps> {
     val range = wayPoint.range
 
     g {
+        css {
+            pointerEvents = None.none
+        }
         when (range) {
             is CircleRange -> {
                 circle {

@@ -13,7 +13,7 @@ import org.webctc.router.WebCTCRouter
 
 class WayPointRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
-        get("/") {
+        get {
             try {
                 call.respond(WayPointCacheData.wayPointCache.values)
             } catch (e: Exception) {
@@ -22,24 +22,26 @@ class WayPointRouter : WebCTCRouter() {
         }
 
         authenticate("auth-session") {
-            post("/update") {
-                val id = call.request.queryParameters["id"] ?: return@post
+            route("{id}") {
+                patch {
+                    val id = call.parameters["id"] ?: return@patch
 
-                val wayPoint: WayPoint = call.receive()
+                    val wayPoint: WayPoint = call.receive()
 
-                WayPointCacheData.wayPointCache[id] = wayPoint
-                WebCTCCore.INSTANCE.wayPointData.markDirty()
+                    WayPointCacheData.wayPointCache[id] = wayPoint
+                    WebCTCCore.INSTANCE.wayPointData.markDirty()
 
-                call.respond(wayPoint)
-            }
+                    call.respond(wayPoint)
+                }
 
-            post("/delete") {
-                val id = call.request.queryParameters["id"] ?: return@post
+                delete("/delete") {
+                    val id = call.parameters["id"] ?: return@delete
 
-                WayPointCacheData.wayPointCache.remove(id)
-                WebCTCCore.INSTANCE.wayPointData.markDirty()
+                    WayPointCacheData.wayPointCache.remove(id)
+                    WebCTCCore.INSTANCE.wayPointData.markDirty()
 
-                call.respond(HttpStatusCode.OK)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

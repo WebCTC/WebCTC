@@ -37,53 +37,59 @@ class RailGroupRouter : WebCTCRouter() {
     }
 
     override fun install(application: Route): Route.() -> Unit = {
-        get("/") {
+        get {
             call.respond(RailGroupData.railGroupList)
         }
-        get("/railgroup") {
+        get("/{RailGroup}") {
             call.getRailGroup()?.let { call.respond(it) }
         }
 
         authenticate("auth-session") {
-            post("/create") {
+            post {
                 val railGroup = RailGroup.create()
                 call.respond(railGroup)
 
                 WebCTCCore.INSTANCE.railGroupData.markDirty()
             }
-            post("/delete") {
-                val railGroup = call.getRailGroup() ?: return@post
 
-                railGroup.delete()
+            route("/{RailGroup}") {
+                delete {
+                    val railGroup = call.getRailGroup() ?: return@delete
 
-                call.respond(HttpStatusCode.OK)
+                    railGroup.delete()
 
-                WebCTCCore.INSTANCE.railGroupData.markDirty()
+                    call.respond(HttpStatusCode.OK)
+
+                    WebCTCCore.INSTANCE.railGroupData.markDirty()
+                }
+                put {
+                    val oldRailGroup = call.getRailGroup() ?: return@put
+                    val railGroup: RailGroup = call.receive()
+
+                    oldRailGroup.updateBy(railGroup)
+
+                    call.respond(railGroup)
+
+                    WebCTCCore.INSTANCE.railGroupData.markDirty()
+                }
             }
-            post("/update") {
-                val oldRailGroup = call.getRailGroup() ?: return@post
-                val railGroup: RailGroup = call.receive()
+            route("ws") {
+                webSocket("/block") {
+                    val uuid = call.sessions.get<WebCTCCore.UserSession>()?.uuid ?: return@webSocket
+                    this.initPosSetter("BlockPosSetter", uuid, blockPosConnection, Items.stick)
+                }
+                webSocket("/signal") {
+                    val uuid = call.sessions.get<WebCTCCore.UserSession>()?.uuid ?: return@webSocket
+                    this.initPosSetter("SignalPosSetter", uuid, signalPosConnection, Items.blaze_rod)
+                }
 
-                oldRailGroup.updateBy(railGroup)
-
-                call.respond(railGroup)
-
-                WebCTCCore.INSTANCE.railGroupData.markDirty()
-            }
-            webSocket("/BlockPosConnection") {
-                val uuid = call.sessions.get<WebCTCCore.UserSession>()?.uuid ?: return@webSocket
-                this.initPosSetter("BlockPosSetter", uuid, blockPosConnection, Items.stick)
-            }
-            webSocket("/SignalPosConnection") {
-                val uuid = call.sessions.get<WebCTCCore.UserSession>()?.uuid ?: return@webSocket
-                this.initPosSetter("SignalPosSetter", uuid, signalPosConnection, Items.blaze_rod)
             }
         }
     }
 }
 
 private suspend fun ApplicationCall.getRailGroup(): RailGroup? {
-    val uuid = request.queryParameters["uuid"]?.toUUID()
+    val uuid = parameters["RailGroup"]?.toUUID()
     val railGroup = RailGroupData.railGroupList.find { it.uuid == uuid }
     if (railGroup == null) {
         respond(HttpStatusCode.NotFound)

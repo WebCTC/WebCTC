@@ -29,12 +29,12 @@ import kotlin.time.Duration.Companion.seconds
 val interval = 3.seconds
 
 val MapView = FC {
-    val railList by useListDataWithWebsocket<LargeRailData>("/api/rails/", "/api/rails/railsocket") { a, b ->
+    val railList by useListDataWithWebsocket<LargeRailData>("/api/rails", "/api/rails/ws") { a, b ->
         a.pos == b.pos
     }
-    val signalList by useIntervalListData<SignalData>("api/signals/", interval)
-    val formationList by useIntervalListData<FormationData>("api/formations/", interval)
-    val waypointList by useListData<WayPoint>("api/waypoints/")
+    val signalList by useIntervalListData<SignalData>("api/signals", interval)
+    val formationList by useIntervalListData<FormationData>("api/formations", interval)
+    val waypointList by useListData<WayPoint>("api/waypoints")
 
     var panzoomInstance by useState<dynamic>(null)
 

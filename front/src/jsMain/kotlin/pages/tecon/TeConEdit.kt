@@ -23,9 +23,9 @@ import utils.useListData
 import web.cssom.*
 
 val TeConEdit = FC {
-    val railList by useListData<LargeRailData>("/api/rails/")
-    val signalList by useListData<SignalData>("/api/signals/")
-    val railGroups by useListData<RailGroup>("/api/railgroups/")
+    val railList by useListData<LargeRailData>("/api/rails")
+    val signalList by useListData<SignalData>("/api/signals")
+    val railGroups by useListData<RailGroup>("/api/railgroups")
     var selectedRail by useState<PosInt>()
     var activeRailGroupUUID by useState<UUID>()
     val activeRailGroup = useMemo(railGroups, activeRailGroupUUID) {

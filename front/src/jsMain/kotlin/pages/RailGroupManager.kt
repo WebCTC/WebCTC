@@ -33,10 +33,10 @@ import web.cssom.*
 
 
 val RailGroupManager = FC {
-    val railList by useListData<LargeRailData>("/api/rails/")
-    val signalList by useListData<SignalData>("/api/signals/")
-    val waypointList by useListData<WayPoint>("/api/waypoints/")
-    val (railGroups, setRailGroups) = useListData<RailGroup>("/api/railgroups/")
+    val railList by useListData<LargeRailData>("/api/rails")
+    val signalList by useListData<SignalData>("/api/signals")
+    val waypointList by useListData<WayPoint>("/api/waypoints")
+    val (railGroups, setRailGroups) = useListData<RailGroup>("/api/railgroups")
     var selectedRails by useState<Collection<PosInt>>(setOf())
 
     var isShiftKeyDown by useState(false)
@@ -47,7 +47,7 @@ val RailGroupManager = FC {
 
     val createRailGroup = {
         MainScope().launch {
-            val railGroup: RailGroup = client.post("/api/railgroups/create").body()
+            val railGroup: RailGroup = client.post("/api/railgroups").body()
             setRailGroups {
                 it.toMutableList().apply {
                     add(railGroup)
@@ -58,9 +58,7 @@ val RailGroupManager = FC {
 
     val deleteRailGroup = { uuid: UUID ->
         MainScope().launch {
-            client.post("/api/railgroups/delete") {
-                parameter("uuid", uuid)
-            }
+            client.delete("/api/railgroups/$uuid")
             setRailGroups {
                 it.toMutableList().apply {
                     removeAll { it.uuid == uuid }

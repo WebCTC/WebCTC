@@ -46,9 +46,9 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
 
         val changedWayPoint = WayPoint(waypoint.identifyName, name, pos, range)
 
+        val id = waypoint.identifyName
         MainScope().launch {
-            val response: WayPoint = client.post("/api/waypoints/update") {
-                parameter("id", waypoint.identifyName)
+            val response: WayPoint = client.put("/api/waypoints/$id") {
                 contentType(ContentType.Application.Json)
                 setBody(changedWayPoint)
             }.body()
@@ -60,9 +60,7 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
 
     val deleteWayPoint = { id: String ->
         MainScope().launch {
-            client.post("/api/waypoints/delete") {
-                parameter("id", id)
-            }
+            client.delete("/api/waypoints/$id")
             it.deleteWayPoint(id)
         }
     }

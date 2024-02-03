@@ -17,12 +17,12 @@ import org.webctc.router.WebCTCRouter
 class FormationsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
-        get("/") {
+        get {
             call.respond(getServerFormationManager().formations.values.mapNotNull { it.toData() })
         }
         get("/{FormationID}") {
             val formationId = call.parameters["FormationID"]!!.toLong()
-            val formation = this@FormationsRouter.getServerFormationManager().getFormation(formationId)
+            val formation = this@FormationsRouter.getFormation(formationId)
 
             if (formation == null) {
                 call.respond(HttpStatusCode.NotFound)
@@ -32,7 +32,7 @@ class FormationsRouter : WebCTCRouter() {
         }
         get("/{FormationID}/trains") {
             val formationId = call.parameters["FormationID"]!!.toLong()
-            val formation = getServerFormationManager().getFormation(formationId)
+            val formation = this@FormationsRouter.getFormation(formationId)
 
             val trains = formation?.entries?.mapNotNull { it.train.toData() }
 
@@ -48,6 +48,10 @@ class FormationsRouter : WebCTCRouter() {
         return CommonProxy::class.java.getDeclaredField("fm")
             .apply { isAccessible = true }
             .get(RTMCore.proxy) as FormationManager
+    }
+
+    private fun getFormation(formationId: Long): Formation? {
+        return getServerFormationManager().getFormation(formationId)
     }
 }
 

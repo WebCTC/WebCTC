@@ -19,9 +19,9 @@ import utils.useListData
 import web.cssom.*
 
 val WayPointEditor = FC {
-    val railList by useListData<LargeRailData>("/api/rails/")
-    val signalList by useListData<SignalData>("/api/signals/")
-    var waypointList by useListData<WayPoint>("/api/waypoints/")
+    val railList by useListData<LargeRailData>("/api/rails")
+    val signalList by useListData<SignalData>("/api/signals")
+    var waypointList by useListData<WayPoint>("/api/waypoints")
 
     CssBaseline {}
 
