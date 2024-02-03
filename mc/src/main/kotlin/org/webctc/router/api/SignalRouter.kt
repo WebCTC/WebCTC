@@ -16,11 +16,9 @@ import org.webctc.router.WebCTCRouter
 class SignalRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
         get("/") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             this.call.respond(SignalCacheData.signalMapCache.values)
         }
         get("/signal") {
-            this.call.response.header(HttpHeaders.AccessControlAllowOrigin, "*")
             val x = this.call.request.queryParameters["x"]?.toIntOrNull()
             val y = this.call.request.queryParameters["y"]?.toIntOrNull()
             val z = this.call.request.queryParameters["z"]?.toIntOrNull()
