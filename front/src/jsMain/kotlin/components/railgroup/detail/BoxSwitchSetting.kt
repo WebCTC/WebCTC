@@ -9,6 +9,7 @@ import org.webctc.common.types.railgroup.SettingEntry
 import org.webctc.common.types.railgroup.SwitchSetting
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 import react.dom.events.ChangeEvent
 import react.dom.onChange
@@ -96,6 +97,7 @@ val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                                         sx {
                                             flexGrow = number(1.0)
                                         }
+                                        label = ReactNode("Key")
                                         size = Size.small
                                         value = entry.key
                                         onChange = { formEvent ->
@@ -110,11 +112,16 @@ val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                                             )
                                         }
                                     }
-                                    ArrowRight {}
+                                    ArrowRight {
+                                        sx {
+                                            marginBlock = 8.px
+                                        }
+                                    }
                                     Button {
-                                        +entry.value.toString()
+                                        +(if (entry.value) "R" else "N")
                                         size = Size.small
                                         variant = ButtonVariant.outlined
+                                        color = if (entry.value) ButtonColor.error else ButtonColor.success
                                         onClick = { _ ->
                                             updateSwitchSetting(
                                                 switchSetting.copy(
