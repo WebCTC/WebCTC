@@ -13,6 +13,7 @@ import react.ReactNode
 import react.create
 import react.dom.events.ChangeEvent
 import react.dom.onChange
+import utils.setNew
 import web.cssom.*
 import web.html.HTMLInputElement
 
@@ -47,7 +48,8 @@ val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                 title = "Switch Rs Pos"
                 posList = rsPos
                 updatePosList = {
-                    updateSwitchSetting(switchSetting.copy(switchRsPos = it))
+                    switchSetting.copy(switchRsPos = it)
+                        .also(updateSwitchSetting)
                 }
                 wsPath = "/api/railgroups/ws/block"
             }
@@ -63,11 +65,8 @@ val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                         +"Add"
                         variant = ButtonVariant.outlined
                         onClick = {
-                            updateSwitchSetting(
-                                switchSetting.copy(
-                                    settingMap = settingMap + SettingEntry()
-                                )
-                            )
+                            switchSetting.copy(settingMap = settingMap + SettingEntry())
+                                .also(updateSwitchSetting)
                         }
                     }
                 }
@@ -81,8 +80,8 @@ val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                                 secondaryAction = IconButton.create {
                                     Delete {}
                                     onClick = {
-                                        switchSetting.settingMap = settingMap - entry
-                                        updateSwitchSetting(switchSetting)
+                                        switchSetting.copy(settingMap = settingMap - entry)
+                                            .also(updateSwitchSetting)
                                     }
                                 }
 
@@ -94,42 +93,28 @@ val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                                     }
 
                                     TextField {
-                                        sx {
-                                            flexGrow = number(1.0)
-                                        }
+                                        sx { flexGrow = number(1.0) }
                                         label = ReactNode("Key")
                                         size = Size.small
                                         value = entry.key
                                         onChange = { formEvent ->
                                             val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
                                             val newKey = event.target.value
-                                            updateSwitchSetting(
-                                                switchSetting.copy(
-                                                    settingMap = settingMap.toMutableList().apply {
-                                                        this[index] = entry.copy(key = newKey)
-                                                    }.toSet()
-                                                )
-                                            )
+                                            switchSetting.copy(
+                                                settingMap = settingMap.setNew(index, entry.copy(key = newKey))
+                                            ).also(updateSwitchSetting)
                                         }
                                     }
-                                    ArrowRight {
-                                        sx {
-                                            marginBlock = 8.px
-                                        }
-                                    }
+                                    ArrowRight { sx { marginBlock = 8.px } }
                                     Button {
                                         +(if (entry.value) "R" else "N")
                                         size = Size.small
                                         variant = ButtonVariant.outlined
                                         color = if (entry.value) ButtonColor.error else ButtonColor.success
                                         onClick = { _ ->
-                                            updateSwitchSetting(
-                                                switchSetting.copy(
-                                                    settingMap = settingMap.toMutableList().apply {
-                                                        this[index] = entry.copy(value = !entry.value)
-                                                    }.toSet()
-                                                )
-                                            )
+                                            switchSetting.copy(
+                                                settingMap = settingMap.setNew(index, entry.copy(value = !entry.value))
+                                            ).also(updateSwitchSetting)
                                         }
                                     }
                                 }

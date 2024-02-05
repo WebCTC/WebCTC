@@ -16,7 +16,7 @@ import web.timers.setInterval
 import kotlin.time.Duration
 
 inline fun <reified R : Any> useData(url: String?): StateInstance<R?> {
-    val stateInstance = useState<R?>(null)
+    val stateInstance = useState<R>()
     val (data, setData) = stateInstance
     useEffect(url) {
         if (url.isNullOrEmpty()) {

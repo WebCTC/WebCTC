@@ -15,6 +15,8 @@ import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.waypoint.WayPoint
 import react.FC
 import react.dom.svg.ReactSVG.g
+import utils.removeAtNew
+import utils.setNew
 import utils.useListData
 import web.cssom.*
 
@@ -62,22 +64,14 @@ val WayPointEditor = FC {
                             height = 100.pct
                             overflow = Auto.auto
                         }
-                        waypointList.forEach {
+                        waypointList.forEachIndexed { index, wayPoint ->
                             AccordionWayPoint {
-                                waypoint = it
+                                waypoint = wayPoint
                                 updateWayPoint = {
-                                    waypointList
-                                        .indexOfFirst { w -> w.identifyName == it.identifyName }
-                                        .takeIf { it != -1 }
-                                        ?.let { index -> waypointList.toMutableList().apply { set(index, it) } }
-                                        ?.let { waypointList = it }
+                                    waypointList = waypointList.setNew(index, it)
                                 }
                                 deleteWayPoint = { id ->
-                                    waypointList
-                                        .indexOfFirst { w -> w.identifyName == id }
-                                        .takeIf { it != -1 }
-                                        ?.let { waypointList.toMutableList().apply { removeAt(it) } }
-                                        ?.let { waypointList = it }
+                                    waypointList = waypointList.removeAtNew(index)
                                 }
                             }
                         }

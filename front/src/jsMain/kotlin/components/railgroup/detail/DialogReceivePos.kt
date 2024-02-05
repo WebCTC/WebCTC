@@ -13,6 +13,7 @@ import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import react.*
+import utils.removeAtNew
 import web.cssom.px
 
 external interface DialogReceivePosProps : Props {
@@ -33,7 +34,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
     val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
     val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
 
-    val (data, setData) = useState(listOf<PosInt>())
+    var data by useState(listOf<PosInt>())
     var session by useState<WebSocketSession?>(null)
 
     useEffect(open) {
@@ -48,7 +49,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
                 session = this
                 while (true) {
                     val received = receiveDeserialized<PosInt>()
-                    setData { it + received }
+                    data += received
                 }
             }
         }
@@ -65,15 +66,14 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
         DialogContent {
             List {
                 disablePadding = true
-                data.forEach { pos ->
+                data.forEachIndexed { index, pos ->
                     ListItem {
                         sx { paddingRight = 72.px }
                         disablePadding = true
                         secondaryAction = IconButton.create {
                             Delete {}
-                            onClick = { setData { it - pos } }
+                            onClick = { data = data.removeAtNew(index) }
                         }
-
                         ListItemPosInt {
                             this.pos = pos
                         }

@@ -10,6 +10,8 @@ import org.webctc.common.types.railgroup.PosIntWithKey
 import react.*
 import react.dom.events.ChangeEvent
 import react.dom.onChange
+import utils.removeAtNew
+import utils.setNew
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.px
@@ -17,13 +19,15 @@ import web.html.HTMLInputElement
 
 external interface PosIntWithKeyListProps : Props {
     var title: String
-    var stateInstance: StateInstance<Set<PosIntWithKey>>
+    var posList: Set<PosIntWithKey>
+    var updatePosList: (Set<PosIntWithKey>) -> Unit
     var wsPath: String
 }
 
 val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
     val title = props.title
-    val (list, setter) = props.stateInstance
+    val list = props.posList
+    val setter = props.updatePosList
     val wsPath = props.wsPath
 
     var open by useState<UUID?> { null }
@@ -49,7 +53,7 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
                 Button {
                     +"Add"
                     variant = ButtonVariant.outlined
-                    onClick = { setter { it + PosIntWithKey.ZERO } }
+                    onClick = { (list + PosIntWithKey.ZERO).also(setter) }
                 }
             }
         }
@@ -62,17 +66,15 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
                         disablePadding = true
                         secondaryAction = IconButton.create {
                             Delete {}
-                            onClick = { setter { it - pos } }
+                            onClick = {
+                                list.removeAtNew(index).also(setter)
+                            }
                         }
 
                         ListItemPosIntWithKey {
                             this.pos = pos
-                            this.onChange = { new ->
-                                setter {
-                                    it.toMutableList()
-                                        .apply { this[index] = new }
-                                        .toMutableSet()
-                                }
+                            this.onChange = {
+                                list.setNew(index, it).also(setter)
                             }
                         }
                     }
@@ -85,9 +87,9 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
         this.title = title
         this.wsPath = wsPath
         this.uuid = open
-        this.onSave = { list ->
+        this.onSave = { it ->
             open = null
-            setter { it + list.map(::PosIntWithKey) }
+            setter(list + it.map(::PosIntWithKey))
         }
         this.key = open?.toString()
     }
@@ -95,7 +97,7 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
 
 external interface ListItemPosIntWithKeyProps : Props {
     var pos: PosIntWithKey
-    var onChange: ((PosIntWithKey) -> Unit)?
+    var onChange: ((PosIntWithKey) -> Unit)
 }
 
 val ListItemPosIntWithKey = FC<ListItemPosIntWithKeyProps> {
@@ -111,17 +113,17 @@ val ListItemPosIntWithKey = FC<ListItemPosIntWithKeyProps> {
             TextFieldPosInt {
                 this.pos = pos.toPosInt()
                 this.prop = it
-                this.onChange = { new -> onChange?.let { it(PosIntWithKey(new)) } }
+                this.onChange = { new -> PosIntWithKey(new).also(onChange) }
             }
         }
         TextField {
             size = Size.small
             label = ReactNode("Key")
-            value = pos.key ?: ""
+            value = pos.key
             this.onChange = { formEvent ->
                 val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
                 val new = event.target.value
-                onChange?.let { it(PosIntWithKey(pos.x, pos.y, pos.z, new)) }
+                PosIntWithKey(pos.x, pos.y, pos.z, new).also(onChange)
             }
         }
     }

@@ -4,19 +4,26 @@ import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
-import react.*
+import react.FC
+import react.Props
+import react.ReactNode
+import react.create
+import utils.removeAtNew
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.px
 
 external interface BoxRailListProps : Props {
-    var railsStateInstance: StateInstance<Set<PosInt>>
+    var rails: Set<PosInt>
+    var updateRails: (Set<PosInt>) -> Unit
     var selectedRails: Collection<PosInt>
-    var setHoveringRail: StateSetter<PosInt?>
+    var hoveringRail: PosInt?
+    var setHoveringRail: (PosInt?) -> Unit
 }
 
 val BoxRailList = FC<BoxRailListProps> { props ->
-    val (rails, setRails) = props.railsStateInstance
+    val rails = props.rails
+    val updateRails = props.updateRails
     val selectedRails = props.selectedRails
     val setHoveringRail = props.setHoveringRail
 
@@ -31,20 +38,20 @@ val BoxRailList = FC<BoxRailListProps> { props ->
             Button {
                 +"Add"
                 variant = ButtonVariant.outlined
-                onClick = {
-                    setRails { it + selectedRails }
-                }
+                onClick = { (rails + selectedRails).also(updateRails) }
             }
         }
         Paper {
             List {
                 disablePadding = true
-                rails.forEach { pos ->
+                rails.forEachIndexed { index, pos ->
                     ListItem {
                         disablePadding = true
                         secondaryAction = IconButton.create {
                             Delete {}
-                            onClick = { setRails { it - pos } }
+                            onClick = {
+                                rails.removeAtNew(index).also(updateRails)
+                            }
                         }
                         ListItemButton {
                             ListItemText {

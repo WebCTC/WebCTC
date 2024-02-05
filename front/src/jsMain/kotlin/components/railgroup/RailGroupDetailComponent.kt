@@ -31,29 +31,28 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
     val deleteRailGroup = props.deleteRailGroup
     val selectedRails = props.selectedRails
 
-    val nameStateInstance = useState(rg.name)
-    val (name) = nameStateInstance
-
-    val railPosStateInstance = useState(rg.railPosList)
-    val (railPoss) = railPosStateInstance
-
-    val rsPossStateInstance = useState(rg.rsPosList)
-    val (rsPoss) = rsPossStateInstance
-
-    var displayPoss by useState(rg.displayPosList)
-
+    var name by useState(rg.name)
+    var rails by useState(rg.railPosList)
+    var rsList by useState(rg.rsPosList)
+    var displayList by useState(rg.displayPosList)
     var nextRailGroups by useState(rg.nextRailGroupList)
-
     var switchSetting by useState(rg.switchSetting)
-
-    val (hoveringRail, setHoveringRail) = useState<PosInt?>(null)
+    var hoveringRail by useState<PosInt?>(null)
 
     var sending by useState(false)
 
     val sendRailGroup = {
         sending = true
 
-        val changedRailGroup = RailGroup(rg.uuid, name, railPoss, rsPoss, nextRailGroups, displayPoss, switchSetting)
+        val changedRailGroup = RailGroup(
+            rg.uuid,
+            name,
+            rails,
+            rsList,
+            nextRailGroups,
+            displayList,
+            switchSetting
+        )
 
         MainScope().launch {
             client.put("/api/railgroups/${rg.uuid}") {
@@ -77,26 +76,32 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             gap = 16.px
         }
 
-        BoxRgName { stateInstance = nameStateInstance }
+        BoxRgName {
+            this.name = name
+            this.onChange = { name = it }
+        }
 
         BoxRgUUID { uuid = rg.uuid }
 
         BoxRailList {
-            this.railsStateInstance = railPosStateInstance
+            this.rails = rails
+            this.updateRails = { rails = it }
             this.selectedRails = selectedRails
-            this.setHoveringRail = setHoveringRail
+            this.hoveringRail = hoveringRail
+            this.setHoveringRail = { hoveringRail = it }
         }
 
         BoxPosIntWithKeyList {
             title = "RedStone Pos"
-            stateInstance = rsPossStateInstance
+            posList = rsList
+            updatePosList = { rsList = it }
             wsPath = "/api/railgroups/ws/block"
         }
 
         BoxPosIntList {
             title = "Display Pos"
-            posList = displayPoss
-            updatePosList = { displayPoss = it }
+            posList = displayList
+            updatePosList = { displayList = it }
             wsPath = "/api/railgroups/ws/signal"
         }
 
@@ -151,10 +156,10 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                 +"Save"
                 onClick = { sendRailGroup() }
                 disabled = rg.name == name &&
-                        rg.railPosList == railPoss &&
-                        rg.rsPosList == rsPoss &&
+                        rg.railPosList == rails &&
+                        rg.rsPosList == rsList &&
                         rg.nextRailGroupList == nextRailGroups &&
-                        rg.displayPosList == displayPoss &&
+                        rg.displayPosList == displayList &&
                         rg.switchSetting == switchSetting || sending
                 variant = ButtonVariant.contained
             }
@@ -170,7 +175,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
 
     Global {
         styles {
-            railPoss.forEach {
+            rails.forEach {
                 "g#rail\\,${it.x}\\,${it.y}\\,${it.z}" {
                     set(CustomPropertyName("stroke"), "orange")
                 }

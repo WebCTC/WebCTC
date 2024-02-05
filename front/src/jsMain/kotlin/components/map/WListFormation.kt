@@ -10,6 +10,7 @@ import org.webctc.common.types.trains.FormationData
 import org.webctc.common.types.waypoint.WayPoint
 import react.FC
 import react.ReactNode
+import utils.createUniquePairList
 import web.cssom.Color
 
 
@@ -83,12 +84,6 @@ fun getLocationString(list: List<WayPoint>, pos: PosDouble): String {
             .minByOrNull { (a, b) -> pos.distanceToSegment(a.pos, b.pos) }
             ?.let { (a, b) -> "${a.calculatedDisplayName(pos)} - ${b.calculatedDisplayName(pos)}" }
             ?: ""
-    }
-}
-
-fun <A> List<A>.createUniquePairList(): List<Pair<A, A>> {
-    return this.flatMapIndexed { index, a ->
-        this.subList(index + 1, this.size).map { b -> Pair(a, b) }
     }
 }
 

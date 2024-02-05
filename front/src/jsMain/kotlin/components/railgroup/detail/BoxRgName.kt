@@ -5,27 +5,25 @@ import mui.material.OutlinedInput
 import mui.material.Paper
 import react.FC
 import react.Props
-import react.StateInstance
 import react.dom.events.ChangeEvent
 import web.html.HTMLInputElement
 
 external interface BoxRgNameProps : Props {
-    var stateInstance: StateInstance<String>
+    var name: String
+    var onChange: (String) -> Unit
 }
 
 val BoxRgName = FC<BoxRgNameProps> { props ->
-    val (text, setText) = props.stateInstance
-
     Box {
         +"Name"
         Paper {
             OutlinedInput {
                 fullWidth = true
-                value = text
+                value = props.name
                 onChange = {
                     val event = it.unsafeCast<ChangeEvent<HTMLInputElement>>()
                     val target = event.target
-                    setText(target.value)
+                    props.onChange(target.value)
                 }
             }
         }
