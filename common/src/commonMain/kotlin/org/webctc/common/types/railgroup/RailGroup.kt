@@ -13,7 +13,7 @@ data class RailGroup(
     var rsPosList: Set<PosIntWithKey> = setOf(),
     var nextRailGroupList: Set<UUID> = setOf(),
     var displayPosList: Set<PosInt> = setOf(),
-    var switchSetting: SwitchSetting = SwitchSetting(),
+    var switchSettings: Set<SwitchSetting> = setOf(),
     var signalLevel: Int = 0
 ) {
     fun updateBy(other: RailGroup) {
@@ -22,7 +22,7 @@ data class RailGroup(
         this.rsPosList = other.rsPosList
         this.nextRailGroupList = other.nextRailGroupList
         this.displayPosList = other.displayPosList
-        this.switchSetting = other.switchSetting
+        this.switchSettings = other.switchSettings
     }
 
     override fun equals(other: Any?): Boolean = other is RailGroup && this.uuid == other.uuid

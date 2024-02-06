@@ -36,7 +36,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
     var rsList by useState(rg.rsPosList)
     var displayList by useState(rg.displayPosList)
     var nextRailGroups by useState(rg.nextRailGroupList)
-    var switchSetting by useState(rg.switchSetting)
+    var switchSettings by useState(rg.switchSettings)
     var hoveringRail by useState<PosInt?>(null)
 
     var sending by useState(false)
@@ -51,7 +51,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             rsList,
             nextRailGroups,
             displayList,
-            switchSetting
+            switchSettings
         )
 
         MainScope().launch {
@@ -142,9 +142,9 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             }
         }
 
-        BoxSwitchSetting {
-            this.switchSetting = switchSetting
-            updateSwitchSetting = { switchSetting = it }
+        BoxSwitchSettings {
+            this.switchSettings = switchSettings
+            updateSwitchSettings = { switchSettings = it }
         }
 
         Box {
@@ -160,7 +160,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                         rg.rsPosList == rsList &&
                         rg.nextRailGroupList == nextRailGroups &&
                         rg.displayPosList == displayList &&
-                        rg.switchSetting == switchSetting || sending
+                        rg.switchSettings == switchSettings || sending
                 variant = ButtonVariant.contained
             }
 

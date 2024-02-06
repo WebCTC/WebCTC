@@ -2,6 +2,7 @@ package components.railgroup.detail
 
 import mui.icons.material.ArrowRight
 import mui.icons.material.Delete
+import mui.icons.material.ExpandMore
 import mui.material.*
 import mui.material.Size
 import mui.system.sx
@@ -13,36 +14,89 @@ import react.ReactNode
 import react.create
 import react.dom.events.ChangeEvent
 import react.dom.onChange
+import utils.removeAtNew
 import utils.setNew
 import web.cssom.*
 import web.html.HTMLInputElement
 
+external interface BoxSwitchSettingsProps : Props {
+    var switchSettings: Set<SwitchSetting>
+    var updateSwitchSettings: (Set<SwitchSetting>) -> Unit
+}
+
+val BoxSwitchSettings = FC<BoxSwitchSettingsProps> { props ->
+    val switchSettings = props.switchSettings
+    val updateSwitchSettings = props.updateSwitchSettings
+
+    Box {
+        Box {
+            sx {
+                display = Display.flex
+                justifyContent = JustifyContent.spaceBetween
+                paddingBottom = 8.px
+            }
+            +"Switch Setting"
+
+            Button {
+                +"Add"
+                variant = ButtonVariant.outlined
+                onClick = { (switchSettings + SwitchSetting()).also(updateSwitchSettings) }
+            }
+        }
+
+        Paper {
+            switchSettings.forEachIndexed { index, switchSetting ->
+                AccordionSwitchSetting {
+                    this.switchSetting = switchSetting
+                    this.updateSwitchSetting = { switchSettings.setNew(index, it).also(updateSwitchSettings) }
+                    this.deleteSwitchSetting = { switchSettings.removeAtNew(index).also(updateSwitchSettings) }
+                }
+            }
+        }
+    }
+}
+
 external interface BoxSwitchSettingProps : Props {
     var switchSetting: SwitchSetting
     var updateSwitchSetting: (SwitchSetting) -> Unit
+    var deleteSwitchSetting: () -> Unit
 }
 
-val BoxSwitchSetting = FC<BoxSwitchSettingProps> { props ->
+val AccordionSwitchSetting = FC<BoxSwitchSettingProps> { props ->
     val switchSetting = props.switchSetting
+    val updateSwitchSetting = props.updateSwitchSetting
     val rsPos = switchSetting.switchRsPos
     val settingMap = switchSetting.settingMap
-    val updateSwitchSetting = props.updateSwitchSetting
 
-    Box {
-        sx {
-            display = Display.flex
-            flexDirection = FlexDirection.column
-            gap = 8.px
+    Accordion {
+        AccordionSummary {
+            expandIcon = ExpandMore.create {}
+            +switchSetting.name
+
+            IconButton {
+                Delete {}
+                onClick = { props.deleteSwitchSetting() }
+            }
         }
-        Box {
-            +"Switch Setting"
-        }
-        Box {
+        AccordionDetails {
             sx {
-                paddingLeft = 8.px
                 display = Display.flex
                 flexDirection = FlexDirection.column
                 gap = 8.px
+            }
+            Box {
+                TextField {
+                    label = ReactNode("Name")
+                    fullWidth = true
+                    size = Size.small
+                    value = switchSetting.name
+                    onChange = { formEvent ->
+                        val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                        val newName = event.target.value
+                        switchSetting.copy(name = newName)
+                            .also(updateSwitchSetting)
+                    }
+                }
             }
             BoxPosIntList {
                 title = "Switch Rs Pos"

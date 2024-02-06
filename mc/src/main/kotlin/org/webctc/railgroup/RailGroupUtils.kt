@@ -64,7 +64,9 @@ fun RailGroup.writeToNBT(): NBTTagCompound {
         .toNBTTagList()
         .let { tag.setTag("displayPosTagList", it) }
 
-    tag.setTag("switchSetting", switchSetting.writeToNBT())
+    switchSettings.map(SwitchSetting::writeToNBT)
+        .toNBTTagList()
+        .let { tag.setTag("switchSettingList", it) }
 
     return tag
 }
@@ -93,7 +95,10 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
         .map(PosInt::readFromNBT)
         .toMutableSet()
 
-    val switchSetting = SwitchSetting.readFromNBT(nbt.getCompoundTag("switchSetting"))
+    val switchSettings = nbt.getTagList("switchSettingList", 10)
+        .toList()
+        .map(SwitchSetting::readFromNBT)
+        .toMutableSet()
 
     val railGroup = RailGroup(
         uuid,
@@ -102,7 +107,7 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
         rsPosList,
         nextRailGroupList,
         displayPosList,
-        switchSetting
+        switchSettings
     )
 
     return railGroup
@@ -117,6 +122,8 @@ fun SwitchSetting.writeToNBT(): NBTTagCompound {
 }
 
 fun SwitchSetting.Companion.readFromNBT(nbt: NBTTagCompound): SwitchSetting {
+    val name = nbt.getString("name")
+
     val settingMap = nbt.getTagList("settingMap", 10)
         .toList()
         .map(SettingEntry::readFromNBT)
@@ -127,7 +134,7 @@ fun SwitchSetting.Companion.readFromNBT(nbt: NBTTagCompound): SwitchSetting {
         .map(PosInt::readFromNBT)
         .toSet()
 
-    return SwitchSetting(switchRsPos, settingMap)
+    return SwitchSetting(name, switchRsPos, settingMap)
 }
 
 fun SettingEntry.writeToNBT(): NBTTagCompound {
@@ -160,18 +167,19 @@ fun RailGroup.update() {
         .forEach { it.setElectricity(it.xCoord, it.yCoord, it.zCoord, this.signalLevel) }
 
     val reservedKey = RailGroupData.getReservedKey(this.uuid)
-    if (this.switchSetting.settingMap.any { reservedKey == it.key }) {
-        this.switchSetting.settingMap.find { reservedKey == it.key }?.let {
-            val world = MinecraftServer.getServer().entityWorld
-            val block = if (it.value) Blocks.redstone_block else Blocks.stained_glass
-            this.switchSetting.switchRsPos.forEach {
+    this.switchSettings.forEach { switchSetting ->
+        if (switchSetting.settingMap.any { reservedKey == it.key }) {
+            switchSetting.settingMap.find { reservedKey == it.key }?.let {
+                val block = if (it.value) Blocks.redstone_block else Blocks.stained_glass
+                switchSetting.switchRsPos.forEach {
+                    world.setBlock(it.x, it.y, it.z, block, 14, 3)
+                }
+            }
+        } else if (isTrainOnRail) {
+            switchSetting.switchRsPos.forEach {
+                val block = world.getBlock(it.x, it.y, it.z)
                 world.setBlock(it.x, it.y, it.z, block, 14, 3)
             }
-        }
-    } else if (isTrainOnRail) {
-        this.switchSetting.switchRsPos.forEach {
-            val block = world.getBlock(it.x, it.y, it.z)
-            world.setBlock(it.x, it.y, it.z, block, 14, 3)
         }
     }
 
