@@ -22,12 +22,9 @@ import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.waypoint.WayPoint
-import react.FC
-import react.ReactNode
+import react.*
 import react.dom.html.ReactHTML.h1
 import react.dom.svg.ReactSVG.g
-import react.useEffectOnce
-import react.useState
 import utils.useListData
 import web.cssom.*
 
@@ -37,13 +34,15 @@ val RailGroupManager = FC {
     val signalList by useListData<SignalData>("/api/signals")
     val waypointList by useListData<WayPoint>("/api/waypoints")
     val (railGroups, setRailGroups) = useListData<RailGroup>("/api/railgroups")
-    var selectedRails by useState<Collection<PosInt>>(setOf())
+    var selectedRails by useState<Set<PosInt>>(setOf())
 
     var isShiftKeyDown by useState(false)
 
     var activeRailGroupUUID by useState<UUID?>(null)
 
-    val activeRailGroup = railGroups.find { it.uuid == activeRailGroupUUID }
+    val activeRailGroup = useMemo(
+        activeRailGroupUUID, railGroups
+    ) { railGroups.find { it.uuid == activeRailGroupUUID } }
 
     val createRailGroup = {
         MainScope().launch {
@@ -53,6 +52,7 @@ val RailGroupManager = FC {
                     add(railGroup)
                 }
             }
+            activeRailGroupUUID = railGroup.uuid
         }
     }
 
