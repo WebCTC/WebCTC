@@ -115,6 +115,7 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
 
 fun SwitchSetting.writeToNBT(): NBTTagCompound {
     val tag = NBTTagCompound()
+    tag.setString("name", name)
     tag.setTag("settingMap", settingMap.map(SettingEntry::writeToNBT).toNBTTagList())
     tag.setTag("switchRsPos", switchRsPos.map(PosInt::writeToNBT).toNBTTagList())
 
