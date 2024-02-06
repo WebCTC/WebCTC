@@ -74,6 +74,10 @@ val AccordionSwitchSetting = FC<BoxSwitchSettingProps> { props ->
             +switchSetting.name
 
             IconButton {
+                sx {
+                    marginBlock = -8.px
+                    marginLeft = Auto.auto
+                }
                 Delete {}
                 onClick = { props.deleteSwitchSetting() }
             }
