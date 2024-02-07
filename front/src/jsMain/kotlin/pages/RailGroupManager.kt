@@ -23,10 +23,13 @@ import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.waypoint.WayPoint
 import react.*
+import react.dom.events.ChangeEvent
 import react.dom.html.ReactHTML.h1
+import react.dom.onChange
 import react.dom.svg.ReactSVG.g
 import utils.useListData
 import web.cssom.*
+import web.html.HTMLInputElement
 
 
 val RailGroupManager = FC {
@@ -34,6 +37,11 @@ val RailGroupManager = FC {
     val signalList by useListData<SignalData>("/api/signals")
     val waypointList by useListData<WayPoint>("/api/waypoints")
     val (railGroups, setRailGroups) = useListData<RailGroup>("/api/railgroups")
+    var searchText by useState("")
+    val searchResult = useMemo(searchText, railGroups) {
+        railGroups.filter { it.name.contains(searchText, ignoreCase = true) }
+    }
+
     var selectedRails by useState<Set<PosInt>>(setOf())
 
     var isShiftKeyDown by useState(false)
@@ -134,11 +142,23 @@ val RailGroupManager = FC {
                     paddingInline = 16.px
                     display = Display.flex
                     flexDirection = FlexDirection.column
+                    gap = 8.px
                 }
                 h1 {
                     +"RailGroups"
                 }
 
+                Box {
+                    TextField {
+                        label = ReactNode("Name")
+                        this.onChange = { formEvent ->
+                            val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                            val target = event.target
+                            val value = target.value
+                            searchText = value
+                        }
+                    }
+                }
                 Box {
                     Button {
                         +"Create"
@@ -149,13 +169,12 @@ val RailGroupManager = FC {
                 Paper {
                     sx {
                         flex = number(1.0)
-                        marginBlock = 8.px
                         overflowY = Auto.auto
                     }
                     List {
                         dense = true
                         disablePadding = true
-                        railGroups.sortedBy { it.name }
+                        searchResult.sortedBy { it.name }
                             .forEach { rg ->
                                 ListItemButton {
                                     selected = rg.uuid == activeRailGroupUUID
