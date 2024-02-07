@@ -122,7 +122,11 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
 
         private fun RailGroupChain.lock() {
             this.chain.mapNotNull(::findRailGroup).forEach {
-                val frozenTime = if (it.hasSwitch() && lockList[it.uuid]?.key != this.key) 20 else 0
+                val hasSwitch = it.hasSwitch()
+                val isKeyEquals = lockList[it.uuid]?.key == this.key
+                val finishFrozen = isKeyEquals && lockList[it.uuid]?.frozenTime == 0
+                val frozenTime =
+                    if (hasSwitch) (if (isKeyEquals) lockList[it.uuid]!!.frozenTime else 20) else 0
                 lockList[it.uuid] = Lock(this.key, frozenTime)
             }
         }
