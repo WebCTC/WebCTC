@@ -71,6 +71,10 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             lockList -= uuid
         }
 
+        fun unsafeRelease(uuids: Array<UUID>) {
+            lockList -= uuids.toSet()
+        }
+
         fun isLocked(uuid: UUID, key: String): Boolean {
             return lockList[uuid]?.key == key
         }

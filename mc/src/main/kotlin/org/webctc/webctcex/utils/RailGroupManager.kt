@@ -31,6 +31,11 @@ class RailGroupManager {
         }
 
         @JvmStatic
+        fun unsafeRelease(uuids: Array<String>) {
+            RailGroupData.unsafeRelease(uuids.map(::UUID).toTypedArray())
+        }
+
+        @JvmStatic
         fun isReserved(uuid: String, key: String): Boolean {
             return RailGroupData.isReserved(UUID(uuid), key)
         }
