@@ -20,7 +20,8 @@ external interface DialogReceivePosProps : Props {
     var title: String
     var wsPath: String
     var uuid: UUID?
-    var onSave: (list: List<PosInt>) -> Unit
+    var onSave: (list: Set<PosInt>) -> Unit
+    var onClose: () -> Unit
 }
 
 val DialogReceivePos = FC<DialogReceivePosProps> { props ->
@@ -29,12 +30,13 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
     val uuid = props.uuid
     val open = uuid != null
     val onSave = props.onSave
+    val onClose = props.onClose
 
     val protocol = window.location.protocol
     val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
     val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
 
-    var data by useState(listOf<PosInt>())
+    var (data, setData) = useState(setOf<PosInt>())
     var session by useState<WebSocketSession?>(null)
 
     useEffect(open) {
@@ -49,7 +51,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
                 session = this
                 while (true) {
                     val received = receiveDeserialized<PosInt>()
-                    data += received
+                    setData { it + received }
                 }
             }
         }
@@ -62,6 +64,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
 
     Dialog {
         this.open = open
+        this.onClose = { _, _ -> onClose() }
         DialogTitle { +"Minecraft Click Handler($title)" }
         DialogContent {
             List {
@@ -72,7 +75,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
                         disablePadding = true
                         secondaryAction = IconButton.create {
                             Delete {}
-                            onClick = { data = data.removeAtNew(index) }
+                            onClick = { setData { it.removeAtNew(index) } }
                         }
                         ListItemPosInt {
                             this.pos = pos
@@ -85,6 +88,10 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
             Button {
                 +"Save"
                 onClick = { onSave(data) }
+            }
+            Button {
+                +"Close"
+                onClick = { onClose() }
             }
         }
     }

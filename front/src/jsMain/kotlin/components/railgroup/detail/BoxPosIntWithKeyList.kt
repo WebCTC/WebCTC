@@ -91,6 +91,9 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
             open = null
             setter(list + it.map(::PosIntWithKey))
         }
+        this.onClose = {
+            open = null
+        }
         this.key = open?.toString()
     }
 }
