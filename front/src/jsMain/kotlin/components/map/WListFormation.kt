@@ -81,7 +81,10 @@ fun getLocationString(list: List<WayPoint>, pos: PosDouble): String {
         list.createUniquePairList()
             .filter { (a, b) -> pos.isInsideSegment2D(a.pos, b.pos) }
             .filter { (a, b) -> pos.distanceToSegment(a.pos, b.pos) < a.pos.distanceTo(b.pos) }
-            .minByOrNull { (a, b) -> pos.distanceToSegment(a.pos, b.pos) }
+            .minByOrNull { (a, b) ->
+                a.pos.distanceTo(b.pos) + b.pos.distanceTo(pos) +
+                        pos.distanceToSegment(a.pos, b.pos)
+            }
             ?.let { (a, b) -> "${a.calculatedDisplayName(pos)} - ${b.calculatedDisplayName(pos)}" }
             ?: ""
     }
