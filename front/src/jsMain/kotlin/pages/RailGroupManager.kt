@@ -16,6 +16,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.uuid.UUID
 import mui.material.*
+import mui.material.Size
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.LargeRailData
@@ -151,6 +152,8 @@ val RailGroupManager = FC {
                 Box {
                     TextField {
                         label = ReactNode("Name")
+                        fullWidth = true
+                        size = Size.small
                         this.onChange = { formEvent ->
                             val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
                             val target = event.target
