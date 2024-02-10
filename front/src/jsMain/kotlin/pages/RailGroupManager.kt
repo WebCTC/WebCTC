@@ -116,7 +116,7 @@ val RailGroupManager = FC {
                                         clear()
                                     } else {
                                         if (!isShiftKeyDown) clear()
-                                        add(it.pos)
+                                        if (it.pos in this) remove(it.pos) else add(it.pos)
                                     }
                                 }
                             }
