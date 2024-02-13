@@ -22,9 +22,11 @@ import net.minecraftforge.event.world.BlockEvent
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.railgroup.RailGroupData
+import org.webctc.railgroup.RailGroupStateWS
 import org.webctc.railgroup.update
 import org.webctc.router.api.Connection
 import org.webctc.router.api.RailGroupRouter
+import org.webctc.signal.SignalStateWS
 import java.util.*
 
 class WebCTCEventHandler {
@@ -81,10 +83,12 @@ class WebCTCEventHandler {
             if (tickCount == 20) {
                 WebCTCCore.INSTANCE.railData.update()
                 WebCTCCore.INSTANCE.signalData.update()
+                SignalStateWS.sendAll()
                 tickCount = 0
             }
             RailGroupData.railGroupList.forEach { it.update() }
             RailGroupData.updateLocks()
+            RailGroupStateWS.sendAll()
         }
     }
 }

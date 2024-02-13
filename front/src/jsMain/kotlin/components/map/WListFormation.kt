@@ -4,14 +4,12 @@ import components.railgroup.detail.ListItemPosIntProps
 import mui.material.ListItemButton
 import mui.material.ListItemText
 import mui.material.Paper
-import mui.system.sx
 import org.webctc.common.types.PosDouble
 import org.webctc.common.types.trains.FormationData
 import org.webctc.common.types.waypoint.WayPoint
 import react.FC
 import react.ReactNode
 import utils.createUniquePairList
-import web.cssom.Color
 
 
 external interface ListItemFormationProps : ListItemPosIntProps {
@@ -28,9 +26,6 @@ val ListItemFormation = FC<ListItemFormationProps> {
     val selected = it.selected
 
     Paper {
-        sx {
-            backgroundColor = Color("white")
-        }
         ListItemButton {
             ListItemText {
                 val controlCarName = formation.controlCar?.name
@@ -82,8 +77,7 @@ fun getLocationString(list: List<WayPoint>, pos: PosDouble): String {
             .filter { (a, b) -> pos.isInsideSegment2D(a.pos, b.pos) }
             .filter { (a, b) -> pos.distanceToSegment(a.pos, b.pos) < a.pos.distanceTo(b.pos) }
             .minByOrNull { (a, b) ->
-                a.pos.distanceTo(b.pos) + b.pos.distanceTo(pos) +
-                        pos.distanceToSegment(a.pos, b.pos)
+                a.pos.distanceTo(pos) + b.pos.distanceTo(pos) + pos.distanceToSegment(a.pos, b.pos)
             }
             ?.let { (a, b) -> "${a.calculatedDisplayName(pos)} - ${b.calculatedDisplayName(pos)}" }
             ?: ""

@@ -75,12 +75,21 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             lockList -= uuids.toSet()
         }
 
+        fun isLocked(uuid: UUID): Boolean {
+            return lockList[uuid] != null
+        }
+
         fun isLocked(uuid: UUID, key: String): Boolean {
             return lockList[uuid]?.key == key
         }
 
         fun isLocked(uuids: Array<UUID>, key: String): Boolean {
             return uuids.all { isLocked(it, key) }
+        }
+
+        fun isReserved(uuid: UUID): Boolean {
+            val lock = lockList[uuid]
+            return lock != null && lock.frozenTime == 0 && !isConverting(uuid)
         }
 
         fun isReserved(uuid: UUID, key: String): Boolean {
@@ -92,9 +101,9 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             return uuids.all { isReserved(it, key) }
         }
 
-        private fun isConverting(uuid: UUID): Boolean {
+        fun isConverting(uuid: UUID): Boolean {
             return findRailGroup(uuid)?.let { rg ->
-                return rg.railPosList
+                rg.railPosList
                     .mapNotNull { RailCacheData.railMapCache[it] }
                     .any { it.converting }
             } ?: false

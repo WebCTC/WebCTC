@@ -12,11 +12,11 @@ import web.cssom.Display
 import web.cssom.px
 
 external interface ToggleButtonGroupEditModeProps : Props {
-    var onChange: (String) -> Unit
+    var onChange: (EditMode) -> Unit
 }
 
 val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
-    var editMode by useState("hand")
+    var editMode by useState(EditMode.HAND)
 
     Box {
         sx {
@@ -27,21 +27,21 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
             exclusive = true
             value = editMode
             onChange = { _, value ->
-                if (value is String) {
+                if (value is EditMode) {
                     editMode = value
                     it.onChange(value)
                 }
             }
             ToggleButton {
                 PanToolOutlined {}
-                value = "hand"
+                value = EditMode.HAND
             }
         }
         ToggleButtonGroup {
             exclusive = true
             value = editMode
             onChange = { _, value ->
-                if (value is String) {
+                if (value is EditMode) {
                     editMode = value
                     it.onChange(value)
                 }

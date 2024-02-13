@@ -82,6 +82,11 @@ val serviceList = listOf(
         "WayPointを編集することができます",
         "/p/waypoint",
     ),
+    Service(
+        "TeCon Editor",
+        "連動盤を閲覧・編集することができます",
+        "/p/tecons",
+    ),
 )
 
 val Account = FC {

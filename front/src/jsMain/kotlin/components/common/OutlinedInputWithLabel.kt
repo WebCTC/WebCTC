@@ -1,4 +1,4 @@
-package components.railgroup.detail
+package components.common
 
 import mui.material.Box
 import mui.material.OutlinedInput
@@ -8,12 +8,12 @@ import react.Props
 import react.dom.events.ChangeEvent
 import web.html.HTMLInputElement
 
-external interface BoxRgNameProps : Props {
+external interface OutlinedInputWithLabelProps : Props {
     var name: String
     var onChange: (String) -> Unit
 }
 
-val BoxRgName = FC<BoxRgNameProps> { props ->
+val OutlinedInputWithLabel = FC<OutlinedInputWithLabelProps> { props ->
     Box {
         +"Name"
         Paper {

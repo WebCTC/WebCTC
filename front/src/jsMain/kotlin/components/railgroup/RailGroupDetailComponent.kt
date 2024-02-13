@@ -1,6 +1,7 @@
 package components.railgroup
 
 import client
+import components.common.OutlinedInputWithLabel
 import components.railgroup.detail.*
 import emotion.react.Global
 import emotion.react.styles
@@ -9,14 +10,15 @@ import io.ktor.http.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.uuid.UUID
-import mui.icons.material.Delete
-import mui.material.*
+import mui.material.Box
+import mui.material.Button
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
 import react.FC
 import react.Props
-import react.create
 import react.useState
 import web.cssom.*
 
@@ -76,7 +78,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             gap = 16.px
         }
 
-        BoxRgName {
+        OutlinedInputWithLabel {
             this.name = name
             this.onChange = { name = it }
         }
@@ -105,41 +107,10 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             wsPath = "/api/railgroups/ws/signal"
         }
 
-        Box {
-            Box {
-                sx {
-                    display = Display.flex
-                    justifyContent = JustifyContent.spaceBetween
-                    paddingBottom = 8.px
-                }
-                +"Next RailGroups"
-                Button {
-                    +"Add"
-                    variant = ButtonVariant.outlined
-                    onClick = {
-                        nextRailGroups = nextRailGroups.toMutableSet().apply {
-                        }
-                    }
-                    disabled = true
-                }
-            }
-            Paper {
-                List {
-                    disablePadding = true
-                    nextRailGroups.forEach { uuid ->
-                        ListItem {
-                            secondaryAction = IconButton.create {
-                                Delete {}
-                                onClick = { nextRailGroups = nextRailGroups - uuid }
-                            }
-
-                            ListItemText {
-                                +uuid.toString()
-                            }
-                        }
-                    }
-                }
-            }
+        BoxRailGroupList {
+            title = "Next RailGroup"
+            railGroupList = nextRailGroups
+            updateRailGroupList = { nextRailGroups = it }
         }
 
         BoxSwitchSettings {

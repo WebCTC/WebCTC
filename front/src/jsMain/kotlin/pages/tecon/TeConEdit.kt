@@ -8,21 +8,32 @@ import components.tecon.TeConEditorViewComponent
 import emotion.react.Global
 import emotion.react.styles
 import kotlinx.uuid.UUID
+import mui.icons.material.ContentCopy
 import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.LargeRailData
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.signal.SignalData
-import react.FC
-import react.ReactNode
+import org.webctc.common.types.tecon.TeCon
+import react.*
 import react.dom.svg.ReactSVG.g
-import react.useMemo
-import react.useState
+import react.router.useNavigate
+import react.router.useParams
+import utils.useData
 import utils.useListData
 import web.cssom.*
+import web.navigator.navigator
 
 val TeConEdit = FC {
+    val params = useParams()
+    val uuid = params["uuid"] as String
+    val navigate = useNavigate()
+
+    val tecon by useData<TeCon>("/api/tecons/$uuid") {
+        navigate("/p/tecons")
+    }
+
     val railList by useListData<LargeRailData>("/api/rails")
     val signalList by useListData<SignalData>("/api/signals")
     val railGroups by useListData<RailGroup>("/api/railgroups")
@@ -64,11 +75,12 @@ val TeConEdit = FC {
                                     val pos = it.pos
                                     if (selectedRail == pos) {
                                         selectedRail = null
+                                        activeRailGroupUUID = null
                                     } else {
                                         selectedRail = pos
-                                        if (railGroups.count { pos in it.railPosList } == 1) {
-                                            activeRailGroupUUID = railGroups.find { pos in it.railPosList }!!.uuid
-                                        }
+                                        activeRailGroupUUID = if (railGroups.count { pos in it.railPosList } == 1) {
+                                            railGroups.find { pos in it.railPosList }!!.uuid
+                                        } else null
                                     }
                                 }
                             }
@@ -99,6 +111,7 @@ val TeConEdit = FC {
                             padding = 16.px
                         }
                         Paper {
+                            elevation = 0
                             sx {
                                 backgroundColor = Color("rgba(255,255,255,0.4)")
                                 height = 100.pct
@@ -112,13 +125,22 @@ val TeConEdit = FC {
                                     .sortedBy { it.name }
                                     .forEach { rg ->
                                         Paper {
-                                            sx { backgroundColor = Color("white") }
-                                            ListItemButton {
-                                                selected = rg.uuid == activeRailGroupUUID
-                                                onClick = { activeRailGroupUUID = rg.uuid }
-                                                ListItemText {
-                                                    primary = ReactNode(rg.name)
-                                                    secondary = ReactNode("${rg.railPosList.size} rails")
+                                            elevation = 0
+                                            sx { borderRadius = 0.px }
+                                            ListItem {
+                                                disableGutters = true
+                                                disablePadding = true
+                                                secondaryAction = IconButton.create {
+                                                    ContentCopy {}
+                                                    onClick = { navigator.clipboard.writeText(rg.uuid.toString()) }
+                                                }
+                                                ListItemButton {
+                                                    selected = rg.uuid == activeRailGroupUUID
+                                                    onClick = { activeRailGroupUUID = rg.uuid }
+                                                    ListItemText {
+                                                        primary = ReactNode(rg.name)
+                                                        secondary = ReactNode("${rg.railPosList.size} rails")
+                                                    }
                                                 }
                                             }
                                         }
@@ -131,7 +153,19 @@ val TeConEdit = FC {
 
             Box {
                 sx { flexGrow = number(2.0) }
-                TeConEditorViewComponent {}
+                if (tecon == null) {
+                    Box {
+                        sx {
+                            height = 100.pct
+                            backgroundColor = Color("#202020")
+                        }
+                        LinearProgress {}
+                    }
+                } else {
+                    TeConEditorViewComponent {
+                        this.tecon = tecon!!
+                    }
+                }
             }
         }
     }

@@ -13,16 +13,27 @@ import org.webctc.cache.readFromNBT
 import org.webctc.cache.writeToNBT
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.RailMapSwitchData
-import org.webctc.common.types.railgroup.PosIntWithKey
-import org.webctc.common.types.railgroup.RailGroup
-import org.webctc.common.types.railgroup.SettingEntry
-import org.webctc.common.types.railgroup.SwitchSetting
-
+import org.webctc.common.types.railgroup.*
 
 fun RailGroup.isTrainOnRail(): Boolean {
     return railPosList
         .mapNotNull { RailCacheData.railMapCache[it] }
         .any { it.isTrainOnRail }
+}
+
+fun RailGroup.isLocked(): Boolean {
+    return RailGroupData.isLocked(this.uuid)
+}
+
+fun RailGroup.isReserved(): Boolean {
+    return RailGroupData.isReserved(this.uuid)
+}
+
+fun RailGroup.getState(): RailGroupState {
+    val isTrainOnRail = this.isTrainOnRail()
+    val isReserved = this.isReserved()
+    val isLocked = this.isLocked()
+    return RailGroupState(isLocked, isReserved, isTrainOnRail)
 }
 
 fun UUID.writeToNBT(): NBTTagString {

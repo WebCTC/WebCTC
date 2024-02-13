@@ -19,12 +19,12 @@ import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.*
 import org.webctc.common.types.toPosInt
 import org.webctc.router.WebCTCRouter
-import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 class RailRouter : WebCTCRouter() {
     companion object {
-        val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
+        val connections = CopyOnWriteArrayList<Connection>()
     }
 
     override fun install(application: Route): Route.() -> Unit = {
@@ -87,18 +87,16 @@ private val isOpenField = RailMapSwitch::class.java.getDeclaredField("isOpen").a
 }
 
 fun RailMap.toData(): IRailMapData {
-    return if (this is RailMapSwitch)
-        this.toData()
-    else
-        RailMapData(
-            this.startRP.toDataClass(),
-            this.endRP.toDataClass(),
-            this.length,
-            NeighborPos(
-                this.startRP.getNeighborPosData(),
-                this.endRP.getNeighborPosData()
-            ),
-        )
+    return if (this is RailMapSwitch) this.toData()
+    else RailMapData(
+        this.startRP.toDataClass(),
+        this.endRP.toDataClass(),
+        this.length,
+        NeighborPos(
+            this.startRP.getNeighborPosData(),
+            this.endRP.getNeighborPosData()
+        ),
+    )
 }
 
 fun RailMapSwitch.toData(): IRailMapData {

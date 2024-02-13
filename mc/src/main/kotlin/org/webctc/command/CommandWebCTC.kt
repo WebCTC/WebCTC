@@ -67,7 +67,7 @@ class CommandWebCTC : CommandBase() {
 
     override fun addTabCompletionOptions(sender: ICommandSender, args: Array<String>): List<String>? {
         return when (args.size) {
-            1 -> listOf("auth", "waypoint")
+            1 -> listOf("auth", "waypoint").filter { it.startsWith(args[0]) }
             2 -> if (args[0] == "waypoint") listOf("create", "delete").filter { it.startsWith(args[1]) } else null
             3 -> if (args[1] == "delete") WayPointCacheData.wayPointCache.keys.filter { it.startsWith(args[2]) } else null
             else -> null

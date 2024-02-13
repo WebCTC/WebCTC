@@ -23,6 +23,7 @@ import net.minecraftforge.common.config.Configuration
 import org.webctc.cache.auth.CredentialData
 import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.signal.SignalCacheData
+import org.webctc.cache.tecon.TeConData
 import org.webctc.cache.waypoint.WayPointCacheData
 import org.webctc.command.CommandWebCTC
 import org.webctc.common.types.kotlinxJson
@@ -45,6 +46,7 @@ class WebCTCCore {
     lateinit var wayPointData: WayPointCacheData
     lateinit var credentialData: CredentialData
     lateinit var railGroupData: RailGroupData
+    lateinit var teConData: TeConData
 
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
@@ -100,6 +102,7 @@ class WebCTCCore {
         RouterManager.registerRouter("/api/signals", SignalRouter())
         RouterManager.registerRouter("/api/waypoints", WayPointRouter())
         RouterManager.registerRouter("/api/railgroups", RailGroupRouter())
+        RouterManager.registerRouter("/api/tecons", TeConRouter())
         RouterManager.registerRouter("/auth", AuthRouter())
     }
 
@@ -154,6 +157,14 @@ class WebCTCCore {
             world.mapStorage.setData("webctcex_railgroup", this.railGroupData)
         } else {
             this.railGroupData = railGroupData as RailGroupData
+        }
+
+        val teConData = world.mapStorage.loadData(TeConData::class.java, "webctc_tecon")
+        if (teConData == null) {
+            this.teConData = TeConData("webctc_tecon")
+            world.mapStorage.setData("webctc_tecon", this.teConData)
+        } else {
+            this.teConData = teConData as TeConData
         }
 
         this.applicationEngine = embeddedServer(Netty, port = WebCTCConfig.portNumber) {

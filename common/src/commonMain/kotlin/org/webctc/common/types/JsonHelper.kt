@@ -7,6 +7,7 @@ import kotlinx.serialization.modules.subclass
 import org.webctc.common.types.rail.IRailMapData
 import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.common.types.tecon.shape.*
 import org.webctc.common.types.waypoint.range.CircleRange
 import org.webctc.common.types.waypoint.range.IRange
 import org.webctc.common.types.waypoint.range.RectangleRange
@@ -82,6 +83,13 @@ val kotlinxJson = Json {
         polymorphic(IRange::class) {
             subclass(CircleRange::class)
             subclass(RectangleRange::class)
+        }
+        polymorphic(IShape::class) {
+            subclass(RailLine::class)
+            subclass(PolyLine::class)
+            subclass(Signal::class)
+            subclass(TeConLever::class)
+            subclass(Route::class)
         }
     }
     ignoreUnknownKeys = true

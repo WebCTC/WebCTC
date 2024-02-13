@@ -1,18 +1,44 @@
 package org.webctc.common.types
 
 import kotlinx.serialization.Serializable
+import kotlin.math.ceil
+import kotlin.math.log2
+import kotlin.math.pow
 import kotlin.math.sqrt
+
+private const val worldSize = 30000000
+private val bits = 1 + log2(ceil(worldSize.toDouble()).nextPowerOfTwo()).toInt()
+private val xBits = bits
+private val zBits = bits
+private val yBits = 64 - xBits - zBits
+private val yShift = 0 + zBits
+private val xShift = yShift + yBits
+private val xMask = (1L shl xBits) - 1L
+private val yMask = (1L shl yBits) - 1L
+private val zMask = (1L shl zBits) - 1L
 
 @Serializable
 data class PosInt(val x: Int, val y: Int, val z: Int) {
+    constructor(serialized: Long) : this(
+        (serialized shl 64 - xShift - xBits shr 64 - xBits).toInt(),
+        (serialized shl 64 - yShift - yBits shr 64 - yBits).toInt(),
+        (serialized shl 64 - zBits shr 64 - zBits).toInt()
+    )
+
     override fun toString(): String {
         return "$x,$y,$z"
+    }
+
+    fun toLong(): Long {
+        return (x.toLong() and xMask shl xShift) or (y.toLong() and yMask shl yShift) or (z.toLong() and zMask shl 0)
     }
 
     companion object {
         val ZERO = PosInt(0, 0, 0)
     }
 }
+
+fun Double.nextPowerOfTwo(): Double = 2.0.pow(ceil(log2(this)))
 
 fun IntArray.toPosInt(): PosInt {
     return PosInt(this[0], this[1], this[2])

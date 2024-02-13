@@ -5,7 +5,6 @@ import kotlinx.uuid.generateUUID
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
-import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.PosIntWithKey
 import react.*
 import react.dom.events.ChangeEvent
@@ -112,12 +111,9 @@ val ListItemPosIntWithKey = FC<ListItemPosIntWithKeyProps> {
             padding = 6.px
             gap = 8.px
         }
-        arrayOf(PosInt::x, PosInt::y, PosInt::z).forEach {
-            TextFieldPosInt {
-                this.pos = pos.toPosInt()
-                this.prop = it
-                this.onChange = { new -> PosIntWithKey(new).also(onChange) }
-            }
+        TextFieldPosIntXYZ {
+            this.pos = pos.toPosInt()
+            this.onChange = { new -> PosIntWithKey(new).also(onChange) }
         }
         TextField {
             size = Size.small

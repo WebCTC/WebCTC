@@ -154,6 +154,7 @@ val RailGroupManager = FC {
                         label = ReactNode("Name")
                         fullWidth = true
                         size = Size.small
+                        value = searchText
                         this.onChange = { formEvent ->
                             val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
                             val target = event.target
@@ -177,17 +178,16 @@ val RailGroupManager = FC {
                     List {
                         dense = true
                         disablePadding = true
-                        searchResult.sortedBy { it.name }
-                            .forEach { rg ->
-                                ListItemButton {
-                                    selected = rg.uuid == activeRailGroupUUID
-                                    onClick = { activeRailGroupUUID = rg.uuid }
-                                    ListItemText {
-                                        primary = ReactNode(rg.name)
-                                        secondary = ReactNode("${rg.railPosList.size} rails")
-                                    }
+                        searchResult.sortedBy { it.name }.forEach { rg ->
+                            ListItemButton {
+                                selected = rg.uuid == activeRailGroupUUID
+                                onClick = { activeRailGroupUUID = rg.uuid }
+                                ListItemText {
+                                    primary = ReactNode(rg.name)
+                                    secondary = ReactNode("${rg.railPosList.size} rails")
                                 }
                             }
+                        }
                     }
                 }
             }

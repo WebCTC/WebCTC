@@ -10,6 +10,7 @@ import org.webctc.common.types.kotlinxJson
 import pages.*
 import pages.tecon.TeConEdit
 import pages.tecon.TeConList
+import pages.tecon.TeConView
 import react.create
 import react.dom.client.createRoot
 import react.router.RouterProvider
@@ -48,8 +49,14 @@ fun main() {
             path = "/p/waypoint"
             element = WayPointEditor.create()
         }, jso {
-            path = "/p/tecon"
+            path = "/p/tecons"
             element = TeConList.create()
+        }, jso {
+            path = "/p/tecons/view/:uuid"
+            element = TeConView.create()
+        }, jso {
+            path = "/p/tecons/edit/:uuid"
+            element = TeConEdit.create()
         }, jso {
             path = "/login"
             element = Login.create()

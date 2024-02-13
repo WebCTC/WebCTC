@@ -112,29 +112,44 @@ val ListItemPosInt = FC<ListItemPosIntProps> {
             padding = 6.px
             gap = 8.px
         }
-        arrayOf(PosInt::x, PosInt::y, PosInt::z).forEach {
-            TextFieldPosInt {
-                this.pos = pos
-                this.prop = it
-                this.onChange = onChange
-            }
+        TextFieldPosIntXYZ {
+            this.pos = pos
+            this.onChange = onChange
         }
     }
 }
 
-external interface TextFieldPosIntProps : Props {
+external interface TextFieldPosIntXYZProps : Props {
+    var pos: PosInt
+    var onChange: ((PosInt) -> Unit)
+}
+
+val TextFieldPosIntXYZ = FC<TextFieldPosIntXYZProps> { props ->
+    arrayOf(PosInt::x, PosInt::y, PosInt::z).forEach {
+        TextFieldPosInt {
+            this.pos = props.pos
+            this.prop = it
+            this.onChange = props.onChange
+        }
+    }
+}
+
+private external interface TextFieldPosIntProps : Props {
     var pos: PosInt
     var prop: KProperty1<PosInt, Int>
     var onChange: ((PosInt) -> Unit)
 }
 
-val TextFieldPosInt = FC<TextFieldPosIntProps> {
-    val pos = it.pos
-    val prop = it.prop
-    val onChange = it.onChange
+private val regex = """^(-?\d+),?\s(-?\d+),?\s(-?\d+)$""".toRegex()
+
+private val TextFieldPosInt = FC<TextFieldPosIntProps> { props ->
+    val pos = props.pos
+    val prop = props.prop
+    val onChange = props.onChange
     TextField {
         size = Size.small
         defaultValue = prop.get(pos)
+        key = prop.get(pos).toString()
         type = InputType.number
         label = ReactNode(prop.name)
         onBlur = { focusEvent ->
@@ -148,6 +163,15 @@ val TextFieldPosInt = FC<TextFieldPosIntProps> {
                     z = if (prop.name == "z") axisValue else pos.z
                 ).also(onChange)
                 target.value = axisValue.toString()
+            }
+        }
+        onPaste = { pasteEvent ->
+            val text = pasteEvent.clipboardData.getData("text")
+
+            regex.find(text)?.let {
+                pasteEvent.preventDefault()
+                val (x, y, z) = it.destructured
+                PosInt(x.toInt(), y.toInt(), z.toInt()).also(onChange)
             }
         }
     }

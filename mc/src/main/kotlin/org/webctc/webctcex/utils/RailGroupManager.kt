@@ -1,7 +1,10 @@
 package org.webctc.webctcex.utils
 
+import jp.ngt.rtm.rail.TileEntityLargeRailSwitchCore
 import kotlinx.uuid.UUID
+import org.webctc.WebCTCCore
 import org.webctc.railgroup.RailGroupData
+import org.webctc.router.api.isConverting
 
 class RailGroupManager {
     companion object {
@@ -53,6 +56,18 @@ class RailGroupManager {
         @JvmStatic
         fun isLocked(uuids: Array<String>, key: String): Boolean {
             return RailGroupData.isLocked(uuids.map(::UUID).toTypedArray(), key)
+        }
+
+        @JvmStatic
+        fun isConverting(uuid: String): Boolean {
+            return RailGroupData.isConverting(UUID(uuid))
+        }
+
+        @JvmStatic
+        fun isConverting(x: Int, y: Int, z: Int): Boolean {
+            return WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z)?.let {
+                it is TileEntityLargeRailSwitchCore && it.isConverting()
+            } ?: false
         }
     }
 }

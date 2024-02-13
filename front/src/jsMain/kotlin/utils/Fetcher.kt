@@ -15,7 +15,7 @@ import web.timers.clearInterval
 import web.timers.setInterval
 import kotlin.time.Duration
 
-inline fun <reified R : Any> useData(url: String?): StateInstance<R?> {
+inline fun <reified R : Any> useData(url: String?, notFound: () -> Unit = {}): StateInstance<R?> {
     val stateInstance = useState<R>()
     val (data, setData) = stateInstance
     useEffect(url) {
@@ -28,6 +28,67 @@ inline fun <reified R : Any> useData(url: String?): StateInstance<R?> {
             val res: R = client.get(url).body()
             if (ignore) return@launch
             setData { res }
+        }
+        cleanup {
+            ignore = true
+        }
+    }
+    return stateInstance
+}
+
+inline fun <reified R : Any> useIntervalData(url: String?, interval: Duration): StateInstance<R?> {
+    val stateInstance = useState<R>()
+    val (data, setData) = stateInstance
+    useEffect(url) {
+        if (url.isNullOrEmpty()) {
+            setData { null }
+            return@useEffect
+        }
+        var ignore = false
+        val intervalId = setInterval(interval) {
+            MainScope().launch {
+                val res: R = client.get(url).body()
+                if (ignore) return@launch
+                setData { res }
+            }
+        }
+        cleanup {
+            ignore = true
+            clearInterval(intervalId)
+        }
+    }
+    return stateInstance
+}
+
+inline fun <reified R : Any> useDataWithWebsocket(
+    path: String,
+    wsPath: String,
+    crossinline equals: (R?, R?) -> Boolean
+): StateInstance<R?> {
+    val stateInstance = useState<R>()
+    val (data, setData) = stateInstance
+
+    val protocol = window.location.protocol
+    val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
+    val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
+
+    useEffect(path) {
+        var ignore = false
+        MainScope().launch {
+            val res: R = client.get(path).body()
+            if (ignore) return@launch
+            setData { res }
+        }
+        MainScope().launch {
+            client.ws(wsPath, {
+                url.protocol = wsProtocol
+                url.port = port
+            }) {
+                while (!ignore) {
+                    val received = receiveDeserialized<R>()
+                    setData { if (equals(it, received)) it else received }
+                }
+            }
         }
         cleanup {
             ignore = true
@@ -106,7 +167,7 @@ inline fun <reified R : Any> useListDataWithWebsocket(
                 url.protocol = wsProtocol
                 url.port = port
             }) {
-                while (true) {
+                while (!ignore) {
                     val receivedList = receiveDeserialized<List<R>>()
                     setData {
                         it.filterNot { old -> receivedList.any { new -> equals(old, new) } } + receivedList

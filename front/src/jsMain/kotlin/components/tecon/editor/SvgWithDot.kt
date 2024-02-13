@@ -17,9 +17,9 @@ import web.svg.SVGSVGElement
 external interface SvgWithDotProps : PropsWithChildren {
     var dotVisibility: Boolean
     var cursorVisibility: Boolean
-    var onClick: (MouseEvent<SVGSVGElement, *>) -> Unit
-    var onUpdateMousePos: (PosInt2D) -> Unit
-    var onInitPanzoom: (dynamic) -> Unit
+    var onClick: ((MouseEvent<SVGSVGElement, *>) -> Unit)?
+    var onUpdateMousePos: ((PosInt2D) -> Unit)?
+    var onInitPanzoom: ((dynamic) -> Unit)?
 }
 
 val dotGap = 32
@@ -49,7 +49,7 @@ val SvgWithDot = FC<SvgWithDotProps> { props ->
             }
         }
         panzoomRef.current = panzoom
-        props.onInitPanzoom(panzoom)
+        props.onInitPanzoom?.let { it(panzoom) }
     }
 
 
@@ -65,29 +65,31 @@ val SvgWithDot = FC<SvgWithDotProps> { props ->
                 backgroundPositionY = (scaledDotGap / 2 + offsetY).px
             }
         }
-        onClick = { e -> props.onClick(e) }
-        onMouseMove = { e ->
-            val rect = e.currentTarget.getBoundingClientRect()
-            val x = e.clientX - rect.left
-            val y = e.clientY - rect.top
+        props.onClick?.let { onClick = { e -> it(e) } }
+        props.onUpdateMousePos?.let {
+            onMouseMove = { e ->
+                val rect = e.currentTarget.getBoundingClientRect()
+                val x = e.clientX - rect.left
+                val y = e.clientY - rect.top
 
-            val transform = panzoomRef.current!!.getTransform()
-            val scale = transform.scale.toString().toDouble()
-            val svgX = transform.x.toString().toDouble()
-            val svgY = transform.y.toString().toDouble()
+                val transform = panzoomRef.current!!.getTransform()
+                val scale = transform.scale.toString().toDouble()
+                val svgX = transform.x.toString().toDouble()
+                val svgY = transform.y.toString().toDouble()
 
-            val mouseXSvg = x / scale - svgX / scale
-            val mouseYSvg = y / scale - svgY / scale
+                val mouseXSvg = x / scale - svgX / scale
+                val mouseYSvg = y / scale - svgY / scale
 
-            val dotGapX = if (mouseXSvg < 0) -dotGap else dotGap
-            val dotGapY = if (mouseYSvg < 0) -dotGap else dotGap
+                val dotGapX = if (mouseXSvg < 0) -dotGap else dotGap
+                val dotGapY = if (mouseYSvg < 0) -dotGap else dotGap
 
-            val mouseX = mouseXSvg + dotGapX / 2 - (mouseXSvg + dotGapX / 2) % dotGapX
-            val mouseY = mouseYSvg + dotGapY / 2 - (mouseYSvg + dotGapY / 2) % dotGapY
+                val mouseX = mouseXSvg + dotGapX / 2 - (mouseXSvg + dotGapX / 2) % dotGapX
+                val mouseY = mouseYSvg + dotGapY / 2 - (mouseYSvg + dotGapY / 2) % dotGapY
 
-            val pos = PosInt2D(mouseX.toInt(), mouseY.toInt())
-            mousePos = pos
-            props.onUpdateMousePos(pos)
+                val pos = PosInt2D(mouseX.toInt(), mouseY.toInt())
+                mousePos = pos
+                it(pos)
+            }
         }
         g {
             ref = tcnRef
