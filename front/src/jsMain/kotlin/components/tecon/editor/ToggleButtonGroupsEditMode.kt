@@ -1,5 +1,6 @@
 package components.tecon.editor
 
+import components.icon.*
 import mui.icons.material.PanToolOutlined
 import mui.material.Box
 import mui.material.ToggleButton
@@ -33,8 +34,16 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                 }
             }
             ToggleButton {
+                mdiCursorDefaultOutline {}
+                value = EditMode.CURSOR
+            }
+            ToggleButton {
                 PanToolOutlined {}
                 value = EditMode.HAND
+            }
+            ToggleButton {
+                mdiEraser {}
+                value = EditMode.ERASER
             }
         }
         ToggleButtonGroup {
@@ -47,20 +56,22 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                 }
             }
             ToggleButton {
-                +"線路"
-                value = "rail"
+                mdiFence {}
+                value = EditMode.RAIL
             }
             ToggleButton {
-                +"信号"
-                value = "signal"
+                WciSignal {}
+                value = EditMode.SIGNAL
             }
             ToggleButton {
-                +"進路テコ"
-                value = "tecon"
+                WciRouteLever {}
+                value = EditMode.TECON
+                disabled = true
             }
             ToggleButton {
-                +"進路選別"
-                value = "route"
+                WciRouteSelection {}
+                value = EditMode.ROUTE
+                disabled = true
             }
         }
     }

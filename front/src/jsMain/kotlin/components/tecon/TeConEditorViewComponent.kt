@@ -56,9 +56,60 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
         }
         SvgWithDot {
             dotVisibility = dotVisible
-            cursorVisibility = mode != "hand"
+            cursorVisibility = mode.posCount > 0
+            onClick = { _ ->
+                if (mode.posCount > 0) {
+                    var newSelectedPosList =
+                        if (nowMousePos in selectedPosList) selectedPosList - nowMousePos
+                        else selectedPosList + nowMousePos.copy()
+
+                    if (newSelectedPosList.size == mode.posCount) {
+                        parts += mode.create(newSelectedPosList)!!
+                        newSelectedPosList = listOf()
+                    }
+                    selectedPosList = newSelectedPosList
+                }
+            }
             onUpdateMousePos = { nowMousePos = it }
             onInitPanzoom = { panzoomRef.current = it }
+
+            parts.forEachIndexed { index, iShape ->
+                val onSelect = { if (selectedPart == iShape) selectedPart = null else selectedPart = iShape }
+                val onDelete = { parts = parts.removeAtNew(index) }
+                val selected = selectedPart == iShape
+                when (iShape) {
+                    is RailLine -> RailLineElement {
+                        rail = iShape
+                        this.mode = mode
+                        this.onSelect = onSelect
+                        this.onDelete = onDelete
+                        this.selected = selected
+                    }
+
+                    is Signal -> SignalElement {
+                        signal = iShape
+                        this.mode = mode
+                        this.onSelect = onSelect
+                        this.onDelete = onDelete
+                        this.selected = selected
+                    }
+
+                    else -> {}
+                }
+            }
+
+            if (mode == EditMode.RAIL && selectedPosList.isNotEmpty()) {
+                val selectedPos = selectedPosList.first()
+                line {
+                    x1 = selectedPos.x.toDouble()
+                    y1 = selectedPos.y.toDouble()
+                    x2 = nowMousePos.x.toDouble()
+                    y2 = nowMousePos.y.toDouble()
+                    stroke = "white"
+                    strokeWidth = 8.0
+                    opacity = 0.5
+                }
+            }
         }
         Box {
             sx {
