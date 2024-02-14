@@ -8,5 +8,6 @@ import org.webctc.common.types.PosInt2D
 data class Signal(
     val pos: PosInt2D,
     val signalPos: PosInt = PosInt.ZERO,
+    val rotation: Int? = null,
     override val zIndex: Int = 0
 ) : IShape

@@ -59,7 +59,6 @@ class WebCTCCore {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
-
         PluginManager.registerPlugin {
             install(Compression)
             install(WebSockets) {
