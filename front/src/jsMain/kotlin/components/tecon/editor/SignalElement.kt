@@ -52,17 +52,17 @@ val SignalElement = FC<SignalElementProps> { props ->
             val cos = cos((-rotation - 90) * (PI / 180))
             val sin = sin((-rotation - 90) * (PI / 180))
             line {
-                x1 = x.toDouble()
-                y1 = y.toDouble()
-                x2 = x.toDouble() + 32.0 * cos
-                y2 = y.toDouble() - 32.0 * sin
+                x1 = x.toDouble() + 12 * cos
+                y1 = y.toDouble() - 12 * sin
+                x2 = x.toDouble() + 32 * cos
+                y2 = y.toDouble() - 32 * sin
                 strokeWidth = 4.0
             }
             line {
-                x1 = x.toDouble() + 32.0 * cos + 12.0 * sin
-                y1 = y.toDouble() + 12.0 * cos - 32.0 * sin
-                x2 = x.toDouble() + 32.0 * cos - 12.0 * sin
-                y2 = y.toDouble() - 12.0 * cos - 32.0 * sin
+                x1 = x.toDouble() + 32 * cos + 12 * sin
+                y1 = y.toDouble() + 12 * cos - 32 * sin
+                x2 = x.toDouble() + 32 * cos - 12 * sin
+                y2 = y.toDouble() - 12 * cos - 32 * sin
                 strokeWidth = 4.0
             }
         }
