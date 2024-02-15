@@ -33,7 +33,7 @@ fun RailGroup.getState(): RailGroupState {
     val isTrainOnRail = this.isTrainOnRail()
     val isReserved = this.isReserved()
     val isLocked = this.isLocked()
-    return RailGroupState(isLocked, isReserved, isTrainOnRail)
+    return RailGroupState(this.uuid, isLocked, isReserved, isTrainOnRail)
 }
 
 fun UUID.writeToNBT(): NBTTagString {

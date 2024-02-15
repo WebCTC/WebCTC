@@ -5,8 +5,6 @@ import components.map.MapPanzoomSvg
 import components.map.WRailHover
 import components.map.WSignalGroup
 import components.tecon.TeConEditorViewComponent
-import emotion.react.Global
-import emotion.react.styles
 import kotlinx.uuid.UUID
 import mui.icons.material.ContentCopy
 import mui.material.*
@@ -83,6 +81,8 @@ val TeConEdit = FC {
                                         } else null
                                     }
                                 }
+                                color =
+                                    if (activeRailGroupUUID != null && it.pos in activeRailGroup!!.railPosList) "orange" else null
                             }
                         }
                     }
@@ -165,16 +165,6 @@ val TeConEdit = FC {
                     TeConEditorViewComponent {
                         this.tecon = tecon!!
                     }
-                }
-            }
-        }
-    }
-
-    Global {
-        styles {
-            activeRailGroup?.railPosList?.forEach {
-                "g#rail\\,${it.x}\\,${it.y}\\,${it.z}" {
-                    set(CustomPropertyName("stroke"), "orange")
                 }
             }
         }

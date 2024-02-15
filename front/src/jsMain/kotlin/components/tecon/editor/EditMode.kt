@@ -11,7 +11,7 @@ enum class EditMode(
     HAND,
     ERASER,
     RAIL(2, { (start, end) -> RailLine(start, end) }),
-    POLYLINE(Int.MAX_VALUE),
+    POLYLINE(Int.MAX_VALUE, { RailPolyLine(it) }),
     SIGNAL(1, { (pos) -> Signal(pos) }),
     TECON(1, { (pos) -> TeConLever(pos) }),
     ROUTE(1, { (pos) -> Route(pos) });

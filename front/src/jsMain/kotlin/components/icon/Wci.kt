@@ -6,6 +6,19 @@ import react.dom.html.ReactHTML.title
 import react.dom.svg.ReactSVG.path
 import react.dom.svg.ReactSVG.polygon
 
+val WciPolyRailLine = FC {
+    SvgIcon {
+        viewBox = "0 0 24 24"
+        title {
+            +"poly rail line"
+        }
+        path {
+            d =
+                "M21,9v2h-2V9h-2v2c0,0,0,0-2-1.2V7h-2v1.6c-0.6-0.3-1.2-0.7-2-1.2V5H9v1.2C8.4,5.8,7.7,5.4,7,5V3H5v2H3V3H1v12h2v-2h2v2h2 v-2l2,1.2V17h2v-1.6l2,1.2V19h2v-1.2l2,1.2v2h2v-2h2v2h2V9H21z M5,11H3V7h2V11z M7,11V7l2,1.2v4L7,11z M11,13.4v-4l2,1.2v4L11,13.4z M17,17l-2-1.2v-4l2,1.2V17z M21,17h-2v-4h2V17z"
+        }
+    }
+}
+
 val WciSignal = FC {
     SvgIcon {
         viewBox = "0 0 24 24"

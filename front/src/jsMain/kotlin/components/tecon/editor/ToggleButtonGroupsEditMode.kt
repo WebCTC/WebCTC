@@ -60,6 +60,10 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                 value = EditMode.RAIL
             }
             ToggleButton {
+                WciPolyRailLine {}
+                value = EditMode.POLYLINE
+            }
+            ToggleButton {
                 WciSignal {}
                 value = EditMode.SIGNAL
             }

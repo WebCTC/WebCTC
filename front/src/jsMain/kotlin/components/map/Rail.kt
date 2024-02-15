@@ -14,8 +14,7 @@ external interface LargeRailProps : Props {
     var largeRailData: LargeRailData
 }
 
-external interface LargeRailClickableProps : Props {
-    var largeRailData: LargeRailData
+external interface LargeRailClickableProps : LargeRailProps {
     var onClick: ((LargeRailData) -> Unit)?
     var color: String?
 }

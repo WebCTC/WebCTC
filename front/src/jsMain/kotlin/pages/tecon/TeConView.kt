@@ -1,16 +1,13 @@
 package pages.tecon
 
 import components.Header
-import components.tecon.editor.RailLineElement
-import components.tecon.editor.SignalElement
 import components.tecon.editor.SvgWithDot
+import components.tecon.viewer.TeConViewer
 import mui.material.Box
 import mui.material.Card
 import mui.material.CssBaseline
 import mui.system.sx
 import org.webctc.common.types.tecon.TeCon
-import org.webctc.common.types.tecon.shape.RailLine
-import org.webctc.common.types.tecon.shape.Signal
 import react.FC
 import react.router.useNavigate
 import react.router.useParams
@@ -25,7 +22,7 @@ val TeConView = FC {
     val tecon by useData<TeCon>("/api/tecons/$uuid") {
         navigate("/p/tecons")
     }
-    val parts = tecon?.parts ?: emptyList()
+    val parts = tecon?.parts
 
     CssBaseline {}
 
@@ -43,22 +40,14 @@ val TeConView = FC {
                 display = Display.flex
                 flexDirection = FlexDirection.row
             }
-            SvgWithDot {
-                dotVisibility = false
-                cursorVisibility = false
-
-                parts.forEach {
-                    when (it) {
-                        is RailLine -> RailLineElement {
-                            rail = it
-                        }
-
-                        is Signal -> SignalElement {
-                            signal = it
-                        }
-
-                        else -> {}
-                    }
+            if (parts == null) {
+                SvgWithDot {
+                    dotVisibility = false
+                    cursorVisibility = false
+                }
+            } else {
+                TeConViewer {
+                    this.parts = parts
                 }
             }
             Box {

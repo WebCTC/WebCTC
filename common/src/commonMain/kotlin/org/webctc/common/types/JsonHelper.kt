@@ -86,7 +86,7 @@ val kotlinxJson = Json {
         }
         polymorphic(IShape::class) {
             subclass(RailLine::class)
-            subclass(PolyLine::class)
+            subclass(RailPolyLine::class)
             subclass(Signal::class)
             subclass(TeConLever::class)
             subclass(Route::class)

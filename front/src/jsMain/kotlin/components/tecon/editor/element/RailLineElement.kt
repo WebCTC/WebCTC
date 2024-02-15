@@ -1,4 +1,4 @@
-package components.tecon.editor
+package components.tecon.editor.element
 
 import components.railgroup.detail.BoxRailGroupList
 import mui.material.Box
@@ -8,10 +8,13 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML.h2
 import react.dom.svg.ReactSVG.path
-import utils.useDataWithWebsocket
 import kotlin.math.abs
 
-external interface LineElementProps : ITeConElementProps {
+external interface RailElementProps : ITeConElementProps {
+    var rgState: Set<RailGroupState>?
+}
+
+external interface LineElementProps : RailElementProps {
     var rail: RailLine
 }
 
@@ -20,18 +23,13 @@ val RailLineElement = FC<LineElementProps> { props ->
     val startPos = railLine.start
     val endPos = railLine.end
 
-    val rgStateList = if (props.mode == null) railLine.railGroupList.map {
-        val state by useDataWithWebsocket<RailGroupState>(
-            "/api/railgroups/$it/state",
-            "/api/railgroups/$it/state/ws"
-        ) { a, b -> a == b }
-        state
-    } else emptyList()
+    val rgStateList = props.rgState ?: emptySet()
 
     val color =
-        if (rgStateList.any { it?.trainOnRail == true }) "red"
-        else if (rgStateList.any { it?.reserved == true }) "yellow"
-        else if (rgStateList.any { it?.locked == true }) "orange"
+        if (rgStateList.any { it.trainOnRail == true }) "red"
+        else if (rgStateList.any { it.reserved == true }) "yellow"
+        else if (rgStateList.any { it.locked == true }) "orange"
+        else if (railLine.railGroupList.isEmpty()) "gray"
         else "white"
 
     ITeConElementBase {

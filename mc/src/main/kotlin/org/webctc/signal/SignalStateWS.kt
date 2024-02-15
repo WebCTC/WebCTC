@@ -40,5 +40,5 @@ data class SignalStateWS(
 
 fun SignalData.getState(): SignalState {
     val signalLevel = SignalCacheData.signalMapCache[this.pos]?.signalLevel ?: 0
-    return SignalState(signalLevel)
+    return SignalState(this.pos, signalLevel)
 }

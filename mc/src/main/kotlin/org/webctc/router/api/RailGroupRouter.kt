@@ -25,7 +25,10 @@ import net.minecraft.util.EnumChatFormatting.WHITE
 import org.webctc.WebCTCCore
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
-import org.webctc.railgroup.*
+import org.webctc.railgroup.RailGroupData
+import org.webctc.railgroup.RailGroupStateWS
+import org.webctc.railgroup.create
+import org.webctc.railgroup.delete
 import org.webctc.router.WebCTCRouter
 
 class RailGroupRouter : WebCTCRouter() {
@@ -42,20 +45,18 @@ class RailGroupRouter : WebCTCRouter() {
             get {
                 call.getRailGroup()?.let { call.respond(it) }
             }
+        }
 
-            get("/state") {
-                val railGroup = call.getRailGroup() ?: return@get
-                val railGroupState = railGroup.getState()
-
-                call.respond(railGroupState)
-            }
-
-            webSocket("/state/ws") {
-                val railGroup = call.getRailGroup() ?: return@webSocket
-                val railGroupStateWS = RailGroupStateWS(railGroup, this)
+        route("/state") {
+            webSocket("/ws") {
+                val uuids = receiveDeserialized<Set<UUID>>()
+                val railGroupStateWSSet = uuids.mapNotNull { uuid ->
+                    val railGroup = RailGroupData.railGroupList.find { it.uuid == uuid }
+                    if (railGroup != null) RailGroupStateWS(railGroup, this) else null
+                }.toSet()
                 for (frame in incoming) {
                 }
-                railGroupStateWS.close()
+                railGroupStateWSSet.forEach { it.close() }
             }
         }
 

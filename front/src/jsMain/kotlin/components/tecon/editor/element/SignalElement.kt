@@ -1,9 +1,10 @@
-package components.tecon.editor
+package components.tecon.editor.element
 
 import components.railgroup.detail.TextFieldPosIntXYZ
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
+import org.webctc.common.types.PosInt
 import org.webctc.common.types.signal.SignalState
 import org.webctc.common.types.tecon.shape.Signal
 import pages.xs
@@ -14,7 +15,6 @@ import react.create
 import react.dom.html.ReactHTML.h2
 import react.dom.svg.ReactSVG.circle
 import react.dom.svg.ReactSVG.line
-import utils.useDataWithWebsocket
 import web.cssom.AlignItems
 import web.cssom.Display
 import web.cssom.px
@@ -24,29 +24,23 @@ import kotlin.math.sin
 
 external interface SignalElementProps : ITeConElementProps {
     var signal: Signal
+    var signalState: SignalState?
 }
 
 val SignalElement = FC<SignalElementProps> { props ->
-    val signalPos = props.signal.signalPos
     val pos = props.signal.pos
     val rotation = props.signal.rotation
     val x = pos.x
     val y = pos.y
 
-    val signalLevel = if (props.mode == null) useDataWithWebsocket<SignalState>(
-        "/api/signals/${signalPos.toLong()}/state",
-        "/api/signals/${signalPos.toLong()}/state/ws"
-    ) { a, b -> a == b }.let {
-        val state by it
-        (state?.level ?: 0) > 1
-    } else false
+    val signalLevel = props.signalState?.level ?: 0
 
     ITeConElementBase {
         mode = props.mode
         onDelete = props.onDelete
         onSelect = props.onSelect
-        fill = (if (signalLevel) "LawnGreen" else "#202020")
-        stroke = "white"
+        fill = (if (signalLevel > 1) "LawnGreen" else "#202020")
+        stroke = if (props.signal.signalPos == PosInt.ZERO) "gray" else "white"
         selected = props.selected
         rotation?.let {
             val cos = cos((-rotation - 90) * (PI / 180))

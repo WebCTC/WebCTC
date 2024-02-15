@@ -97,6 +97,39 @@ inline fun <reified R : Any> useDataWithWebsocket(
     return stateInstance
 }
 
+inline fun <reified R : Any> useListDataWS(
+    wsPath: String,
+    bodyData: Any,
+    crossinline equals: (R, R) -> Boolean
+): StateInstance<List<R>> {
+    val stateInstance = useState<List<R>>(listOf())
+    val (data, setData) = stateInstance
+
+    val protocol = window.location.protocol
+    val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
+    val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
+
+    useEffect(wsPath) {
+        var ignore = false
+        MainScope().launch {
+            client.ws(wsPath, {
+                url.protocol = wsProtocol
+                url.port = port
+            }) {
+                sendSerialized(bodyData)
+                while (!ignore) {
+                    val received = receiveDeserialized<R>()
+                    setData {
+                        it.filterNot { old -> equals(old, received) } + received
+                    }
+                }
+            }
+        }
+        cleanup { ignore = true }
+    }
+    return stateInstance
+}
+
 inline fun <reified R : Any> useListData(url: String?): StateInstance<List<R>> {
     val stateInstance = useState<List<R>>(listOf())
     val (data, setData) = stateInstance
