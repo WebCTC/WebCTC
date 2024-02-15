@@ -12,21 +12,21 @@ import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt2D
 import org.webctc.common.types.tecon.TeCon
-import org.webctc.common.types.tecon.shape.IShape
-import org.webctc.common.types.tecon.shape.RailLine
-import org.webctc.common.types.tecon.shape.RailPolyLine
-import org.webctc.common.types.tecon.shape.Signal
+import org.webctc.common.types.tecon.shape.*
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.h2
 import react.dom.svg.ReactSVG.line
 import react.dom.svg.ReactSVG.polyline
+import react.dom.svg.ReactSVG.rect
 import react.router.useNavigate
 import react.useRef
 import react.useState
 import utils.removeAtNew
 import utils.setNew
 import web.cssom.*
+import kotlin.math.abs
+import kotlin.math.min
 
 external interface TeConEditorViewComponentProps : Props {
     var tecon: TeCon
@@ -111,6 +111,14 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                         this.selected = selected
                     }
 
+                    is RectBox -> RectBoxElement {
+                        rectBox = iShape
+                        this.mode = mode
+                        this.onSelect = onSelect
+                        this.onDelete = onDelete
+                        this.selected = selected
+                    }
+
                     else -> {}
                 }
             }
@@ -137,6 +145,28 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                             strokeWidth = 8.0
                             fill = "none"
                             opacity = 0.5
+                        }
+                    }
+
+                    EditMode.RECT -> {
+                        val selectedPos = selectedPosList.first()
+
+                        val minX = min(selectedPos.x, nowMousePos.x).toDouble()
+                        val minY = min(selectedPos.y, nowMousePos.y).toDouble()
+                        val boxWidth = abs(selectedPos.x - nowMousePos.x).toDouble()
+                        val boxHeight = abs(selectedPos.y - nowMousePos.y).toDouble()
+
+                        rect {
+                            x = minX
+                            y = minY
+                            width = boxWidth
+                            height = boxHeight
+                            stroke = "white"
+                            strokeWidth = 8.0
+                            fill = "none"
+                            opacity = 0.5
+                            rx = 8.0
+                            ry = 8.0
                         }
                     }
 

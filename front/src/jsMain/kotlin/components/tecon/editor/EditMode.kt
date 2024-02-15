@@ -14,5 +14,7 @@ enum class EditMode(
     POLYLINE(Int.MAX_VALUE, { RailPolyLine(it) }),
     SIGNAL(1, { (pos) -> Signal(pos) }),
     TECON(1, { (pos) -> TeConLever(pos) }),
-    ROUTE(1, { (pos) -> Route(pos) });
+    ROUTE(1, { (pos) -> Route(pos) }),
+
+    RECT(2, { (start, end) -> RectBox(start, end) }),
 }

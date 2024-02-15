@@ -3,6 +3,7 @@ package components.tecon.viewer
 import components.tecon.editor.SvgWithDot
 import components.tecon.editor.element.RailLineElement
 import components.tecon.editor.element.RailPolyLineElement
+import components.tecon.editor.element.RectBoxElement
 import components.tecon.editor.element.SignalElement
 import org.webctc.common.types.railgroup.RailGroupState
 import org.webctc.common.types.signal.SignalState
@@ -47,6 +48,10 @@ val TeConViewer = FC<TeConViewerProps> { props ->
                 is Signal -> SignalElement {
                     signal = it
                     signalState = signalStateList.find { ss -> it.signalPos == ss.pos }
+                }
+
+                is RectBox -> RectBoxElement {
+                    rectBox = it
                 }
             }
         }

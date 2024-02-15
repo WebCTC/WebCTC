@@ -1,6 +1,7 @@
 package components.tecon.editor
 
 import components.icon.*
+import mui.icons.material.Crop169
 import mui.icons.material.PanToolOutlined
 import mui.material.Box
 import mui.material.ToggleButton
@@ -76,6 +77,22 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                 WciRouteSelection {}
                 value = EditMode.ROUTE
                 disabled = true
+            }
+        }
+
+
+        ToggleButtonGroup {
+            exclusive = true
+            value = editMode
+            onChange = { _, value ->
+                if (value is EditMode) {
+                    editMode = value
+                    it.onChange(value)
+                }
+            }
+            ToggleButton {
+                Crop169 {}
+                value = EditMode.RECT
             }
         }
     }

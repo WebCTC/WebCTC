@@ -90,6 +90,7 @@ val kotlinxJson = Json {
             subclass(Signal::class)
             subclass(TeConLever::class)
             subclass(Route::class)
+            subclass(RectBox::class)
         }
     }
     ignoreUnknownKeys = true
