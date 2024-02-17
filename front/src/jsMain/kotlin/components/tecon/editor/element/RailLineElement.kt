@@ -10,16 +10,14 @@ import react.dom.html.ReactHTML.h2
 import react.dom.svg.ReactSVG.path
 import kotlin.math.abs
 
-external interface RailElementProps : ITeConElementProps {
+external interface RGStateElementProps : ITeConElementProps, PreviewElementProps {
     var rgState: Set<RailGroupState>?
 }
 
-external interface LineElementProps : RailElementProps {
-    var rail: RailLine
-}
+external interface LineElementProps : RGStateElementProps, IShapeElementProps<RailLine>
 
 val RailLineElement = FC<LineElementProps> { props ->
-    val railLine = props.rail
+    val railLine = props.iShape
     val startPos = railLine.start
     val endPos = railLine.end
 
@@ -48,6 +46,9 @@ val RailLineElement = FC<LineElementProps> { props ->
                 "M ${startX - 4} $startY L ${endX - 4} $endY L ${endX + 4} $endY L ${startX + 4} $startY Z"
             } else {
                 "M $startX ${startY - 4} L $endX ${endY - 4} L $endX ${endY + 4} L $startX ${startY + 4} Z"
+            }
+            if (props.preview == true) {
+                opacity = 0.5
             }
         }
     }

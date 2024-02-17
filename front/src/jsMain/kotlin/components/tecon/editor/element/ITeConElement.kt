@@ -2,7 +2,9 @@ package components.tecon.editor.element
 
 import components.tecon.editor.EditMode
 import emotion.react.css
+import org.webctc.common.types.tecon.shape.IShape
 import react.FC
+import react.Props
 import react.PropsWithChildren
 import react.dom.svg.ReactSVG.g
 import web.cssom.CustomPropertyName
@@ -14,6 +16,13 @@ external interface ITeConElementProps : PropsWithChildren {
     var selected: Boolean?
 }
 
+external interface PreviewElementProps : Props {
+    var preview: Boolean?
+}
+
+external interface IShapeElementProps<out T : IShape> : Props {
+    var iShape: @UnsafeVariance T
+}
 
 external interface ITeConElementBaseProps : PropsWithChildren {
     var mode: EditMode?

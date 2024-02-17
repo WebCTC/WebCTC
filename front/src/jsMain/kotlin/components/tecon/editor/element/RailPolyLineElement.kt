@@ -8,12 +8,10 @@ import react.Props
 import react.dom.html.ReactHTML.h2
 import react.dom.svg.ReactSVG.polyline
 
-external interface RailPolyLineElementProps : RailElementProps {
-    var railPolyLine: RailPolyLine
-}
+external interface RailPolyLineElementProps : RGStateElementProps, IShapeElementProps<RailPolyLine>
 
 val RailPolyLineElement = FC<RailPolyLineElementProps> { props ->
-    val railPolyLine = props.railPolyLine
+    val railPolyLine = props.iShape
 
     val rgStateList = props.rgState ?: emptySet()
 
@@ -33,6 +31,9 @@ val RailPolyLineElement = FC<RailPolyLineElementProps> { props ->
         polyline {
             strokeWidth = 8.0
             points = railPolyLine.points.joinToString(" ") { "${it.x},${it.y}" }
+            if (props.preview == true) {
+                opacity = 0.5
+            }
         }
     }
 }

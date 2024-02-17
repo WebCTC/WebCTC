@@ -6,12 +6,10 @@ import react.dom.svg.ReactSVG.rect
 import kotlin.math.abs
 import kotlin.math.min
 
-external interface RectBoxElementProps : ITeConElementProps {
-    var rectBox: RectBox
-}
+external interface RectBoxElementProps : ITeConElementProps, PreviewElementProps, IShapeElementProps<RectBox>
 
 val RectBoxElement = FC<RectBoxElementProps> { props ->
-    val rectBox = props.rectBox
+    val rectBox = props.iShape
 
     ITeConElementBase {
         mode = props.mode
@@ -33,6 +31,9 @@ val RectBoxElement = FC<RectBoxElementProps> { props ->
             rx = 8.0
             ry = 8.0
             strokeWidth = 8.0
+            if (props.preview == true) {
+                opacity = 0.5
+            }
         }
     }
 }

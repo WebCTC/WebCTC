@@ -3,7 +3,9 @@ package components.tecon
 import client
 import components.common.OutlinedInputWithLabel
 import components.tecon.editor.*
-import components.tecon.editor.element.*
+import components.tecon.editor.element.RailLineProperty
+import components.tecon.editor.element.RailPolyLineProperty
+import components.tecon.editor.element.SignalProperty
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.MainScope
@@ -12,21 +14,19 @@ import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.PosInt2D
 import org.webctc.common.types.tecon.TeCon
-import org.webctc.common.types.tecon.shape.*
+import org.webctc.common.types.tecon.shape.IShape
+import org.webctc.common.types.tecon.shape.RailLine
+import org.webctc.common.types.tecon.shape.RailPolyLine
+import org.webctc.common.types.tecon.shape.Signal
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.h2
-import react.dom.svg.ReactSVG.line
-import react.dom.svg.ReactSVG.polyline
-import react.dom.svg.ReactSVG.rect
 import react.router.useNavigate
 import react.useRef
 import react.useState
 import utils.removeAtNew
 import utils.setNew
 import web.cssom.*
-import kotlin.math.abs
-import kotlin.math.min
 
 external interface TeConEditorViewComponentProps : Props {
     var tecon: TeCon
@@ -41,7 +41,7 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
     var dotVisible by useState(true)
     val panzoomRef = useRef<dynamic>()
 
-    var mode by useState(EditMode.HAND)
+    var mode by useState<EditMode>(EditMode.HAND)
 
     var nowMousePos by useState(PosInt2D(0, 0))
     var selectedPosList by useState<List<PosInt2D>>(listOf())
@@ -72,7 +72,7 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                     if (fin) newSelectedPosList = newSelectedPosList.dropLast(1)
 
                     if (newSelectedPosList.size == mode.posCount || fin) {
-                        parts += mode.create(newSelectedPosList)!!
+                        parts += mode.createIShape(newSelectedPosList)!!
                         newSelectedPosList = listOf()
                     }
 
@@ -86,92 +86,11 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                 val onSelect = { if (selectedPart == iShape) selectedPart = null else selectedPart = iShape }
                 val onDelete = { parts = parts.removeAtNew(index) }
                 val selected = selectedPart == iShape
-                when (iShape) {
-                    is RailLine -> RailLineElement {
-                        rail = iShape
-                        this.mode = mode
-                        this.onSelect = onSelect
-                        this.onDelete = onDelete
-                        this.selected = selected
-                    }
-
-                    is RailPolyLine -> RailPolyLineElement {
-                        railPolyLine = iShape
-                        this.mode = mode
-                        this.onSelect = onSelect
-                        this.onDelete = onDelete
-                        this.selected = selected
-                    }
-
-                    is Signal -> SignalElement {
-                        signal = iShape
-                        this.mode = mode
-                        this.onSelect = onSelect
-                        this.onDelete = onDelete
-                        this.selected = selected
-                    }
-
-                    is RectBox -> RectBoxElement {
-                        rectBox = iShape
-                        this.mode = mode
-                        this.onSelect = onSelect
-                        this.onDelete = onDelete
-                        this.selected = selected
-                    }
-
-                    else -> {}
-                }
+                +EditMode.createElement(iShape, mode, onSelect, onDelete, selected)
             }
 
             if (selectedPosList.isNotEmpty()) {
-                when (mode) {
-                    EditMode.RAIL -> {
-                        val selectedPos = selectedPosList.first()
-                        line {
-                            x1 = selectedPos.x.toDouble()
-                            y1 = selectedPos.y.toDouble()
-                            x2 = nowMousePos.x.toDouble()
-                            y2 = nowMousePos.y.toDouble()
-                            stroke = "white"
-                            strokeWidth = 8.0
-                            opacity = 0.5
-                        }
-                    }
-
-                    EditMode.POLYLINE -> {
-                        polyline {
-                            points = (selectedPosList + nowMousePos).joinToString(" ") { "${it.x},${it.y}" }
-                            stroke = "white"
-                            strokeWidth = 8.0
-                            fill = "none"
-                            opacity = 0.5
-                        }
-                    }
-
-                    EditMode.RECT -> {
-                        val selectedPos = selectedPosList.first()
-
-                        val minX = min(selectedPos.x, nowMousePos.x).toDouble()
-                        val minY = min(selectedPos.y, nowMousePos.y).toDouble()
-                        val boxWidth = abs(selectedPos.x - nowMousePos.x).toDouble()
-                        val boxHeight = abs(selectedPos.y - nowMousePos.y).toDouble()
-
-                        rect {
-                            x = minX
-                            y = minY
-                            width = boxWidth
-                            height = boxHeight
-                            stroke = "white"
-                            strokeWidth = 8.0
-                            fill = "none"
-                            opacity = 0.5
-                            rx = 8.0
-                            ry = 8.0
-                        }
-                    }
-
-                    else -> {}
-                }
+                +EditMode.createPreviewElement(mode, selectedPosList + nowMousePos)
             }
         }
         Box {
@@ -273,7 +192,7 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                     }
                 }
 
-                if (selectedPart != null) {
+                selectedPart?.let { part ->
                     Card {
                         sx {
                             backgroundColor = Color("white")
@@ -282,23 +201,23 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                         }
                         CardContent {
                             val onChange = { it: IShape ->
-                                val index = parts.indexOf(selectedPart)
+                                val index = parts.indexOf(part)
                                 selectedPart = it
                                 parts = parts.setNew(index, it)
                             }
-                            when (selectedPart) {
+                            when (part) {
                                 is RailLine -> RailLineProperty {
-                                    railLine = selectedPart as RailLine
+                                    railLine = part
                                     this.onChange = onChange
                                 }
 
                                 is RailPolyLine -> RailPolyLineProperty {
-                                    railLine = selectedPart as RailPolyLine
+                                    railLine = part
                                     this.onChange = onChange
                                 }
 
                                 is Signal -> SignalProperty {
-                                    signal = selectedPart as Signal
+                                    signal = part
                                     this.onChange = onChange
                                 }
 

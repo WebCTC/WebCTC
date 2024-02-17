@@ -275,6 +275,9 @@ fun WebAuthnRegistrationOption.toOption(): CredentialCreationOptions {
                 name = kotlinData.user.name
                 displayName = kotlinData.user.displayName
             }
+            authenticatorSelection = jso {
+                requireResidentKey = true
+            }
             pubKeyCredParams = kotlinData.pubKeyCredParams.map {
                 jso<PublicKeyCredentialParameters> {
                     type = PublicKeyCredentialType.publicKey

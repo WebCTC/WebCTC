@@ -22,14 +22,14 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-external interface SignalElementProps : ITeConElementProps {
-    var signal: Signal
+external interface SignalElementProps : ITeConElementProps, IShapeElementProps<Signal> {
     var signalState: SignalState?
 }
 
 val SignalElement = FC<SignalElementProps> { props ->
-    val pos = props.signal.pos
-    val rotation = props.signal.rotation
+    val signal = props.iShape
+    val pos = signal.pos
+    val rotation = signal.rotation
     val x = pos.x
     val y = pos.y
 
@@ -40,7 +40,7 @@ val SignalElement = FC<SignalElementProps> { props ->
         onDelete = props.onDelete
         onSelect = props.onSelect
         fill = (if (signalLevel > 1) "LawnGreen" else "#202020")
-        stroke = if (props.signal.signalPos == PosInt.ZERO) "gray" else "white"
+        stroke = if (signal.signalPos == PosInt.ZERO) "gray" else "white"
         selected = props.selected
         rotation?.let {
             val cos = cos((-rotation - 90) * (PI / 180))

@@ -36,22 +36,22 @@ val TeConViewer = FC<TeConViewerProps> { props ->
         parts.forEach {
             when (it) {
                 is RailLine -> RailLineElement {
-                    rail = it
-                    rgState = rgStateList.filter { rg -> it.railGroupList.contains(rg.uuid) }.toSet()
+                    iShape = it
+                    rgState = rgStateList.filter { rg -> rg.uuid in it.railGroupList }.toSet()
                 }
 
                 is RailPolyLine -> RailPolyLineElement {
-                    railPolyLine = it
-                    rgState = rgStateList.filter { rg -> it.railGroupList.contains(rg.uuid) }.toSet()
+                    iShape = it
+                    rgState = rgStateList.filter { rg -> rg.uuid in it.railGroupList }.toSet()
                 }
 
                 is Signal -> SignalElement {
-                    signal = it
+                    iShape = it
                     signalState = signalStateList.find { ss -> it.signalPos == ss.pos }
                 }
 
                 is RectBox -> RectBoxElement {
-                    rectBox = it
+                    iShape = it
                 }
             }
         }
