@@ -102,12 +102,9 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
                         padding = 6.px
                         gap = 8.px
                     }
-                    arrayOf(PosDouble::x, PosDouble::y, PosDouble::z).forEach {
-                        TextFieldPosDouble {
-                            this.pos = pos
-                            this.prop = it
-                            this.onChange = { pos = it }
-                        }
+                    TextFieldPosDoubleXYZ {
+                        this.pos = pos
+                        this.onChange = { pos = it }
                     }
                 }
             }
@@ -127,13 +124,10 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
                                     padding = 6.px
                                     gap = 8.px
                                 }
-                                arrayOf(PosDouble::x, PosDouble::y, PosDouble::z).forEach {
-                                    TextFieldPosDouble {
-                                        this.pos = circleRange.center
-                                        this.prop = it
-                                        this.onChange = {
-                                            range = circleRange.copy(center = it)
-                                        }
+                                TextFieldPosDoubleXYZ {
+                                    this.pos = circleRange.center
+                                    this.onChange = {
+                                        range = circleRange.copy(center = it)
                                     }
                                 }
                             }
@@ -171,13 +165,10 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
                                     padding = 6.px
                                     gap = 8.px
                                 }
-                                arrayOf(PosDouble::x, PosDouble::y, PosDouble::z).forEach {
-                                    TextFieldPosDouble {
-                                        this.pos = rectangleRange.start
-                                        this.prop = it
-                                        this.onChange = {
-                                            range = rectangleRange.copy(start = it)
-                                        }
+                                TextFieldPosDoubleXYZ {
+                                    this.pos = rectangleRange.start
+                                    this.onChange = {
+                                        range = rectangleRange.copy(start = it)
                                     }
                                 }
                             }
@@ -190,13 +181,10 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
                                     padding = 6.px
                                     gap = 8.px
                                 }
-                                arrayOf(PosDouble::x, PosDouble::y, PosDouble::z).forEach {
-                                    TextFieldPosDouble {
-                                        this.pos = rectangleRange.end
-                                        this.prop = it
-                                        this.onChange = {
-                                            range = rectangleRange.copy(end = it)
-                                        }
+                                TextFieldPosDoubleXYZ {
+                                    this.pos = rectangleRange.end
+                                    this.onChange = {
+                                        range = rectangleRange.copy(end = it)
                                     }
                                 }
                             }
@@ -227,6 +215,22 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
         }
     }
 }
+
+external interface TextFieldPosDoubleXYZProps : Props {
+    var pos: PosDouble
+    var onChange: ((PosDouble) -> Unit)
+}
+
+val TextFieldPosDoubleXYZ = FC<TextFieldPosDoubleXYZProps> { props ->
+    arrayOf(PosDouble::x, PosDouble::y, PosDouble::z).forEach {
+        TextFieldPosDouble {
+            this.pos = props.pos
+            this.prop = it
+            this.onChange = props.onChange
+        }
+    }
+}
+
 
 external interface TextFieldPosDoubleProps : Props {
     var pos: PosDouble
