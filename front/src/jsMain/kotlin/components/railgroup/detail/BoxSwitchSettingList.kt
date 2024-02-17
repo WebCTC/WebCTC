@@ -13,6 +13,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.dom.events.ChangeEvent
+import react.dom.events.FocusEvent
 import react.dom.onChange
 import utils.removeAtNew
 import utils.setNew
@@ -154,13 +155,16 @@ val AccordionSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                                         sx { flexGrow = number(1.0) }
                                         label = ReactNode("Key")
                                         size = Size.small
-                                        value = entry.key
-                                        onChange = { formEvent ->
-                                            val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
-                                            val newKey = event.target.value
+                                        defaultValue = entry.key
+                                        onBlur = { focusEvent ->
+                                            val event = focusEvent.unsafeCast<FocusEvent<HTMLInputElement>>()
+                                            val target = event.target
+                                            val newKey = target.value
                                             switchSetting.copy(
                                                 settingMap = settingMap.setNew(index, entry.copy(key = newKey))
                                             ).also(updateSwitchSetting)
+
+                                            target.value = newKey
                                         }
                                     }
                                     ArrowRight { sx { marginBlock = 8.px } }
