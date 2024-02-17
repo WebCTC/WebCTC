@@ -245,6 +245,7 @@ private val TextFieldPosDouble = FC<TextFieldPosDoubleProps> {
     TextField {
         size = Size.small
         defaultValue = prop.get(pos)
+        key = prop.get(pos).toString()
         type = InputType.number
         label = ReactNode(prop.name)
         onBlur = { focusEvent ->
