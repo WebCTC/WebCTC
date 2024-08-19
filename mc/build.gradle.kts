@@ -56,7 +56,7 @@ dependencies {
     embed("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
 
     embed(project(":common"))
-    embed("app.softwork:kotlinx-uuid-core:0.0.22")
+    embed("app.softwork:kotlinx-uuid-core:0.1.1")
 
     api("com.github.Kai-Z-JP:KaizPatchX:-SNAPSHOT:dev")
 }

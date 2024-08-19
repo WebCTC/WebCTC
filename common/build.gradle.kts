@@ -16,7 +16,7 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
-                implementation("app.softwork:kotlinx-uuid-core:0.0.22")
+                implementation("app.softwork:kotlinx-uuid-core:0.1.1")
             }
         }
     }
