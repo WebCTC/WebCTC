@@ -25,6 +25,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.cache.tecon.TeConData
 import org.webctc.cache.waypoint.WayPointCacheData
+import org.webctc.command.CommandRailGroup
 import org.webctc.command.CommandWebCTC
 import org.webctc.common.types.kotlinxJson
 import org.webctc.plugin.PluginManager
@@ -114,6 +115,7 @@ class WebCTCCore {
     @Mod.EventHandler
     fun handleServerStaring(event: FMLServerStartingEvent) {
         event.registerServerCommand(CommandWebCTC())
+        event.registerServerCommand(CommandRailGroup())
     }
 
     @Mod.EventHandler
