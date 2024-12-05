@@ -83,11 +83,11 @@ class WebCTCEventHandler {
             if (tickCount == 20) {
                 WebCTCCore.INSTANCE.railData.update()
                 WebCTCCore.INSTANCE.signalData.update()
-                SignalStateWS.sendAll()
+                RailGroupData.railGroupList.forEach { it.update() }
                 tickCount = 0
             }
-            RailGroupData.railGroupList.forEach { it.update() }
             RailGroupData.updateLocks()
+            SignalStateWS.sendAll()
             RailGroupStateWS.sendAll()
         }
     }
