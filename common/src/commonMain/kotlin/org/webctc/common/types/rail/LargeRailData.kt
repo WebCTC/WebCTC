@@ -8,7 +8,7 @@ data class LargeRailData(
     val pos: PosInt,
     val isTrainOnRail: Boolean = false,
     val railMaps: List<IRailMapData>,
-    val converting: Boolean = false
+    val turning: Boolean = false
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -19,7 +19,7 @@ data class LargeRailData(
         if (pos != other.pos) return false
         if (isTrainOnRail != other.isTrainOnRail) return false
         if (railMaps != other.railMaps) return false
-        if (converting != other.converting) return false
+        if (turning != other.turning) return false
 
         return true
     }
