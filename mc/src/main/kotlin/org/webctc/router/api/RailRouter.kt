@@ -64,11 +64,11 @@ fun TileEntityLargeRailCore.toData(): LargeRailData {
         this.startPoint.toPosInt(),
         this.isTrainOnRail,
         this.getRailMaps(),
-        this.isConverting()
+        this.isTurning()
     )
 }
 
-fun TileEntityLargeRailCore.isConverting(): Boolean {
+fun TileEntityLargeRailCore.isTurning(): Boolean {
     return (this as? TileEntityLargeRailSwitchCore)?.switch?.points?.any {
         !(it.movement == 0.toFloat() && !it.rpRoot.checkRSInput(this.worldObj) ||
                 it.movement == 1.toFloat() && it.rpRoot.checkRSInput(this.worldObj))

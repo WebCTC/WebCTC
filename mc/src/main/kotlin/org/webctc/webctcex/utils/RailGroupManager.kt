@@ -4,7 +4,7 @@ import jp.ngt.rtm.rail.TileEntityLargeRailSwitchCore
 import kotlinx.uuid.UUID
 import org.webctc.WebCTCCore
 import org.webctc.railgroup.RailGroupData
-import org.webctc.router.api.isConverting
+import org.webctc.router.api.isTurning
 
 class RailGroupManager {
     companion object {
@@ -58,15 +58,27 @@ class RailGroupManager {
             return RailGroupData.isLocked(uuids.map(::UUID).toTypedArray(), key)
         }
 
+        @Deprecated("Use isTurning instead", ReplaceWith("isTurning(uuid)"))
         @JvmStatic
         fun isConverting(uuid: String): Boolean {
-            return RailGroupData.isConverting(UUID(uuid))
+            return isTurning(uuid)
         }
 
         @JvmStatic
+        fun isTurning(uuid: String): Boolean {
+            return RailGroupData.isTurning(UUID(uuid))
+        }
+
+        @Deprecated("Use isTurning instead", ReplaceWith("isTurning(x, y, z)"))
+        @JvmStatic
         fun isConverting(x: Int, y: Int, z: Int): Boolean {
+            return isTurning(x, y, z)
+        }
+
+        @JvmStatic
+        fun isTurning(x: Int, y: Int, z: Int): Boolean {
             return WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z)?.let {
-                it is TileEntityLargeRailSwitchCore && it.isConverting()
+                it is TileEntityLargeRailSwitchCore && it.isTurning()
             } ?: false
         }
     }

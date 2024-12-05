@@ -9,6 +9,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.common.types.railgroup.Lock
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.railgroup.RailGroupChain
+import java.util.concurrent.CopyOnWriteArrayList
 
 class RailGroupData(mapName: String) : WorldSavedData(mapName) {
     override fun readFromNBT(nbt: NBTTagCompound) {
@@ -25,7 +26,7 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
     }
 
     companion object {
-        val railGroupList = mutableListOf<RailGroup>()
+        val railGroupList = CopyOnWriteArrayList<RailGroup>()
         private val lockList = mutableMapOf<UUID, Lock>()
         private val rgcc = mutableSetOf<RailGroupChain>()
 
@@ -89,23 +90,23 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
 
         fun isReserved(uuid: UUID): Boolean {
             val lock = lockList[uuid]
-            return lock != null && lock.frozenTime == 0 && !isConverting(uuid)
+            return lock != null && lock.frozenTime == 0 && !isTurning(uuid)
         }
 
         fun isReserved(uuid: UUID, key: String): Boolean {
             val lock = lockList[uuid]
-            return lock?.key == key && lock.frozenTime == 0 && !isConverting(uuid)
+            return lock?.key == key && lock.frozenTime == 0 && !isTurning(uuid)
         }
 
         fun isReserved(uuids: Array<UUID>, key: String): Boolean {
             return uuids.all { isReserved(it, key) }
         }
 
-        fun isConverting(uuid: UUID): Boolean {
+        fun isTurning(uuid: UUID): Boolean {
             return findRailGroup(uuid)?.let { rg ->
                 rg.railPosList
                     .mapNotNull { RailCacheData.railMapCache[it] }
-                    .any { it.converting }
+                    .any { it.turning }
             } ?: false
         }
 
