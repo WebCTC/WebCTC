@@ -1,13 +1,10 @@
 package org.webctc.router
 
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import kotlinx.uuid.UUID
-import kotlinx.uuid.toKotlinUUID
 import net.minecraft.entity.player.EntityPlayer
 import org.webctc.WebCTCCore
 import org.webctc.common.types.mc.PlayerPrincipal
@@ -15,6 +12,8 @@ import org.webctc.plugin.webauthn.authChallenge
 import org.webctc.plugin.webauthn.authenticate
 import org.webctc.plugin.webauthn.challenge
 import org.webctc.plugin.webauthn.register
+import kotlin.uuid.Uuid
+import kotlin.uuid.toKotlinUuid
 
 class AuthRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit {
@@ -56,7 +55,7 @@ class AuthRouter : WebCTCRouter() {
 class PlayerSessionManager {
     data class PlayerData(
         val name: String,
-        val uuid: UUID
+        val uuid: Uuid
     )
 
     companion object {
@@ -68,7 +67,7 @@ class PlayerSessionManager {
 
         fun createSession(player: EntityPlayer): String {
             val key = generateKey()
-            sessionMap[key] = PlayerData(player.commandSenderName, player.uniqueID.toKotlinUUID())
+            sessionMap[key] = PlayerData(player.commandSenderName, player.uniqueID.toKotlinUuid())
             return key
         }
 

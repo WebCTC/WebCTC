@@ -1,6 +1,5 @@
 package components.railgroup.detail
 
-import kotlinx.uuid.UUID
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
@@ -13,11 +12,12 @@ import web.cssom.AlignItems
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.px
+import kotlin.uuid.Uuid
 
 external interface BoxRailGroupListProps : Props {
     var title: String?
-    var railGroupList: Set<UUID>
-    var updateRailGroupList: (Set<UUID>) -> Unit
+    var railGroupList: Set<Uuid>
+    var updateRailGroupList: (Set<Uuid>) -> Unit
 }
 
 val BoxRailGroupList = FC<BoxRailGroupListProps> { props ->
@@ -29,7 +29,7 @@ val BoxRailGroupList = FC<BoxRailGroupListProps> { props ->
         railGroupList.removeAtNew(index).also(onChange)
     }
 
-    val add = { uuid: UUID ->
+    val add = { uuid: Uuid ->
         (railGroupList + uuid).also(onChange)
     }
 
@@ -59,7 +59,7 @@ val BoxRailGroupList = FC<BoxRailGroupListProps> { props ->
 }
 
 external interface ListItemRailGroupUUIDProps : Props {
-    var uuid: UUID
+    var uuid: Uuid
     var onDelete: () -> Unit
 }
 
@@ -80,12 +80,12 @@ val ListItemRailGroupUUID = FC<ListItemRailGroupUUIDProps> { props ->
 }
 
 external interface ListItemRailGroupUUIDAppendProps : Props {
-    var onAdd: (UUID) -> Unit
+    var onAdd: (Uuid) -> Unit
 }
 
 val ListItemRailGroupUUIDAppend = FC<ListItemRailGroupUUIDAppendProps> { props ->
     var inputValue by useState("")
-    val uuid = if (UUID.isValidUUIDString(inputValue)) UUID(inputValue) else null
+    val uuid = Uuid.parse(inputValue) ?: null
     val railGroup by useData<RailGroup>(uuid?.let { "/api/railgroups/$it" })
     val add = {
         uuid?.let {

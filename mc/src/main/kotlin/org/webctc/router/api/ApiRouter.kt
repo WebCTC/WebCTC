@@ -1,6 +1,5 @@
 package org.webctc.router.api
 
-import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -9,7 +8,7 @@ import org.webctc.router.AbstractRouter
 class ApiRouter : AbstractRouter() {
     override fun install(application: Route): Route.() -> Unit = {
         get {
-            val req = context.request
+            val req = call.request
             val scheme = req.origin.scheme
             val remoteHost = req.origin.serverHost
             val remotePort = req.origin.serverPort.let {

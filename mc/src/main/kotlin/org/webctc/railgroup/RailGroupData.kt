@@ -1,7 +1,6 @@
 package org.webctc.railgroup
 
 import jp.ngt.rtm.rail.TileEntityLargeRailCore
-import kotlinx.uuid.UUID
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.WorldSavedData
@@ -10,6 +9,7 @@ import org.webctc.common.types.railgroup.Lock
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.railgroup.RailGroupChain
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.uuid.Uuid
 
 class RailGroupData(mapName: String) : WorldSavedData(mapName) {
     override fun readFromNBT(nbt: NBTTagCompound) {
@@ -27,10 +27,10 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
 
     companion object {
         val railGroupList = CopyOnWriteArrayList<RailGroup>()
-        private val lockList = mutableMapOf<UUID, Lock>()
+        private val lockList = mutableMapOf<Uuid, Lock>()
         private val rgcc = mutableSetOf<RailGroupChain>()
 
-        fun setSignal(uuid: UUID, signal: Int) {
+        fun setSignal(uuid: Uuid, signal: Int) {
             val world = MinecraftServer.getServer().entityWorld
             findRailGroup(uuid)?.let { rg ->
                 rg.railPosList
@@ -40,15 +40,30 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             }
         }
 
-        fun isTrainOnRail(uuid: UUID): Boolean {
-            return findRailGroup(uuid)?.isTrainOnRail() ?: false
+        @JvmStatic
+        fun setSignal(uuid: String, signal: Int) {
+            setSignal(Uuid.parse(uuid), signal)
         }
 
-        fun hasReleaseFlag(uuid: UUID): Boolean {
-            return lockList[uuid]?.releaseFlag ?: false
+        fun isTrainOnRail(uuid: Uuid): Boolean {
+            return findRailGroup(uuid)?.isTrainOnRail() == true
         }
 
-        fun reserve(uuids: Array<UUID>, key: String): Boolean {
+        @JvmStatic
+        fun isTrainOnRail(uuid: String): Boolean {
+            return isTrainOnRail(Uuid.parse(uuid))
+        }
+
+        fun hasReleaseFlag(uuid: Uuid): Boolean {
+            return lockList[uuid]?.releaseFlag == true
+        }
+
+        @JvmStatic
+        fun hasReleaseFlag(uuid: String): Boolean {
+            return hasReleaseFlag(Uuid.parse(uuid))
+        }
+
+        fun reserve(uuids: Array<Uuid>, key: String): Boolean {
             val railGroupChain = RailGroupChain(uuids.toLinkedHashSet(), key)
 
             if (!railGroupChain.canLock(key)) {
@@ -60,7 +75,12 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             return true
         }
 
-        fun release(uuids: Array<UUID>, key: String) {
+        @JvmStatic
+        fun reserve(uuids: Array<String>, key: String): Boolean {
+            return reserve(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
+        }
+
+        fun release(uuids: Array<Uuid>, key: String) {
             val railGroupChain = RailGroupChain(uuids.toLinkedHashSet(), key)
             if (railGroupChain in rgcc) {
                 rgcc -= railGroupChain
@@ -68,50 +88,105 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             }
         }
 
-        fun unsafeRelease(uuid: UUID) {
+        @JvmStatic
+        fun release(uuids: Array<String>, key: String) {
+            release(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
+        }
+
+        fun unsafeRelease(uuid: Uuid) {
             lockList -= uuid
         }
 
-        fun unsafeRelease(uuids: Array<UUID>) {
+        @JvmStatic
+        fun unsafeRelease(uuid: String) {
+            unsafeRelease(Uuid.parse(uuid))
+        }
+
+        fun unsafeRelease(uuids: Array<Uuid>) {
             lockList -= uuids.toSet()
         }
 
-        fun isLocked(uuid: UUID): Boolean {
+        @JvmStatic
+        fun unsafeRelease(uuids: Array<String>) {
+            unsafeRelease(uuids.map { Uuid.parse(it) }.toTypedArray())
+        }
+
+        fun isLocked(uuid: Uuid): Boolean {
             return lockList[uuid] != null
         }
 
-        fun isLocked(uuid: UUID, key: String): Boolean {
+        @JvmStatic
+        fun isLocked(uuid: String): Boolean {
+            return isLocked(Uuid.parse(uuid))
+        }
+
+        fun isLocked(uuid: Uuid, key: String): Boolean {
             return lockList[uuid]?.key == key
         }
 
-        fun isLocked(uuids: Array<UUID>, key: String): Boolean {
+        @JvmStatic
+        fun isLocked(uuid: String, key: String): Boolean {
+            return isLocked(Uuid.parse(uuid), key)
+        }
+
+        fun isLocked(uuids: Array<Uuid>, key: String): Boolean {
             return uuids.all { isLocked(it, key) }
         }
 
-        fun isReserved(uuid: UUID): Boolean {
+        @JvmStatic
+        fun isLocked(uuids: Array<String>, key: String): Boolean {
+            return isLocked(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
+        }
+
+        fun isReserved(uuid: Uuid): Boolean {
             val lock = lockList[uuid]
             return lock != null && lock.frozenTime == 0 && !isTurning(uuid)
         }
 
-        fun isReserved(uuid: UUID, key: String): Boolean {
+        @JvmStatic
+        fun isReserved(uuid: String): Boolean {
+            return isReserved(Uuid.parse(uuid))
+        }
+
+        fun isReserved(uuid: Uuid, key: String): Boolean {
             val lock = lockList[uuid]
             return lock?.key == key && lock.frozenTime == 0 && !isTurning(uuid)
         }
 
-        fun isReserved(uuids: Array<UUID>, key: String): Boolean {
+        @JvmStatic
+        fun isReserved(uuid: String, key: String): Boolean {
+            return isReserved(Uuid.parse(uuid), key)
+        }
+
+        fun isReserved(uuids: Array<Uuid>, key: String): Boolean {
             return uuids.all { isReserved(it, key) }
         }
 
-        fun isTurning(uuid: UUID): Boolean {
+        @JvmStatic
+        fun isReserved(uuids: Array<String>, key: String): Boolean {
+            return isReserved(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
+        }
+
+        fun isTurning(uuid: Uuid): Boolean {
             return findRailGroup(uuid)?.let { rg ->
                 rg.railPosList
                     .mapNotNull { RailCacheData.railMapCache[it] }
                     .any { it.turning }
-            } ?: false
+            } == true
         }
 
-        fun getReservedKey(uuid: UUID): String? {
+        @JvmStatic
+        fun isTurning(uuid: String): Boolean {
+            return isTurning(Uuid.parse(uuid))
+        }
+
+        fun getReservedKey(uuid: Uuid): String? {
             return lockList[uuid]?.key
+        }
+
+        @JvmStatic
+        fun getReservedKey(uuid: String): String? {
+            return getReservedKey(Uuid.parse(uuid))
         }
 
         fun updateLocks() {
@@ -122,7 +197,7 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             }
         }
 
-        private fun findRailGroup(uuid: UUID): RailGroup? {
+        private fun findRailGroup(uuid: Uuid): RailGroup? {
             return railGroupList.find { it.uuid == uuid }
         }
 

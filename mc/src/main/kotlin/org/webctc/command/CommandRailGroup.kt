@@ -1,10 +1,10 @@
 package org.webctc.command
 
-import kotlinx.uuid.UUID
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.util.ChatComponentText
 import org.webctc.railgroup.RailGroupData
+import kotlin.uuid.Uuid
 
 class CommandRailGroup : CommandBase() {
     override fun getCommandName() = "railgroup"
@@ -16,7 +16,7 @@ class CommandRailGroup : CommandBase() {
             when (args[0].lowercase()) {
                 "setsignal" -> {
                     if (args.size == 3) {
-                        val uuid = UUID(args[1])
+                        val uuid = Uuid.parse(args[1])
                         val signal = args[2].toInt()
                         RailGroupData.setSignal(uuid, signal)
                         sender.addChatMessage(ChatComponentText("[RailGroup] Set signal: $signal to uuid: $uuid"))

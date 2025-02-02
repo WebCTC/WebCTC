@@ -33,10 +33,8 @@ import react.dom.html.ReactHTML.p
 import react.router.useNavigate
 import react.useState
 import utils.useData
-import web.authn.AuthenticatorAttestationResponse
-import web.authn.PublicKeyCredential
-import web.authn.PublicKeyCredentialParameters
-import web.authn.PublicKeyCredentialType
+import web.authn.*
+import web.authn.PublicKeyCredentialType.Companion.publicKey
 import web.credentials.CredentialCreationOptions
 import web.cssom.*
 import web.navigator.navigator
@@ -261,30 +259,31 @@ val Account = FC {
 fun WebAuthnRegistrationOption.toOption(): CredentialCreationOptions {
     val kotlinData = this
 
-    return jso {
-        publicKey = jso {
-            timeout = kotlinData.timeout
-            challenge = kotlinData.challenge.toBuffer()
-            rp = jso {
-                id = kotlinData.rp.id
+    return CredentialCreationOptions(
+        publicKey = PublicKeyCredentialCreationOptions(
+
+            timeout = kotlinData.timeout,
+            challenge = kotlinData.challenge.toBuffer(),
+            rp = PublicKeyCredentialRpEntity(
+                id = kotlinData.rp.id,
                 name = kotlinData.rp.name
-            }
-            user = jso {
-                id = kotlinData.user.id.toBuffer()
-                name = kotlinData.user.name
-                displayName = kotlinData.user.displayName
-            }
-            authenticatorSelection = jso {
+            ),
+            user = PublicKeyCredentialUserEntity(
+                id = kotlinData.user.id.toBuffer(),
+                name = kotlinData.user.name,
+                displayName = kotlinData.user.displayName,
+            ),
+            authenticatorSelection = AuthenticatorSelectionCriteria(
                 requireResidentKey = true
-            }
+            ),
             pubKeyCredParams = kotlinData.pubKeyCredParams.map {
-                jso<PublicKeyCredentialParameters> {
-                    type = PublicKeyCredentialType.publicKey
+                PublicKeyCredentialParameters(
+                    type = publicKey,
                     alg = it.alg
-                }
+                )
             }.toTypedArray()
-        }
-    }
+        ),
+    )
 }
 
 @OptIn(ExperimentalEncodingApi::class)

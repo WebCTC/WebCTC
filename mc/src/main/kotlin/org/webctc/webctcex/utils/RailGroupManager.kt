@@ -1,61 +1,61 @@
 package org.webctc.webctcex.utils
 
 import jp.ngt.rtm.rail.TileEntityLargeRailSwitchCore
-import kotlinx.uuid.UUID
 import org.webctc.WebCTCCore
 import org.webctc.railgroup.RailGroupData
 import org.webctc.router.api.isTurning
+import kotlin.uuid.Uuid
 
 class RailGroupManager {
     companion object {
         @JvmStatic
         fun setSignal(uuid: String, signal: Int) {
-            return RailGroupData.setSignal(UUID(uuid), signal)
+            return RailGroupData.setSignal(Uuid.parse(uuid), signal)
         }
 
         @JvmStatic
         fun isTrainOnRail(uuid: String): Boolean {
-            return RailGroupData.isTrainOnRail(UUID(uuid))
+            return RailGroupData.isTrainOnRail(Uuid.parse(uuid))
         }
 
         @JvmStatic
         fun reserve(uuids: Array<String>, key: String): Boolean {
-            return RailGroupData.reserve(uuids.map(::UUID).toTypedArray(), key)
+            return RailGroupData.reserve(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
         }
 
         @JvmStatic
         fun release(uuids: Array<String>, key: String) {
-            RailGroupData.release(uuids.map(::UUID).toTypedArray(), key)
+            RailGroupData.release(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
         }
 
         @JvmStatic
         fun unsafeRelease(uuid: String) {
-            RailGroupData.unsafeRelease(UUID(uuid))
+            RailGroupData.unsafeRelease(Uuid.parse(uuid))
         }
 
         @JvmStatic
         fun unsafeRelease(uuids: Array<String>) {
-            RailGroupData.unsafeRelease(uuids.map(::UUID).toTypedArray())
+            RailGroupData.unsafeRelease(uuids.map { Uuid.parse(it) }.toTypedArray())
         }
 
         @JvmStatic
         fun isReserved(uuid: String, key: String): Boolean {
-            return RailGroupData.isReserved(UUID(uuid), key)
+            return RailGroupData.isReserved(Uuid.parse(uuid), key)
         }
 
         @JvmStatic
         fun isReserved(uuids: Array<String>, key: String): Boolean {
-            return RailGroupData.isReserved(uuids.map(::UUID).toTypedArray(), key)
+            return RailGroupData.isReserved(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
         }
 
         @JvmStatic
         fun isLocked(uuid: String, key: String): Boolean {
-            return RailGroupData.isLocked(UUID(uuid), key)
+            return RailGroupData.isLocked(Uuid.parse(uuid), key)
         }
 
         @JvmStatic
         fun isLocked(uuids: Array<String>, key: String): Boolean {
-            return RailGroupData.isLocked(uuids.map(::UUID).toTypedArray(), key)
+            return RailGroupData.isLocked(uuids.map { Uuid.parse(it) }.toTypedArray(), key)
         }
 
         @Deprecated("Use isTurning instead", ReplaceWith("isTurning(uuid)"))
@@ -66,7 +66,7 @@ class RailGroupManager {
 
         @JvmStatic
         fun isTurning(uuid: String): Boolean {
-            return RailGroupData.isTurning(UUID(uuid))
+            return RailGroupData.isTurning(Uuid.parse(uuid))
         }
 
         @Deprecated("Use isTurning instead", ReplaceWith("isTurning(x, y, z)"))
@@ -79,7 +79,7 @@ class RailGroupManager {
         fun isTurning(x: Int, y: Int, z: Int): Boolean {
             return WebCTCCore.INSTANCE.server.entityWorld.getTileEntity(x, y, z)?.let {
                 it is TileEntityLargeRailSwitchCore && it.isTurning()
-            } ?: false
+            } == true
         }
     }
 }

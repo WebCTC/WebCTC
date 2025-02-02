@@ -8,8 +8,6 @@ import jp.ngt.rtm.rail.TileEntityLargeRailBase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.uuid.UUID
-import kotlinx.uuid.toKotlinUUID
 import net.minecraft.block.Block
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Items
@@ -28,6 +26,8 @@ import org.webctc.router.api.Connection
 import org.webctc.router.api.RailGroupRouter
 import org.webctc.signal.SignalStateWS
 import java.util.*
+import kotlin.uuid.Uuid
+import kotlin.uuid.toKotlinUuid
 
 class WebCTCEventHandler {
     @SubscribeEvent
@@ -39,7 +39,7 @@ class WebCTCEventHandler {
             itemStack?.isItemEnchanted == true
         ) {
             val item = itemStack.item
-            val uuid = player.uniqueID.toKotlinUUID()
+            val uuid = player.uniqueID.toKotlinUuid()
             val pos = PosInt(event.x, event.y, event.z)
             if (item == Items.stick && itemStack.displayName == "BlockPosSetter") {
                 RailGroupRouter.blockPosConnection[uuid]?.trySendBlockPos(player, pos)
@@ -63,7 +63,7 @@ class WebCTCEventHandler {
                 val uuids = RailGroupData.railGroupList
                     .filter { it.railPosList.contains(pos) }
                     .map(RailGroup::uuid)
-                    .joinToString(transform = UUID::toString)
+                    .joinToString(transform = Uuid::toString)
 
                 player.addChatComponentMessage(
                     ChatComponentText("${RED}If you want to break this rail, first remove it from $uuids.")

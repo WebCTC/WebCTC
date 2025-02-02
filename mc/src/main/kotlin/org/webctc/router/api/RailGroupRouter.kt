@@ -9,9 +9,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.websocket.*
-import kotlinx.uuid.UUID
-import kotlinx.uuid.toKotlinUUID
-import kotlinx.uuid.toUUID
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Items
 import net.minecraft.item.Item
@@ -30,11 +27,12 @@ import org.webctc.railgroup.RailGroupStateWS
 import org.webctc.railgroup.create
 import org.webctc.railgroup.delete
 import org.webctc.router.WebCTCRouter
+import kotlin.uuid.Uuid
 
 class RailGroupRouter : WebCTCRouter() {
     companion object {
-        val blockPosConnection = mutableMapOf<UUID, Connection?>()
-        val signalPosConnection = mutableMapOf<UUID, Connection?>()
+        val blockPosConnection = mutableMapOf<Uuid, Connection?>()
+        val signalPosConnection = mutableMapOf<Uuid, Connection?>()
     }
 
     override fun install(application: Route): Route.() -> Unit = {
@@ -49,7 +47,7 @@ class RailGroupRouter : WebCTCRouter() {
 
         route("/state") {
             webSocket("/ws") {
-                val uuids = receiveDeserialized<Set<UUID>>()
+                val uuids = receiveDeserialized<Set<Uuid>>()
                 val railGroupStateWSSet = uuids.mapNotNull { uuid ->
                     val railGroup = RailGroupData.railGroupList.find { it.uuid == uuid }
                     if (railGroup != null) RailGroupStateWS(railGroup, this) else null
@@ -105,7 +103,7 @@ class RailGroupRouter : WebCTCRouter() {
 }
 
 private suspend fun ApplicationCall.getRailGroup(): RailGroup? {
-    val uuid = parameters["RailGroup"]?.toUUID()
+    val uuid = parameters["RailGroup"]?.let { Uuid.parse(it) }
     val railGroup = RailGroupData.railGroupList.find { it.uuid == uuid }
     if (railGroup == null) {
         respond(HttpStatusCode.NotFound)
@@ -126,8 +124,8 @@ private suspend fun ApplicationCall.getPosInt(): PosInt? {
 
 suspend fun WebSocketServerSession.initPosSetter(
     itemName: String,
-    playerUUID: UUID,
-    connectionList: MutableMap<UUID, Connection?>,
+    playerUUID: Uuid,
+    connectionList: MutableMap<Uuid, Connection?>,
     item: Item
 ) {
     val thisConnection = Connection(this)
@@ -145,7 +143,7 @@ suspend fun WebSocketServerSession.initPosSetter(
         }
         MinecraftServer.getServer().entityWorld.playerEntities
             .filterIsInstance<EntityPlayer>()
-            .find { it.uniqueID.toKotlinUUID() == playerUUID }
+            .find { it.uniqueID == playerUUID }
             ?.let { player ->
                 if (!player.inventory.mainInventory.all {
                         ItemStack.areItemStacksEqual(it, itemStack)

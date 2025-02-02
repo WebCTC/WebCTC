@@ -15,7 +15,6 @@ import org.webctc.common.types.waypoint.WayPoint
 import org.webctc.common.types.waypoint.range.CircleRange
 import org.webctc.common.types.waypoint.range.RectangleRange
 import react.*
-import react.dom.aria.ariaReadOnly
 import react.dom.events.FocusEvent
 import web.cssom.Display
 import web.cssom.JustifyContent

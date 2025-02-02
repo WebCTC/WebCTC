@@ -15,7 +15,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.websocket.*
-import kotlinx.uuid.UUID
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.EnumChatFormatting.*
 import net.minecraftforge.common.MinecraftForge
@@ -36,12 +35,13 @@ import org.webctc.router.RouterManager
 import org.webctc.router.SpaRouter
 import org.webctc.router.api.*
 import java.security.SecureRandom
-import java.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 @Mod(modid = WebCTCCore.MODID, version = WebCTCCore.VERSION, name = WebCTCCore.MODID, acceptableRemoteVersions = "*")
 class WebCTCCore {
     lateinit var server: MinecraftServer
-    lateinit var applicationEngine: ApplicationEngine
+    lateinit var applicationEngine: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
     lateinit var railData: RailCacheData
     lateinit var signalData: SignalCacheData
     lateinit var wayPointData: WayPointCacheData
@@ -63,8 +63,8 @@ class WebCTCCore {
         PluginManager.registerPlugin {
             install(Compression)
             install(WebSockets) {
-                pingPeriod = Duration.ofSeconds(15)
-                timeout = Duration.ofSeconds(5)
+                pingPeriod = 15.seconds
+                timeout = 5.seconds
                 contentConverter = KotlinxWebsocketSerializationConverter(kotlinxJson)
             }
             install(ContentNegotiation) {
@@ -106,7 +106,7 @@ class WebCTCCore {
         RouterManager.registerRouter("/auth", AuthRouter())
     }
 
-    data class UserSession(val id: String, val uuid: UUID) : Principal
+    data class UserSession(val id: String, val uuid: Uuid) : Principal
 
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {

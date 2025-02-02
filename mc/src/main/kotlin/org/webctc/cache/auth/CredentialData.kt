@@ -9,22 +9,22 @@ import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.attestation.statement.AttestationStatement
 import kotlinx.serialization.Serializable
-import kotlinx.uuid.UUID
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.world.WorldSavedData
+import kotlin.uuid.Uuid
 
 class CredentialData(mapName: String) : WorldSavedData(mapName) {
     companion object {
         var credentialCache = mutableMapOf<String, MutableList<AuthenticatorEnvelope>>()
 
-        fun registerAuthenticator(uuid: UUID, authenticator: Authenticator) {
+        fun registerAuthenticator(uuid: Uuid, authenticator: Authenticator) {
             val id = uuid.toString()
 
             credentialCache.getOrPut(id) { mutableListOf() } += AuthenticatorEnvelope(authenticator, 0)
         }
 
-        fun searchCredential(uuid: UUID, credentialId: ByteArray): AuthenticatorEnvelope? {
+        fun searchCredential(uuid: Uuid, credentialId: ByteArray): AuthenticatorEnvelope? {
             val id = uuid.toString()
 
             return credentialCache[id]?.find {

@@ -1,11 +1,11 @@
 package org.webctc.common.types.railgroup
 
 import kotlinx.serialization.Serializable
-import kotlinx.uuid.UUID
+import kotlin.uuid.Uuid
 
 @Serializable
 data class RailGroupChain(
-    val chain: LinkedHashSet<UUID> = LinkedHashSet(),
+    val chain: LinkedHashSet<Uuid> = LinkedHashSet(),
     val key: String = ""
 ) {
     override fun equals(other: Any?): Boolean {

@@ -1,7 +1,5 @@
 package components.railgroup.detail
 
-import kotlinx.uuid.UUID
-import kotlinx.uuid.generateUUID
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
@@ -16,6 +14,7 @@ import web.cssom.px
 import web.html.HTMLInputElement
 import web.html.InputType
 import kotlin.reflect.KProperty1
+import kotlin.uuid.Uuid
 
 external interface PosIntListProps : Props {
     var title: String
@@ -30,7 +29,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
     val setter = props.updatePosList
     val wsPath = props.wsPath
 
-    var open by useState<UUID?>(null)
+    var open by useState<Uuid?>(null)
 
     Box {
         Box {
@@ -48,7 +47,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
                 Button {
                     +"Receive"
                     variant = ButtonVariant.outlined
-                    onClick = { open = UUID.generateUUID() }
+                    onClick = { open = Uuid.random() }
                 }
                 Button {
                     +"Add"

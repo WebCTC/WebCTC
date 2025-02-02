@@ -6,12 +6,12 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.uuid.toUUID
 import org.webctc.WebCTCCore
 import org.webctc.cache.tecon.TeConData
 import org.webctc.cache.tecon.delete
 import org.webctc.common.types.tecon.TeCon
 import org.webctc.router.WebCTCRouter
+import kotlin.uuid.Uuid
 
 class TeConRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
@@ -54,4 +54,4 @@ class TeConRouter : WebCTCRouter() {
     }
 }
 
-private fun ApplicationCall.getTeCon() = parameters["TeCon"]?.toUUID()?.let { TeConData.teConList[it] }
+private fun ApplicationCall.getTeCon() = parameters["TeCon"]?.let { Uuid.parse(it) }?.let { TeConData.teConList[it] }

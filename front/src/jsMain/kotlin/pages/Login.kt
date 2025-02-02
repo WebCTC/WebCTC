@@ -25,6 +25,7 @@ import react.dom.html.ReactHTML.p
 import react.useState
 import web.authn.AuthenticatorAssertionResponse
 import web.authn.PublicKeyCredential
+import web.authn.PublicKeyCredentialRequestOptions
 import web.authn.UserVerificationRequirement
 import web.credentials.CredentialRequestOptions
 import web.cssom.Color
@@ -120,14 +121,14 @@ val Login = FC {
 
 fun WebAuthnAuthenticationOption.toOptions(): CredentialRequestOptions {
     val kotlinData = this
-    return jso {
-        publicKey = jso {
-            challenge = kotlinData.challenge.toBuffer()
-            userVerification = UserVerificationRequirement.preferred
-            rpId = kotlinData.rpId
-            extensions = jso { }
-            timeout = kotlinData.timeout
+    return CredentialRequestOptions(
+        publicKey = PublicKeyCredentialRequestOptions(
+            challenge = kotlinData.challenge.toBuffer(),
+            userVerification = UserVerificationRequirement.preferred,
+            rpId = kotlinData.rpId,
+            extensions = jso { },
+            timeout = kotlinData.timeout,
             allowCredentials = arrayOf()
-        }
-    }
+        )
+    )
 }

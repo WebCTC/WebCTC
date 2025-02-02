@@ -9,16 +9,15 @@ import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import com.webauthn4j.util.Base64UrlUtil
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import kotlinx.uuid.UUID
 import org.webctc.WebCTCCore
 import org.webctc.cache.auth.CredentialData
 import org.webctc.common.types.webauthn.*
+import kotlin.uuid.Uuid
 
 
 data class WebAuthnChallenge(val base64Value: String)
@@ -36,7 +35,7 @@ fun Route.challenge(path: String) {
 
         val query = call.request.queryParameters
 
-        val uuid = session?.uuid ?: UUID(query["uuid"]!!)
+        val uuid = session?.uuid ?: Uuid.parse(query["uuid"]!!)
 
         val webAuthnPublicKey = WebAuthnRegistrationOption(
             base64Challenge,
@@ -116,7 +115,7 @@ fun Route.register(path: String) {
                 registrationData.attestationObject!!.authenticatorData.signCount
             )
 
-            val uuid = UUID(session.uuid.toString())
+            val uuid = Uuid.parse(session.uuid.toString())
 
             CredentialData.registerAuthenticator(uuid, authenticator)
             WebCTCCore.INSTANCE.credentialData.markDirty()
@@ -148,7 +147,7 @@ fun Route.authenticate(path: String) {
             }
 
             val authenticatorContainer = CredentialData.searchCredential(
-                UUID(uuid),
+                Uuid.parse(uuid),
                 authentication.id.let { Base64UrlUtil.decode(it) }
             )
 
@@ -186,7 +185,7 @@ fun Route.authenticate(path: String) {
             authenticatorContainer.incrementSignCount()
             WebCTCCore.INSTANCE.credentialData.markDirty()
 
-            call.sessions.set(WebCTCCore.UserSession("", UUID(uuid)))
+            call.sessions.set(WebCTCCore.UserSession("", Uuid.parse(uuid)))
 
             call.respond(HttpStatusCode.OK)
         } catch (e: Exception) {

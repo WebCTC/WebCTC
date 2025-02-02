@@ -18,7 +18,7 @@ external interface ToggleButtonGroupEditModeProps : Props {
 }
 
 val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
-    var editMode by useState(EditMode.HAND)
+    var editMode by useState<EditMode>(EditMode.HAND)
 
     Box {
         sx {

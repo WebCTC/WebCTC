@@ -5,7 +5,6 @@ import components.map.MapPanzoomSvg
 import components.map.WRailHover
 import components.map.WSignalGroup
 import components.tecon.TeConEditorViewComponent
-import kotlinx.uuid.UUID
 import mui.icons.material.ContentCopy
 import mui.material.*
 import mui.system.sx
@@ -22,6 +21,7 @@ import utils.useData
 import utils.useListData
 import web.cssom.*
 import web.navigator.navigator
+import kotlin.uuid.Uuid
 
 val TeConEdit = FC {
     val params = useParams()
@@ -36,7 +36,7 @@ val TeConEdit = FC {
     val signalList by useListData<SignalData>("/api/signals")
     val railGroups by useListData<RailGroup>("/api/railgroups")
     var selectedRail by useState<PosInt>()
-    var activeRailGroupUUID by useState<UUID>()
+    var activeRailGroupUUID by useState<Uuid>()
     val activeRailGroup = useMemo(railGroups, activeRailGroupUUID) {
         railGroups.find { it.uuid == activeRailGroupUUID }
     }
@@ -143,8 +143,8 @@ val TeConEdit = FC {
 external interface RailGroupListProps : Props {
     var railGroups: List<RailGroup>
     var selectedRail: PosInt?
-    var activeRailGroupUUID: UUID?
-    var setActiveRailGroupUUID: (UUID?) -> Unit
+    var activeRailGroupUUID: Uuid?
+    var setActiveRailGroupUUID: (Uuid?) -> Unit
 }
 
 private val RailGroupList = FC<RailGroupListProps> { props ->

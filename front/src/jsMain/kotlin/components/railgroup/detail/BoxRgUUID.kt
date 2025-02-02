@@ -1,17 +1,16 @@
 package components.railgroup.detail
 
 import js.objects.jso
-import kotlinx.uuid.UUID
 import mui.icons.material.ContentCopy
 import mui.material.*
 import react.FC
 import react.Props
 import react.create
-import react.dom.aria.ariaReadOnly
 import web.navigator.navigator
+import kotlin.uuid.Uuid
 
 external interface BoxRgUUIDProps : Props {
-    var uuid: UUID
+    var uuid: Uuid
 }
 
 val BoxRgUUID = FC<BoxRgUUIDProps> { props ->

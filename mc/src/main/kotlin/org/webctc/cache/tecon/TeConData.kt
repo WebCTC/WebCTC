@@ -1,17 +1,16 @@
 package org.webctc.cache.tecon
 
-import kotlinx.uuid.UUID
-import kotlinx.uuid.toUUID
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.world.WorldSavedData
 import org.webctc.common.types.kotlinxJson
 import org.webctc.common.types.tecon.TeCon
 import org.webctc.railgroup.toList
 import org.webctc.railgroup.toNBTTagList
+import kotlin.uuid.Uuid
 
 class TeConData(mapName: String) : WorldSavedData(mapName) {
     companion object {
-        var teConList = mutableMapOf<UUID, TeCon>()
+        var teConList = mutableMapOf<Uuid, TeCon>()
 
         fun create(): TeCon {
             val teCon = TeCon()
@@ -24,7 +23,7 @@ class TeConData(mapName: String) : WorldSavedData(mapName) {
         teConList = nbt.getTagList("teConList", 10)
             .toList()
             .associate {
-                val uuid = it.getString("uuid").toUUID()
+                val uuid = Uuid.parse(it.getString("uuid"))
                 val teCon = kotlinxJson.decodeFromString(TeCon.serializer(), it.getString("json"))
                 uuid to teCon
             }.toMutableMap()

@@ -16,7 +16,7 @@ val minecraftVersion = "1.7.10-10.13.4.1614-1.7.10"
 group = "org.webctc"
 version = "1.7.10-SNAPSHOT"
 base {
-    archivesBaseName = "WebCTC"
+    archivesName.set("WenCTC")
 }
 
 minecraft {
@@ -56,7 +56,6 @@ dependencies {
     embed("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
 
     embed(project(":common"))
-    embed("app.softwork:kotlinx-uuid-core:0.0.22")
 
     api("com.github.Kai-Z-JP:KaizPatchX:-SNAPSHOT:dev")
 }
@@ -77,7 +76,7 @@ tasks.processResources {
 
 val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets["main"].allSource)
-    classifier = "sources"
+    archiveClassifier.set("sources")
 }
 
 
@@ -108,6 +107,7 @@ tasks.jar {
 tasks.compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
-        apiVersion = "1.9"
+        apiVersion = "2.1"
     }
+    compilerOptions.freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
 }

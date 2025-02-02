@@ -1,17 +1,16 @@
 package org.webctc.common.types.railgroup
 
 import kotlinx.serialization.Serializable
-import kotlinx.uuid.UUID
-import kotlinx.uuid.generateUUID
 import org.webctc.common.types.PosInt
+import kotlin.uuid.Uuid
 
 @Serializable
 data class RailGroup(
-    val uuid: UUID = UUID.generateUUID(),
+    val uuid: Uuid = Uuid.random(),
     var name: String = "Default Name",
     var railPosList: Set<PosInt> = setOf(),
     var rsPosList: Set<PosIntWithKey> = setOf(),
-    var nextRailGroupList: Set<UUID> = setOf(),
+    var nextRailGroupList: Set<Uuid> = setOf(),
     var displayPosList: Set<PosInt> = setOf(),
     var switchSettings: Set<SwitchSetting> = setOf(),
     var signalLevel: Int = 0

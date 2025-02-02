@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.uuid.UUID
 import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonColor
@@ -21,11 +20,12 @@ import react.FC
 import react.Props
 import react.useState
 import web.cssom.*
+import kotlin.uuid.Uuid
 
 external interface RailGroupDetailProps : Props {
     var railGroup: RailGroup
     var selectedRails: Collection<PosInt>
-    var deleteRailGroup: (uuid: UUID) -> Unit
+    var deleteRailGroup: (uuid: Uuid) -> Unit
 }
 
 val RailGroupDetail = FC<RailGroupDetailProps> { props ->

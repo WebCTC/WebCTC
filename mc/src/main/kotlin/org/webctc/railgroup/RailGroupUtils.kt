@@ -1,7 +1,6 @@
 package org.webctc.railgroup
 
 import jp.ngt.rtm.electric.TileEntitySignal
-import kotlinx.uuid.UUID
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTBase
 import net.minecraft.nbt.NBTTagCompound
@@ -14,6 +13,7 @@ import org.webctc.cache.writeToNBT
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.common.types.railgroup.*
+import kotlin.uuid.Uuid
 
 fun RailGroup.isTrainOnRail(): Boolean {
     return railPosList
@@ -36,7 +36,7 @@ fun RailGroup.getState(): RailGroupState {
     return RailGroupState(this.uuid, isLocked, isReserved, isTrainOnRail)
 }
 
-fun UUID.writeToNBT(): NBTTagString {
+fun Uuid.writeToNBT(): NBTTagString {
     return NBTTagString(this.toString())
 }
 
@@ -50,7 +50,7 @@ fun RailGroup.delete(): Boolean {
     return RailGroupData.railGroupList.remove(this)
 }
 
-fun RailGroup.Companion.delete(uuid: UUID): Boolean {
+fun RailGroup.Companion.delete(uuid: Uuid): Boolean {
     return RailGroupData.railGroupList.removeAll { it.uuid == uuid }
 }
 
@@ -67,7 +67,7 @@ fun RailGroup.writeToNBT(): NBTTagCompound {
         .toNBTTagList()
         .let { tag.setTag("rsPosTagList", it) }
 
-    nextRailGroupList.map(UUID::writeToNBT)
+    nextRailGroupList.map(Uuid::writeToNBT)
         .toNBTTagList()
         .let { tag.setTag("nextRailGroupTagList", it) }
 
@@ -83,7 +83,7 @@ fun RailGroup.writeToNBT(): NBTTagCompound {
 }
 
 fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
-    val uuid = UUID(nbt.getString("uuid"))
+    val uuid = Uuid.parse(nbt.getString("uuid"))
     val name = nbt.getString("name")
 
     val railPosList = nbt.getTagList("railPosTagList", 10)
@@ -98,7 +98,7 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
 
     val nextRailGroupList = nbt.getTagList("nextRailGroupTagList", 8)
         .toStringList()
-        .map(::UUID)
+        .map { Uuid.parse(it) }
         .toMutableSet()
 
     val displayPosList = nbt.getTagList("displayPosTagList", 10)

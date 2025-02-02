@@ -14,7 +14,6 @@ import io.ktor.client.request.*
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.uuid.UUID
 import mui.material.*
 import mui.material.Size
 import mui.system.sx
@@ -31,7 +30,7 @@ import react.dom.svg.ReactSVG.g
 import utils.useListData
 import web.cssom.*
 import web.html.HTMLInputElement
-
+import kotlin.uuid.Uuid
 
 val RailGroupManager = FC {
     val railList by useListData<LargeRailData>("/api/rails")
@@ -47,7 +46,7 @@ val RailGroupManager = FC {
 
     var isShiftKeyDown by useState(false)
 
-    var activeRailGroupUUID by useState<UUID?>(null)
+    var activeRailGroupUUID by useState<Uuid?>(null)
 
     val activeRailGroup = useMemo(
         activeRailGroupUUID, railGroups
@@ -65,7 +64,7 @@ val RailGroupManager = FC {
         }
     }
 
-    val deleteRailGroup = { uuid: UUID ->
+    val deleteRailGroup = { uuid: Uuid ->
         MainScope().launch {
             client.delete("/api/railgroups/$uuid")
             setRailGroups {
@@ -76,11 +75,11 @@ val RailGroupManager = FC {
         }
     }
 
-    useEffectOnce {
+    useLayoutEffectOnceWithCleanup {
         window.onkeydown = { if (it.key == "Shift") isShiftKeyDown = true }
         window.onkeyup = { if (it.key == "Shift") isShiftKeyDown = false }
 
-        cleanup {
+        onCleanup {
             window.onkeydown = null
             window.onkeyup = null
         }

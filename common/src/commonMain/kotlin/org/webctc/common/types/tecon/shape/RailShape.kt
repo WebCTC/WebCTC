@@ -1,7 +1,7 @@
 package org.webctc.common.types.tecon.shape
 
-import kotlinx.uuid.UUID
+import kotlin.uuid.Uuid
 
 interface RailShape : IShape {
-    val railGroupList: Set<UUID>
+    val railGroupList: Set<Uuid>
 }

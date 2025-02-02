@@ -4,8 +4,7 @@ import kotlinx.serialization.Serializable
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroupChain
 
-
-interface IRouteComposition {}
+interface IRouteComposition
 
 @Serializable
 data class RouteCompositionRedStone(

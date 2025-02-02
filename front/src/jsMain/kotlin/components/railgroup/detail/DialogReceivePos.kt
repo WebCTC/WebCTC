@@ -7,7 +7,6 @@ import io.ktor.websocket.*
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.uuid.UUID
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
@@ -15,11 +14,12 @@ import org.webctc.common.types.PosInt
 import react.*
 import utils.removeAtNew
 import web.cssom.px
+import kotlin.uuid.Uuid
 
 external interface DialogReceivePosProps : Props {
     var title: String
     var wsPath: String
-    var uuid: UUID?
+    var uuid: Uuid?
     var onSave: (list: Set<PosInt>) -> Unit
     var onClose: () -> Unit
 }
@@ -39,9 +39,9 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
     var (data, setData) = useState(setOf<PosInt>())
     var session by useState<WebSocketSession?>(null)
 
-    useEffect(open) {
+    useEffectWithCleanup(open) {
         if (!open) {
-            return@useEffect
+            return@useEffectWithCleanup
         }
         MainScope().launch {
             client.ws(wsPath, {
@@ -55,7 +55,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
                 }
             }
         }
-        cleanup {
+        onCleanup {
             MainScope().launch {
                 session?.close()
             }
