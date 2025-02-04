@@ -14,12 +14,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.serialization.Serializable
 import org.webctc.WebCTCCore
 import org.webctc.cache.auth.CredentialData
 import org.webctc.common.types.webauthn.*
 import kotlin.uuid.Uuid
 
 
+@Serializable
 data class WebAuthnChallenge(val base64Value: String)
 
 fun Route.challenge(path: String) {

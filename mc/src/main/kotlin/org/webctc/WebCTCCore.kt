@@ -15,6 +15,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.websocket.*
+import kotlinx.serialization.Serializable
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.EnumChatFormatting.*
 import net.minecraftforge.common.MinecraftForge
@@ -106,6 +107,7 @@ class WebCTCCore {
         RouterManager.registerRouter("/auth", AuthRouter())
     }
 
+    @Serializable
     data class UserSession(val id: String, val uuid: Uuid) : Principal
 
     @Mod.EventHandler
