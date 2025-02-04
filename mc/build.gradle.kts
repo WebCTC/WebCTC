@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
 plugins {
     java
     `java-gradle-plugin`
@@ -11,12 +14,13 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
+
 val minecraftVersion = "1.7.10-10.13.4.1614-1.7.10"
 
 group = "org.webctc"
 version = "1.7.10-SNAPSHOT"
 base {
-    archivesName.set("WenCTC")
+    archivesName.set("WebCTC")
 }
 
 minecraft {
@@ -40,6 +44,8 @@ fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
 fun ktorSv(name: String) = ktor("server-$name")
 
 dependencies {
+    compileOnly("org.jetbrains:annotations:26.0.2")
+
     embed(ktorSv("core"))
     embed(ktorSv("netty"))
     embed(ktorSv("compression"))
@@ -79,7 +85,6 @@ val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
 }
 
-
 tasks.jar {
     dependsOn(":front:build")
 
@@ -89,7 +94,7 @@ tasks.jar {
 
     embed.forEach { dep ->
         from(project.zipTree(dep)) {
-            exclude("org/slf4j/")
+            exclude("kotlin/", "org/slf4j/", "module-info.class", "META-INF/")
         }
     }
 
@@ -97,17 +102,18 @@ tasks.jar {
         include("README.md", "LICENSE")
     }
 
-
     from(File(parent!!.subprojects.first { it.name == "front" }.buildDir, "dist/js/productionExecutable")) {
         include("front.js", "index.html")
         into("assets/webctc/html")
     }
 }
 
-tasks.compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        apiVersion = "2.1"
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+        apiVersion.set(KotlinVersion.KOTLIN_2_1)
+        languageVersion.set(KotlinVersion.KOTLIN_2_1)
+        jvmTarget.set(JvmTarget.JVM_1_8)
     }
-    compilerOptions.freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+    jvmToolchain(8)
 }
