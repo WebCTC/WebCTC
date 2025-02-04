@@ -4,6 +4,7 @@ import mui.icons.material.Delete
 import mui.material.*
 import mui.system.sx
 import org.webctc.common.types.railgroup.RailGroup
+import org.webctc.common.uuid.isValidUUIDString
 import react.*
 import react.dom.onChange
 import utils.removeAtNew
@@ -85,7 +86,7 @@ external interface ListItemRailGroupUUIDAppendProps : Props {
 
 val ListItemRailGroupUUIDAppend = FC<ListItemRailGroupUUIDAppendProps> { props ->
     var inputValue by useState("")
-    val uuid = Uuid.parse(inputValue) ?: null
+    val uuid = if (Uuid.isValidUUIDString(inputValue)) Uuid.parse(inputValue) else null
     val railGroup by useData<RailGroup>(uuid?.let { "/api/railgroups/$it" })
     val add = {
         uuid?.let {
