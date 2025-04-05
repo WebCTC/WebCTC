@@ -288,7 +288,7 @@ fun WebAuthnRegistrationOption.toOption(): CredentialCreationOptions {
 
 @OptIn(ExperimentalEncodingApi::class)
 fun String.toBuffer(): ArrayBuffer {
-    val byteArray = Base64.UrlSafe.decode(this)
+    val byteArray = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).decode(this)
 
     return byteArray.toUint8Array().buffer.unsafeCast<ArrayBuffer>()
 }
