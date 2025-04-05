@@ -3,6 +3,7 @@ package components.tecon.editor
 import components.icon.*
 import mui.icons.material.Crop169
 import mui.icons.material.PanToolOutlined
+import mui.icons.material.TextFields
 import mui.material.Box
 import mui.material.ToggleButton
 import mui.material.ToggleButtonGroup
@@ -93,6 +94,10 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
             ToggleButton {
                 Crop169 {}
                 value = EditMode.RECT
+            }
+            ToggleButton {
+                TextFields {}
+                value = EditMode.FREETEXT
             }
         }
     }

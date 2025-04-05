@@ -32,12 +32,19 @@ sealed class EditMode(
         { RailPolyLineProperty.create { it(this) } }
     )
 
-    data object SIGNAL : EditMode(1, { (pos) -> Signal(pos) },
+    data object SIGNAL : EditMode(
+        1, { (pos) -> Signal(pos) },
         { SignalElement.create { it(this) } },
         { SignalProperty.create { it(this) } }
     )
 
     data object TECON : EditMode(1, { (pos) -> TeConLever(pos) })
+
+    data object FREETEXT : EditMode(
+        1, { (pos) -> FreeText(pos) },
+        { FreeTextElement.create { it(this) } },
+        { FreeTextProperty.create { it(this) } }
+    )
 
     data object ROUTE : EditMode(1, { (pos) -> Route(pos) })
 
@@ -54,6 +61,7 @@ sealed class EditMode(
                 is RailPolyLine -> POLYLINE
                 is Signal -> SIGNAL
                 is TeConLever -> TECON
+                is FreeText -> FREETEXT
                 is Route -> ROUTE
                 is RectBox -> RECT
                 else -> null
