@@ -1,6 +1,7 @@
 package components.tecon
 
 import client
+import components.common.DeleteButtonWithDialog
 import components.common.OutlinedInputWithLabel
 import components.tecon.editor.*
 import io.ktor.client.request.*
@@ -230,16 +231,15 @@ private val BoxSettings = FC<BoxSettingsProps> { props ->
                 justifyContent = JustifyContent.spaceBetween
             }
             Button {
-                +"Save"
+                +"保存"
                 variant = ButtonVariant.contained
                 disabled = !canSave
                 onClick = { onSave() }
             }
-            Button {
-                +"Delete"
-                variant = ButtonVariant.outlined
-                color = ButtonColor.error
-                onClick = { onDelete() }
+            DeleteButtonWithDialog {
+                this.onDelete = { onDelete() }
+                title = "TeConの削除"
+                message = "TeCon: $name を削除しますか？"
             }
         }
     }

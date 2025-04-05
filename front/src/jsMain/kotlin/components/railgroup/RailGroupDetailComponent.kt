@@ -1,6 +1,7 @@
 package components.railgroup
 
 import client
+import components.common.DeleteButtonWithDialog
 import components.common.OutlinedInputWithLabel
 import components.railgroup.detail.*
 import emotion.react.Global
@@ -11,7 +12,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import mui.material.Box
 import mui.material.Button
-import mui.material.ButtonColor
 import mui.material.ButtonVariant
 import mui.system.sx
 import org.webctc.common.types.PosInt
@@ -124,7 +124,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                 justifyContent = JustifyContent.spaceBetween
             }
             Button {
-                +"Save"
+                +"保存"
                 onClick = { sendRailGroup() }
                 disabled = rg.name == name &&
                         rg.railPosList == rails &&
@@ -134,12 +134,10 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                         rg.switchSettings == switchSettings || sending
                 variant = ButtonVariant.contained
             }
-
-            Button {
-                +"Delete"
-                onClick = { deleteRailGroup(rg.uuid) }
-                color = ButtonColor.error
-                variant = ButtonVariant.outlined
+            DeleteButtonWithDialog {
+                title = "RailGroupの削除"
+                message = "RailGroup: $name を削除しますか？"
+                onDelete = { deleteRailGroup(rg.uuid) }
             }
         }
     }
