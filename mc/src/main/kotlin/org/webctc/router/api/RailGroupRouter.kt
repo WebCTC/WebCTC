@@ -28,6 +28,7 @@ import org.webctc.railgroup.create
 import org.webctc.railgroup.delete
 import org.webctc.router.WebCTCRouter
 import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 class RailGroupRouter : WebCTCRouter() {
     companion object {
@@ -143,7 +144,7 @@ suspend fun WebSocketServerSession.initPosSetter(
         }
         MinecraftServer.getServer().entityWorld.playerEntities
             .filterIsInstance<EntityPlayer>()
-            .find { it.uniqueID == playerUUID }
+            .find { it.uniqueID == playerUUID.toJavaUuid() }
             ?.let { player ->
                 if (!player.inventory.mainInventory.all {
                         ItemStack.areItemStacksEqual(it, itemStack)
