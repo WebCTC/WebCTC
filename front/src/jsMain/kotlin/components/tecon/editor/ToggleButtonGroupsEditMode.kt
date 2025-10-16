@@ -35,17 +35,17 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                     it.onChange(value)
                 }
             }
-            ToggleButton {
-                mdiCursorDefaultOutline {}
-                value = EditMode.CURSOR
+            EditModeToggleButton {
+                mode = EditMode.CURSOR
+                icon = mdiCursorDefaultOutline
             }
-            ToggleButton {
-                PanToolOutlined {}
-                value = EditMode.HAND
+            EditModeToggleButton {
+                mode = EditMode.HAND
+                icon = PanToolOutlined
             }
-            ToggleButton {
-                mdiEraser {}
-                value = EditMode.ERASER
+            EditModeToggleButton {
+                mode = EditMode.ERASER
+                icon = mdiEraser
             }
         }
         ToggleButtonGroup {
@@ -57,30 +57,29 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                     it.onChange(value)
                 }
             }
-            ToggleButton {
-                mdiFence {}
-                value = EditMode.RAIL
+            EditModeToggleButton {
+                mode = EditMode.RAIL
+                icon = mdiFence
             }
-            ToggleButton {
-                WciPolyRailLine {}
-                value = EditMode.POLYLINE
+            EditModeToggleButton {
+                mode = EditMode.POLYLINE
+                icon = WciPolyRailLine
             }
-            ToggleButton {
-                WciSignal {}
-                value = EditMode.SIGNAL
+            EditModeToggleButton {
+                mode = EditMode.SIGNAL
+                icon = WciSignal
             }
-            ToggleButton {
+            EditModeToggleButton {
+                mode = EditMode.TECON
+                icon = WciRouteLever
                 disabled = true
-                WciRouteLever {}
-                value = EditMode.TECON
             }
-            ToggleButton {
+            EditModeToggleButton {
+                mode = EditMode.ROUTE
+                icon = WciRouteSelection
                 disabled = true
-                WciRouteSelection {}
-                value = EditMode.ROUTE
             }
         }
-
 
         ToggleButtonGroup {
             exclusive = true
@@ -91,14 +90,32 @@ val ToggleButtonGroupEditMode = FC<ToggleButtonGroupEditModeProps> {
                     it.onChange(value)
                 }
             }
-            ToggleButton {
-                Crop169 {}
-                value = EditMode.RECT
+            EditModeToggleButton {
+                mode = EditMode.RECT
+                icon = Crop169
             }
-            ToggleButton {
-                TextFields {}
-                value = EditMode.FREETEXT
+            EditModeToggleButton {
+                mode = EditMode.FREETEXT
+                icon = TextFields
             }
         }
+    }
+}
+
+external interface EditModeToggleButtonProps : Props {
+    var mode: EditMode
+    var icon: FC<*>
+    var disabled: Boolean?
+}
+
+val EditModeToggleButton = FC<EditModeToggleButtonProps> {
+    val mode = it.mode
+    val icon = it.icon
+    val disabled = it.disabled ?: false
+    ToggleButton {
+        this.disabled = disabled
+        title = mode.name
+        icon()
+        value = mode
     }
 }
