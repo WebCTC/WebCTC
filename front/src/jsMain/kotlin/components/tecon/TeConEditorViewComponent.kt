@@ -6,11 +6,16 @@ import components.common.OutlinedInputWithLabel
 import components.tecon.editor.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import js.uri.encodeURIComponent
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import mui.icons.material.Download
 import mui.material.*
+import mui.material.Size
 import mui.system.sx
 import org.webctc.common.types.PosInt2D
+import org.webctc.common.types.kotlinxJson
 import org.webctc.common.types.tecon.TeCon
 import org.webctc.common.types.tecon.shape.IShape
 import react.FC
@@ -21,6 +26,7 @@ import react.useState
 import utils.removeAtNew
 import utils.setNew
 import web.cssom.*
+import web.dom.document
 
 external interface TeConEditorViewComponentProps : Props {
     var tecon: TeCon
@@ -146,6 +152,15 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                                     navigate("/p/tecons")
                                 }
                             }
+                            onDownload = {
+                                val data = "data:application/json;charset=utf-8," + encodeURIComponent(
+                                    kotlinxJson.encodeToString(tecon)
+                                )
+                                val link = document.createElement("a")
+                                link.setAttribute("href", data)
+                                link.setAttribute("download", "${tecon.name}.json")
+                                link.click()
+                            }
                         }
                     }
                 }
@@ -180,6 +195,7 @@ external interface BoxSettingsProps : Props {
     var canSave: Boolean
     var onSave: () -> Unit
     var onDelete: () -> Unit
+    var onDownload: () -> Unit
 }
 
 private val BoxSettings = FC<BoxSettingsProps> { props ->
@@ -191,6 +207,7 @@ private val BoxSettings = FC<BoxSettingsProps> { props ->
     val canSave = props.canSave
     val onSave = props.onSave
     val onDelete = props.onDelete
+    val onDownload = props.onDownload
 
     Typography {
         sx {
@@ -204,6 +221,22 @@ private val BoxSettings = FC<BoxSettingsProps> { props ->
             display = Display.flex
             flexDirection = FlexDirection.column
             gap = 16.px
+        }
+
+        Box {
+            sx {
+                display = Display.flex
+                justifyContent = JustifyContent.flexEnd
+                gap = 8.px
+            }
+
+            IconButton {
+                size = Size.small
+                disabled = canSave
+                onClick = { onDownload() }
+                title = "保存"
+                Download {}
+            }
         }
 
         OutlinedInputWithLabel {
