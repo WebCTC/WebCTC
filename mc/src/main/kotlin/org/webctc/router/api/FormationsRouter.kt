@@ -1,14 +1,15 @@
 package org.webctc.router.api
 
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import jp.ngt.rtm.CommonProxy
 import jp.ngt.rtm.RTMCore
+import jp.ngt.rtm.entity.train.EntityBogie
 import jp.ngt.rtm.entity.train.EntityTrainBase
 import jp.ngt.rtm.entity.train.util.Formation
 import jp.ngt.rtm.entity.train.util.FormationManager
+import jp.ngt.rtm.rail.TileEntityLargeRailCore
 import net.minecraft.entity.player.EntityPlayer
 import org.webctc.common.types.trains.FormationData
 import org.webctc.common.types.trains.FormationEntityData
@@ -56,10 +57,7 @@ class FormationsRouter : WebCTCRouter() {
 }
 
 fun Formation.toData(): FormationData {
-
-    val controlCar = Formation::class.java.getDeclaredMethod("getControlCar")
-        .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
-
+    val controlCar = this.getControlCar()
     val driver = controlCar?.riddenByEntity as? EntityPlayer
     return FormationData(
 
@@ -75,7 +73,22 @@ fun Formation.toData(): FormationData {
         driver?.commandSenderName ?: "",
         Formation::class.java.getDeclaredField("direction")
             .apply { isAccessible = true }.getByte(this),
-        controlCar?.speed ?: 0f
+        controlCar?.speed ?: 0f,
+        this.getCurrentRailObj()?.toData()?.pos
     )
+}
 
+fun Formation.getControlCar(): EntityTrainBase? {
+    return Formation::class.java.getDeclaredMethod("getControlCar")
+        .apply { isAccessible = true }.invoke(this) as? EntityTrainBase
+}
+
+fun Formation.getCurrentRailObj(): TileEntityLargeRailCore? {
+    val controlCar = this.getControlCar()
+    val frontBogie =
+        if (controlCar?.getBogie(0)?.isFront == true) controlCar.getBogie(0)
+        else controlCar?.getBogie(1)
+
+    return EntityBogie::class.java.getDeclaredField("currentRailObj")
+        .apply { isAccessible = true }.get(frontBogie) as? TileEntityLargeRailCore
 }

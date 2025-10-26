@@ -1,6 +1,7 @@
 package org.webctc.common.types.trains
 
 import kotlinx.serialization.Serializable
+import org.webctc.common.types.PosInt
 
 
 @Serializable
@@ -10,7 +11,8 @@ data class FormationData(
     val controlCar: TrainData?,
     val driver: String,
     val direction: Byte,
-    val speed: Float
+    val speed: Float,
+    val currentRailMap: PosInt?
 )
 
 @Serializable

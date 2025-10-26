@@ -95,6 +95,7 @@ val kotlinxJson = Json {
             subclass(Route::class)
             subclass(RectBox::class)
             subclass(FreeText::class)
+            subclass(TrainNumber::class)
         }
         polymorphic(IRouteComposition::class) {
             subclass(RouteCompositionRedStone::class)

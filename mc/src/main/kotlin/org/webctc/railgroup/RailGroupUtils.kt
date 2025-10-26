@@ -1,6 +1,7 @@
 package org.webctc.railgroup
 
 import jp.ngt.rtm.electric.TileEntitySignal
+import jp.ngt.rtm.entity.train.util.FormationManager
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTBase
 import net.minecraft.nbt.NBTTagCompound
@@ -13,6 +14,9 @@ import org.webctc.cache.writeToNBT
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.RailMapSwitchData
 import org.webctc.common.types.railgroup.*
+import org.webctc.router.api.getControlCar
+import org.webctc.router.api.getCurrentRailObj
+import org.webctc.router.api.toData
 import kotlin.uuid.Uuid
 
 fun RailGroup.isTrainOnRail(): Boolean {
@@ -33,7 +37,16 @@ fun RailGroup.getState(): RailGroupState {
     val isTrainOnRail = this.isTrainOnRail()
     val isReserved = this.isReserved()
     val isLocked = this.isLocked()
-    return RailGroupState(this.uuid, isLocked, isReserved, isTrainOnRail)
+
+    val rgFormation = if (isTrainOnRail) FormationManager.getInstance().formations.values
+        .find { it?.getCurrentRailObj()?.toData()?.pos in this.railPosList } else null
+    val trainName = if (rgFormation != null) {
+        rgFormation.getControlCar()?.resourceState?.name ?: "?"
+    } else {
+        null
+    }
+
+    return RailGroupState(this.uuid, isLocked, isReserved, isTrainOnRail, trainName)
 }
 
 fun Uuid.writeToNBT(): NBTTagString {

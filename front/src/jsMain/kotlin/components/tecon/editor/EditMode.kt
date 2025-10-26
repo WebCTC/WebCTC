@@ -63,6 +63,13 @@ sealed class EditMode(
         2, { (start, end) -> RectBox(start, PosInt2D.ZERO, end - start) },
         { RectBoxElement.create { it(this) } })
 
+    data object TRAIN_NUMBER : EditMode(
+        "Train Number", 'N',
+        2, { (start, end) -> TrainNumber(start, PosInt2D.ZERO, end - start) },
+        { TrainNumberElement.create { it(this) } },
+        { TrainNumberProperty.create { it(this) } }
+    )
+
     fun isInfinitySelection() = posCount == Int.MAX_VALUE
 
     companion object {
@@ -75,6 +82,7 @@ sealed class EditMode(
                 is FreeText -> FREETEXT
                 is Route -> ROUTE
                 is RectBox -> RECT
+                is TrainNumber -> TRAIN_NUMBER
                 else -> null
             }
         }

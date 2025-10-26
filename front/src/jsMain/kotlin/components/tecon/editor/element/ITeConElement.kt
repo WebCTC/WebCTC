@@ -48,7 +48,7 @@ val ITeConElementBase = FC<ITeConElementBaseProps> { props ->
                     props.stroke?.let { set(CustomPropertyName("stroke"), "lightcoral") }
                 } else if (props.mode == EditMode.CURSOR) {
                     props.fill?.let { set(CustomPropertyName("fill"), "lightblue") }
-                    props.stroke?.let { set(CustomPropertyName("stroke"), "lightblue") }
+                    props.stroke?.let { set(CustomPropertyName("stroke"), "skyblue") }
                 }
             }
             set(
@@ -57,7 +57,7 @@ val ITeConElementBase = FC<ITeConElementBaseProps> { props ->
             )
             set(
                 CustomPropertyName("stroke"),
-                if (props.stroke == null) "none" else if (props.selected == true) "lightblue" else props.stroke
+                if (props.stroke == null) "none" else if (props.selected == true) "skyblue" else props.stroke
             )
         }
         transform = props.transform

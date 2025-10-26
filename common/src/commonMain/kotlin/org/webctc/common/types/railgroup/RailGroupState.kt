@@ -9,4 +9,5 @@ data class RailGroupState(
     val locked: Boolean,
     val reserved: Boolean,
     val trainOnRail: Boolean,
+    val trainName: String?,
 )

@@ -1,10 +1,7 @@
 package components.tecon.viewer
 
 import components.tecon.editor.SvgWithDot
-import components.tecon.editor.element.RailLineElement
-import components.tecon.editor.element.RailPolyLineElement
-import components.tecon.editor.element.RectBoxElement
-import components.tecon.editor.element.SignalElement
+import components.tecon.editor.element.*
 import org.webctc.common.types.railgroup.RailGroupState
 import org.webctc.common.types.signal.SignalState
 import org.webctc.common.types.tecon.shape.*
@@ -21,7 +18,8 @@ val TeConViewer = FC<TeConViewerProps> { props ->
 
     val rgStateList by useListDataWS<RailGroupState>(
         "/api/railgroups/state/ws",
-        props.parts.filterIsInstance<RailShape>().map { it.railGroupList }.flatten().toSet()
+        (props.parts.filterIsInstance<RailShape>().map { it.railGroupList }.flatten() +
+                props.parts.filterIsInstance<TrainNumber>().map { it.railGroupList }.flatten()).toSet()
     ) { a, b -> a.uuid == b.uuid }
 
     val signalStateList by useListDataWS<SignalState>(
@@ -52,6 +50,17 @@ val TeConViewer = FC<TeConViewerProps> { props ->
 
                 is RectBox -> RectBoxElement {
                     iShape = it
+                }
+
+                is FreeText -> FreeTextElement {
+                    iShape = it
+                }
+
+                is TrainNumber -> TrainNumberElement {
+                    iShape = it
+                    trainCustomName =
+                        rgStateList
+                            .firstOrNull { rg -> rg.uuid in it.railGroupList && !rg.trainName.isNullOrEmpty() }?.trainName
                 }
             }
         }
