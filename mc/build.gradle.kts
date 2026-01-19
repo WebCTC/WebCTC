@@ -59,7 +59,7 @@ dependencies {
 
     embed("com.webauthn4j:webauthn4j-core:0.21.9.RELEASE")
 
-    embed("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
+    embed("com.fasterxml.jackson.core:jackson-annotations:2.21")
 
     embed(project(":common"))
 
