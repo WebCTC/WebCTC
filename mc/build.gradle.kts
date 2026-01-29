@@ -27,6 +27,7 @@ minecraft {
     version = minecraftVersion
     runDir = "eclipse"
     srgExtra("PK: io/netty org/webctc/lib/io/netty")
+    srgExtra("PK: org/slf4j org/webctc/lib/org/slf4j")
 }
 
 repositories {
@@ -94,7 +95,7 @@ tasks.jar {
 
     embed.forEach { dep ->
         from(project.zipTree(dep)) {
-            exclude("kotlin/", "org/slf4j/", "module-info.class", "META-INF/")
+            exclude("kotlin/", "module-info.class", "META-INF/")
         }
     }
 
