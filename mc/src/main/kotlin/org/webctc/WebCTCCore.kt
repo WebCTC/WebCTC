@@ -188,7 +188,7 @@ class WebCTCCore {
 
     companion object {
         const val MODID = "webctc"
-        const val VERSION = "1.0.0-rc.1"
+        const val VERSION = "1.0.0"
 
         val IN_CHAT_LOGO = "${GRAY}[${GREEN}Web${WHITE}CTC${GRAY}]"
 
