@@ -39,8 +39,8 @@ fun main() {
 
             route("tecons") {
                 page(TeConList)
-                page("view/:uuid", TeConView)
-                page("edit/:uuid", TeConEdit)
+                page("view/\$uuid", TeConView)
+                page("edit/\$uuid", TeConEdit)
             }
         }
     }
