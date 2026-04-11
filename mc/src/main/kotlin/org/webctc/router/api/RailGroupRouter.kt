@@ -22,6 +22,7 @@ import net.minecraft.util.EnumChatFormatting.WHITE
 import org.webctc.WebCTCCore
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
+import org.webctc.common.types.railgroup.RailGroupFolder
 import org.webctc.railgroup.RailGroupData
 import org.webctc.railgroup.RailGroupStateWS
 import org.webctc.railgroup.create
@@ -40,6 +41,42 @@ class RailGroupRouter : WebCTCRouter() {
         get {
             call.respond(RailGroupData.railGroupList)
         }
+
+        route("/folders") {
+            get {
+                call.respond(RailGroupData.folderList)
+            }
+            authenticate("auth-session") {
+                post {
+                    val folder = RailGroupFolder.create()
+                    call.respond(folder)
+                    WebCTCCore.INSTANCE.railGroupData.markDirty()
+                }
+                route("/{Folder}") {
+                    put {
+                        val folder = call.getFolder() ?: return@put
+                        val updated: RailGroupFolder = call.receive()
+                        folder.updateBy(updated)
+                        call.respond(folder)
+                        WebCTCCore.INSTANCE.railGroupData.markDirty()
+                    }
+                    delete {
+                        val folder = call.getFolder() ?: return@delete
+                        val parentUuid = folder.parentUuid
+                        RailGroupData.folderList
+                            .filter { it.parentUuid == folder.uuid }
+                            .forEach { it.parentUuid = parentUuid }
+                        RailGroupData.railGroupList
+                            .filter { it.folderUuid == folder.uuid }
+                            .forEach { it.folderUuid = parentUuid }
+                        folder.delete()
+                        call.respond(HttpStatusCode.OK)
+                        WebCTCCore.INSTANCE.railGroupData.markDirty()
+                    }
+                }
+            }
+        }
+
         route("/{RailGroup}") {
             get {
                 call.getRailGroup()?.let { call.respond(it) }
@@ -101,6 +138,13 @@ class RailGroupRouter : WebCTCRouter() {
             }
         }
     }
+}
+
+private suspend fun ApplicationCall.getFolder(): RailGroupFolder? {
+    val uuid = parameters["Folder"]?.let { Uuid.parse(it) }
+    val folder = RailGroupData.folderList.find { it.uuid == uuid }
+    if (folder == null) respond(HttpStatusCode.NotFound)
+    return folder
 }
 
 private suspend fun ApplicationCall.getRailGroup(): RailGroup? {

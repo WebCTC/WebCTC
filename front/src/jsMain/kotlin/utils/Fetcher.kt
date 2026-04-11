@@ -177,6 +177,15 @@ inline fun <reified R : Any> useIntervalListData(url: String?, interval: Duratio
     return stateInstance
 }
 
+fun useAction(block: suspend () -> Unit): () -> Unit =
+    { MainScope().launch { block() } }
+
+fun <P> useAction(block: suspend (P) -> Unit): (P) -> Unit =
+    { param -> MainScope().launch { block(param) } }
+
+fun <P1, P2> useAction(block: suspend (P1, P2) -> Unit): (P1, P2) -> Unit =
+    { p1, p2 -> MainScope().launch { block(p1, p2) } }
+
 inline fun <reified R : Any> useListDataWithWebsocket(
     path: String,
     wsPath: String,

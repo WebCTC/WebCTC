@@ -16,6 +16,7 @@ import mui.material.ButtonVariant
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
+import org.webctc.common.types.railgroup.RailGroupFolder
 import react.FC
 import react.Props
 import react.useState
@@ -26,6 +27,8 @@ external interface RailGroupDetailProps : Props {
     var railGroup: RailGroup
     var selectedRails: Collection<PosInt>
     var deleteRailGroup: (uuid: Uuid) -> Unit
+    var folders: List<RailGroupFolder>
+    var onSave: (RailGroup) -> Unit
 }
 
 val RailGroupDetail = FC<RailGroupDetailProps> { props ->
@@ -39,6 +42,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
     var displayList by useState(rg.displayPosList)
     var nextRailGroups by useState(rg.nextRailGroupList)
     var switchSettings by useState(rg.switchSettings)
+    var folderUuid by useState(rg.folderUuid)
     var hoveringRail by useState<PosInt?>(null)
 
     var sending by useState(false)
@@ -53,7 +57,8 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             rsList,
             nextRailGroups,
             displayList,
-            switchSettings
+            switchSettings,
+            folderUuid = folderUuid
         )
 
         MainScope().launch {
@@ -64,6 +69,7 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
             }
 
             rg.updateBy(changedRailGroup)
+            props.onSave(changedRailGroup)
             sending = false
         }
     }
@@ -84,6 +90,12 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
         }
 
         BoxRgUUID { uuid = rg.uuid }
+
+        BoxFolderPicker {
+            this.folders = props.folders
+            this.currentFolderUuid = folderUuid
+            this.onChange = { folderUuid = it }
+        }
 
         BoxRailList {
             this.rails = rails
@@ -131,7 +143,8 @@ val RailGroupDetail = FC<RailGroupDetailProps> { props ->
                         rg.rsPosList == rsList &&
                         rg.nextRailGroupList == nextRailGroups &&
                         rg.displayPosList == displayList &&
-                        rg.switchSettings == switchSettings || sending
+                        rg.switchSettings == switchSettings &&
+                        rg.folderUuid == folderUuid || sending
                 variant = ButtonVariant.contained
             }
             DeleteButtonWithDialog {

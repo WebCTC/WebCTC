@@ -8,6 +8,7 @@ import org.webctc.cache.rail.RailCacheData
 import org.webctc.common.types.railgroup.Lock
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.railgroup.RailGroupChain
+import org.webctc.common.types.railgroup.RailGroupFolder
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.uuid.Uuid
 
@@ -16,6 +17,10 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
         railGroupList.clear()
         nbt.getTagList("RailGroupData", 10).toList()
             .mapTo(railGroupList, RailGroup::readFromNBT)
+
+        folderList.clear()
+        nbt.getTagList("RailGroupFolderData", 10).toList()
+            .mapTo(folderList) { RailGroupFolder.readFromNBT(it) }
     }
 
     override fun writeToNBT(nbt: NBTTagCompound) {
@@ -23,10 +28,16 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             .map(RailGroup::writeToNBT)
             .toNBTTagList()
             .let { nbt.setTag("RailGroupData", it) }
+
+        folderList
+            .map { it.writeToNBT() }
+            .toNBTTagList()
+            .let { nbt.setTag("RailGroupFolderData", it) }
     }
 
     companion object {
         val railGroupList = CopyOnWriteArrayList<RailGroup>()
+        val folderList = CopyOnWriteArrayList<RailGroupFolder>()
         private val lockList = mutableMapOf<Uuid, Lock>()
         private val rgcc = mutableSetOf<RailGroupChain>()
 

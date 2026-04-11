@@ -92,6 +92,8 @@ fun RailGroup.writeToNBT(): NBTTagCompound {
         .toNBTTagList()
         .let { tag.setTag("switchSettingList", it) }
 
+    folderUuid?.let { tag.setString("folderUuid", it.toString()) }
+
     return tag
 }
 
@@ -124,17 +126,18 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
         .map(SwitchSetting::readFromNBT)
         .toMutableSet()
 
-    val railGroup = RailGroup(
+    val folderUuid = if (nbt.hasKey("folderUuid")) Uuid.parse(nbt.getString("folderUuid")) else null
+
+    return RailGroup(
         uuid,
         name,
         railPosList,
         rsPosList,
         nextRailGroupList,
         displayPosList,
-        switchSettings
+        switchSettings,
+        folderUuid = folderUuid
     )
-
-    return railGroup
 }
 
 fun SwitchSetting.writeToNBT(): NBTTagCompound {
