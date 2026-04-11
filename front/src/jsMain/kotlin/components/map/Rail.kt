@@ -9,6 +9,7 @@ import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.line
 import web.cssom.Cursor
 import web.cssom.CustomPropertyName
+import web.dom.ElementId
 
 external interface LargeRailProps : Props {
     var largeRailData: LargeRailData
@@ -27,7 +28,7 @@ val WRail = FC<LargeRailProps> {
         if (isTrainOnRail) {
             stroke = "red"
         }
-        id = "rail,${rail.pos}"
+        id = ElementId("rail,${rail.pos}")
         rail.railMaps.forEach {
             val isNotActive = it is RailMapSwitchData && it.isNotActive
             line {
@@ -48,7 +49,7 @@ val WRailHover = FC<LargeRailClickableProps> {
 
     g {
         stroke = it.color
-        id = "rail,${rail.pos}"
+        id = ElementId("rail,${rail.pos}")
         css {
             cursor = Cursor.pointer
             hover {

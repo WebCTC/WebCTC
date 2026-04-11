@@ -8,7 +8,7 @@ import emotion.react.styles
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import js.objects.jso
+import js.promise.await
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -23,10 +23,7 @@ import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.p
 import react.useState
-import web.authn.AuthenticatorAssertionResponse
-import web.authn.PublicKeyCredential
-import web.authn.PublicKeyCredentialRequestOptions
-import web.authn.UserVerificationRequirement
+import web.authn.*
 import web.credentials.CredentialRequestOptions
 import web.cssom.Color
 import web.cssom.px
@@ -126,7 +123,7 @@ fun WebAuthnAuthenticationOption.toOptions(): CredentialRequestOptions {
             challenge = kotlinData.challenge.toBuffer(),
             userVerification = UserVerificationRequirement.preferred,
             rpId = kotlinData.rpId,
-            extensions = jso { },
+            extensions = AuthenticationExtensionsClientInputs(),
             timeout = kotlinData.timeout,
             allowCredentials = arrayOf()
         )

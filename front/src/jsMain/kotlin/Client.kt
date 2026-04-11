@@ -1,4 +1,3 @@
-
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -29,24 +28,21 @@ fun main() {
         .apply { document.body.appendChild(this) }
         .let(::createRoot)
 
-    val routing = routing {
-        route("/") {
-            page(MapView)
-            page("login", Login)
+    val routing = routing(notFound = FallBack) {
+        page(MapView)
+        page("login", Login)
 
-            route("p") {
-                page("account", Account)
-                page("railgroup", RailGroupManager)
-                page("waypoint", WayPointEditor)
+        route("p") {
+            page("account", Account)
+            page("railgroup", RailGroupManager)
+            page("waypoint", WayPointEditor)
 
-                route("tecons") {
-                    page(TeConList)
-                    page("view/:uuid", TeConView)
-                    page("edit/:uuid", TeConEdit)
-                }
+            route("tecons") {
+                page(TeConList)
+                page("view/:uuid", TeConView)
+                page("edit/:uuid", TeConEdit)
             }
         }
-        fallback(FallBack)
     }
 
     val provider = routing.createRouterProvider()

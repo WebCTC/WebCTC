@@ -8,6 +8,7 @@ import react.dom.svg.ReactSVG.line
 import react.dom.svg.ReactSVG.polyline
 import web.cssom.Color
 import web.cssom.rgb
+import web.dom.ElementId
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -25,7 +26,7 @@ external interface SignalGroupProps : Props {
 val WSignal = FC<SignalProps> {
     val signal = it.signal
     circle {
-        id = "signal,${signal.pos}"
+        id = ElementId("signal,${signal.pos}")
         cx = it.cx
         cy = it.cy
         r = 1.5

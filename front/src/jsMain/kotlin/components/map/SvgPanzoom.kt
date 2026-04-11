@@ -1,6 +1,6 @@
 package components.map
 
-import js.objects.jso
+import js.objects.unsafeJso
 import module.panzoom
 import pages.MapSVG
 import react.FC
@@ -14,7 +14,7 @@ val MapPanzoomSvg = FC<PropsWithChildren> { props ->
 
     val mtxRef = useRef<SVGElement>()
 
-    useLayoutEffectOnce { panzoom(mtxRef.current!!, jso { smoothScroll = false }) }
+    useLayoutEffectOnce { panzoom(mtxRef.current!!, unsafeJso { smoothScroll = false }) }
 
     MapSVG {
         g {

@@ -5,11 +5,12 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import js.coroutines.awaitCancellation
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import react.StateInstance
-import react.useEffectWithCleanup
+import react.useEffect
 import react.useState
 import web.timers.clearInterval
 import web.timers.setInterval
@@ -18,10 +19,10 @@ import kotlin.time.Duration
 inline fun <reified R : Any> useData(url: String?, notFound: () -> Unit = {}): StateInstance<R?> {
     val stateInstance = useState<R>()
     val (data, setData) = stateInstance
-    useEffectWithCleanup(url) {
+    useEffect(url) {
         if (url.isNullOrEmpty()) {
             setData { null }
-            return@useEffectWithCleanup
+            return@useEffect
         }
         var ignore = false
         MainScope().launch {
@@ -29,7 +30,7 @@ inline fun <reified R : Any> useData(url: String?, notFound: () -> Unit = {}): S
             if (ignore) return@launch
             setData { res }
         }
-        onCleanup {
+        awaitCancellation {
             ignore = true
         }
     }
@@ -39,10 +40,10 @@ inline fun <reified R : Any> useData(url: String?, notFound: () -> Unit = {}): S
 inline fun <reified R : Any> useIntervalData(url: String?, interval: Duration): StateInstance<R?> {
     val stateInstance = useState<R>()
     val (data, setData) = stateInstance
-    useEffectWithCleanup(url) {
+    useEffect(url) {
         if (url.isNullOrEmpty()) {
             setData { null }
-            return@useEffectWithCleanup
+            return@useEffect
         }
         var ignore = false
         val intervalId = setInterval(interval) {
@@ -52,7 +53,7 @@ inline fun <reified R : Any> useIntervalData(url: String?, interval: Duration): 
                 setData { res }
             }
         }
-        onCleanup {
+        awaitCancellation {
             ignore = true
             clearInterval(intervalId)
         }
@@ -72,7 +73,7 @@ inline fun <reified R : Any> useDataWithWebsocket(
     val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
     val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
 
-    useEffectWithCleanup(path) {
+    useEffect(path) {
         var ignore = false
         MainScope().launch {
             val res: R = client.get(path).body()
@@ -90,7 +91,7 @@ inline fun <reified R : Any> useDataWithWebsocket(
                 }
             }
         }
-        onCleanup {
+        awaitCancellation {
             ignore = true
         }
     }
@@ -109,7 +110,7 @@ inline fun <reified R : Any> useListDataWS(
     val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
     val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
 
-    useEffectWithCleanup(wsPath) {
+    useEffect(wsPath) {
         var ignore = false
         MainScope().launch {
             client.ws(wsPath, {
@@ -125,7 +126,7 @@ inline fun <reified R : Any> useListDataWS(
                 }
             }
         }
-        onCleanup { ignore = true }
+        awaitCancellation { ignore = true }
     }
     return stateInstance
 }
@@ -133,18 +134,18 @@ inline fun <reified R : Any> useListDataWS(
 inline fun <reified R : Any> useListData(url: String?): StateInstance<List<R>> {
     val stateInstance = useState<List<R>>(listOf())
     val (data, setData) = stateInstance
-    useEffectWithCleanup(url) {
+    useEffect(url) {
         var ignore = false
         if (url.isNullOrEmpty()) {
             setData { listOf() }
-            return@useEffectWithCleanup
+            return@useEffect
         }
         MainScope().launch {
             val res: List<R> = client.get(url).body()
             if (ignore) return@launch
             setData { res }
         }
-        onCleanup {
+        awaitCancellation {
             ignore = true
         }
     }
@@ -155,11 +156,11 @@ inline fun <reified R : Any> useIntervalListData(url: String?, interval: Duratio
     val stateInstance = useState<List<R>>(listOf())
     val (data, setData) = stateInstance
 
-    useEffectWithCleanup(url) {
+    useEffect(url) {
         var ignore = false
         if (url.isNullOrEmpty()) {
             setData { listOf() }
-            return@useEffectWithCleanup
+            return@useEffect
         }
         val intervalId = setInterval(interval) {
             MainScope().launch {
@@ -168,7 +169,7 @@ inline fun <reified R : Any> useIntervalListData(url: String?, interval: Duratio
                 setData { res }
             }
         }
-        onCleanup {
+        awaitCancellation {
             ignore = true
             clearInterval(intervalId)
         }
@@ -188,7 +189,7 @@ inline fun <reified R : Any> useListDataWithWebsocket(
     val wsProtocol = if (protocol == "https:") URLProtocol.WSS else URLProtocol.WS
     val port = window.location.port.toIntOrNull() ?: wsProtocol.defaultPort
 
-    useEffectWithCleanup(path) {
+    useEffect(path) {
         var ignore = false
         MainScope().launch {
             val res: List<R> = client.get(path).body()
@@ -208,7 +209,7 @@ inline fun <reified R : Any> useListDataWithWebsocket(
                 }
             }
         }
-        onCleanup {
+        awaitCancellation {
             ignore = true
         }
     }

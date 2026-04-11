@@ -15,7 +15,8 @@ import react.FC
 import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML.h1
-import react.router.useNavigate
+import tanstack.react.router.useNavigate
+import tanstack.router.core.RoutePath
 import utils.useListData
 import web.cssom.px
 
@@ -42,7 +43,7 @@ val TeConList = FC {
                     onClick = {
                         MainScope().launch {
                             val new = client.post("/api/tecons").body<TeCon>()
-                            navigate("edit/${new.uuid}")
+                            navigate { to = RoutePath("edit/${new.uuid}") }
                         }
                     }
                 }
@@ -55,11 +56,11 @@ val TeConList = FC {
                             disablePadding = true
                             secondaryAction = IconButton.create {
                                 Edit {}
-                                onClick = { navigate("edit/${tecon.uuid}") }
+                                onClick = { navigate { to = RoutePath("edit/${tecon.uuid}") } }
                             }
                             ListItemButton {
                                 ListItemText { primary = ReactNode(tecon.name) }
-                                onClick = { navigate("view/${tecon.uuid}") }
+                                onClick = { navigate { to = RoutePath("view/${tecon.uuid}") } }
                             }
                         }
                     }

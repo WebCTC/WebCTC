@@ -11,10 +11,12 @@ import react.FC
 import react.ReactNode
 import react.dom.onChange
 import react.dom.svg.ReactSVG.text
+import react.dom.svg.TextAnchor
 import web.cssom.FontSize
 import web.cssom.FontWeight
 import web.cssom.px
 import web.html.InputType
+import web.html.number
 
 external interface FreeTextElementProps : ITeConElementProps, IShapeElementProps<FreeText>
 
@@ -33,7 +35,12 @@ var FreeTextElement = FC<FreeTextElementProps> { props ->
         text {
             fill = textShape.color
             fontSize = textShape.size.toDouble()
-            textAnchor = textShape.anchor
+            textAnchor = when (textShape.anchor) {
+                "start" -> TextAnchor.start
+                "middle" -> TextAnchor.middle
+                "end" -> TextAnchor.end
+                else -> null
+            }
             +textShape.text
         }
     }

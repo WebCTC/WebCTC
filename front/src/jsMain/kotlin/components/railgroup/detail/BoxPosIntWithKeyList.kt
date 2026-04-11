@@ -92,7 +92,7 @@ val BoxPosIntWithKeyList = FC<PosIntWithKeyListProps> { props ->
         this.onClose = {
             open = null
         }
-        this.key = open?.toString()
+        this.key = Key(open?.toString() ?: "closed")
     }
 }
 
@@ -119,7 +119,7 @@ val ListItemPosIntWithKey = FC<ListItemPosIntWithKeyProps> {
             label = ReactNode("Key")
             value = pos.key
             this.onChange = { formEvent ->
-                val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement, HTMLInputElement>>()
                 val new = event.target.value
                 PosIntWithKey(pos.x, pos.y, pos.z, new).also(onChange)
             }

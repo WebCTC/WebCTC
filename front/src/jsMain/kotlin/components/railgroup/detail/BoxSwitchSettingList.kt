@@ -96,7 +96,7 @@ val AccordionSwitchSetting = FC<BoxSwitchSettingProps> { props ->
                     size = Size.small
                     value = switchSetting.name
                     onChange = { formEvent ->
-                        val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                        val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement, HTMLInputElement>>()
                         val newName = event.target.value
                         switchSetting.copy(name = newName)
                             .also(updateSwitchSetting)

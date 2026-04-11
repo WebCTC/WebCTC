@@ -11,6 +11,7 @@ import react.dom.svg.ReactSVG.circle
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.rect
 import react.dom.svg.ReactSVG.text
+import react.dom.svg.TextAnchor
 import web.cssom.None
 
 external interface WayPointProps : Props {
@@ -66,7 +67,7 @@ val WWayPoint = FC<WayPointProps> {
                 fill = "white"
                 fontSize = 8.0
                 fontWeight = "bold"
-                textAnchor = "middle"
+                textAnchor = TextAnchor.middle
 
             }
             title {

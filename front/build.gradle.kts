@@ -4,6 +4,7 @@ import kotlinx.html.dom.serialize
 
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.js-plain-objects")
 }
 
 buildscript {
@@ -26,7 +27,6 @@ val wrappersVersion = extra["kotlin.wrappers.version"] as String
 val ktorVersion = extra["ktor.version"] as String
 fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
 fun ktorCl(target: String) = ktor("client-$target")
-fun kotlinWrp(target: String) = "org.jetbrains.kotlin-wrappers:kotlin-$target"
 
 kotlin {
     js {
@@ -47,14 +47,14 @@ kotlin {
                 implementation(ktorCl("content-negotiation"))
                 implementation(ktor("serialization-kotlinx-json"))
 
-                implementation(project.dependencies.enforcedPlatform(kotlinWrp("wrappers-bom:$wrappersVersion")))
-                implementation(kotlinWrp("react"))
-                implementation(kotlinWrp("react-dom"))
-                implementation(kotlinWrp("react-router-dom"))
+                implementation(kotlinWrappers.react)
+                implementation(kotlinWrappers.reactDom)
+                implementation(kotlinWrappers.tanstack.reactRouter)
 
-                implementation(kotlinWrp("emotion"))
-                implementation(kotlinWrp("mui-material"))
-                implementation(kotlinWrp("mui-icons-material"))
+                implementation(kotlinWrappers.emotion.react)
+                implementation(kotlinWrappers.emotion.styled)
+                implementation(kotlinWrappers.mui.material)
+                implementation(kotlinWrappers.mui.iconsMaterial)
 
                 implementation(npm("panzoom", "9.4.0"))
 

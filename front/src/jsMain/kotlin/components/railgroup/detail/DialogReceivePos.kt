@@ -4,6 +4,7 @@ import client
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.websocket.*
+import js.coroutines.awaitCancellation
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -39,9 +40,9 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
     var (data, setData) = useState(setOf<PosInt>())
     var session by useState<WebSocketSession?>(null)
 
-    useEffectWithCleanup(open) {
+    useEffect(open) {
         if (!open) {
-            return@useEffectWithCleanup
+            return@useEffect
         }
         MainScope().launch {
             client.ws(wsPath, {
@@ -55,7 +56,7 @@ val DialogReceivePos = FC<DialogReceivePosProps> { props ->
                 }
             }
         }
-        onCleanup {
+        awaitCancellation {
             MainScope().launch {
                 session?.close()
             }

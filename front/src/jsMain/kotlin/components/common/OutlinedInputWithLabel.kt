@@ -21,7 +21,7 @@ val OutlinedInputWithLabel = FC<OutlinedInputWithLabelProps> { props ->
                 fullWidth = true
                 value = props.name
                 onChange = {
-                    val event = it.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                    val event = it.unsafeCast<ChangeEvent<HTMLInputElement, HTMLInputElement>>()
                     val target = event.target
                     props.onChange(target.value)
                 }

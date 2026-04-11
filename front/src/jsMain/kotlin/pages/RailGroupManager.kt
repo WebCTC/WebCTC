@@ -11,6 +11,7 @@ import emotion.react.Global
 import emotion.react.styles
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import js.coroutines.awaitCancellation
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -75,11 +76,11 @@ val RailGroupManager = FC {
         }
     }
 
-    useLayoutEffectOnceWithCleanup {
+    useLayoutEffectOnce {
         window.onkeydown = { if (it.key == "Shift") isShiftKeyDown = true }
         window.onkeyup = { if (it.key == "Shift") isShiftKeyDown = false }
 
-        onCleanup {
+        awaitCancellation {
             window.onkeydown = null
             window.onkeyup = null
         }
@@ -155,7 +156,7 @@ val RailGroupManager = FC {
                         size = Size.small
                         value = searchText
                         this.onChange = { formEvent ->
-                            val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement>>()
+                            val event = formEvent.unsafeCast<ChangeEvent<HTMLInputElement, HTMLInputElement>>()
                             val target = event.target
                             val value = target.value
                             searchText = value
@@ -202,7 +203,7 @@ val RailGroupManager = FC {
                 }
                 activeRailGroup?.let {
                     RailGroupDetail {
-                        key = it.uuid.toString()
+                        key = Key(it.uuid.toString())
                         this.railGroup = it
                         this.deleteRailGroup = { deleteRailGroup(it) }
                         this.selectedRails = selectedRails

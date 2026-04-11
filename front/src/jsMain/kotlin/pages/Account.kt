@@ -10,8 +10,10 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import js.buffer.ArrayBuffer
-import js.objects.jso
+import js.objects.unsafeJso
+import js.promise.await
 import js.typedarrays.Uint8Array
+import js.typedarrays.toByteArray
 import js.typedarrays.toUint8Array
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -30,11 +32,11 @@ import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.img
 import react.dom.html.ReactHTML.p
-import react.router.useNavigate
 import react.useState
+import tanstack.react.router.useNavigate
+import tanstack.router.core.RoutePath
 import utils.useData
 import web.authn.*
-import web.authn.PublicKeyCredentialType.Companion.publicKey
 import web.credentials.CredentialCreationOptions
 import web.cssom.*
 import web.navigator.navigator
@@ -126,7 +128,7 @@ val Account = FC {
                     } else {
                         img {
                             src = "https://mc-heads.net/avatar/$playerUuid"
-                            style = jso {
+                            style = unsafeJso {
                                 width = 5.rem
                                 height = 5.rem
                             }
@@ -180,7 +182,7 @@ val Account = FC {
                                         +"使う"
                                         variant = ButtonVariant.contained
                                         color = ButtonColor.primary
-                                        onClick = { navigate(service.path) }
+                                        onClick = { navigate { to = RoutePath(service.path) } }
                                     }
                                 }
                             }
@@ -278,7 +280,7 @@ fun WebAuthnRegistrationOption.toOption(): CredentialCreationOptions {
             ),
             pubKeyCredParams = kotlinData.pubKeyCredParams.map {
                 PublicKeyCredentialParameters(
-                    type = publicKey,
+                    type = PublicKeyCredentialType.publicKey,
                     alg = it.alg
                 )
             }.toTypedArray()

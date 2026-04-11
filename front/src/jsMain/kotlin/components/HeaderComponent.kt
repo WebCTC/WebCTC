@@ -10,7 +10,8 @@ import react.FC
 import react.Props
 import react.dom.svg.ReactSVG.path
 import react.dom.svg.ReactSVG.svg
-import react.router.useNavigate
+import tanstack.react.router.useNavigate
+import tanstack.router.core.RoutePath
 import web.cssom.*
 
 val Header = FC<Props> {
@@ -41,7 +42,9 @@ val Header = FC<Props> {
                         fill = "darkslategray"
                     }
                     onClick = {
-                        navigate("/")
+                        navigate {
+                            to = RoutePath("/")
+                        }
                     }
                 }
             }

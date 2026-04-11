@@ -1,66 +1,87 @@
 package routing
 
-import js.objects.jso
 import react.FC
 import react.Props
 import react.create
-import react.router.RouteObject
-import react.router.RouterProvider
-import react.router.dom.createBrowserRouter
+import tanstack.react.router.*
+import tanstack.router.core.BaseRoute
+import tanstack.router.core.RoutePath
 
 data class Routing(
-    val routes: Array<RouteObject>,
+    val router: Router,
 ) {
-    fun createBrowserRouter() = createBrowserRouter(routes)
-
-    fun createRouterProvider() = RouterProvider.create { this.router = createBrowserRouter() }
+    fun createRouterProvider() = RouterProvider.create {
+        this.router = this@Routing.router
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || this::class.js != other::class.js) return false
-
-        other as Routing
-
-        return routes contentEquals other.routes
+        if (other !is Routing) return false
+        return router == other.router
     }
 
-    override fun hashCode() = routes.contentHashCode()
+    override fun hashCode(): Int = router.hashCode()
 }
 
-class RoutingBuilder {
-    val routes = mutableListOf<RouteObject>()
+class RoutingBuilder(
+    private val parentRoute: BaseRoute<*>,
+) {
+    private val routes = mutableListOf<Route>()
 
-    fun page(element: FC<Props>) = page(null, true, element)
+    fun page(element: FC<Props>) = page("/", element)
 
-    fun page(path: String, element: FC<Props>) = page(path, null, element)
+    fun page(path: String, element: FC<Props>) {
+        val route = createRoute(
+            RouteOptions(
+                getParentRoute = { parentRoute },
+                path = RoutePath(path),
+                component = element
+            )
+        )
 
-    fun fallback(element: FC<Props>) = page("*", null, element)
-
-    private fun page(path: String? = null, index: Boolean? = null, element: FC<Props>) {
-        val route: RouteObject = jso {
-            this.path = path
-            this.index = index
-            this.element = element.create()
-        }
-
-        this.routes += route
+        routes += route
     }
 
     fun route(path: String, block: RoutingBuilder.() -> Unit) {
-        val builder = RoutingBuilder()
+        val route = createRoute(
+            RouteOptions(
+                getParentRoute = { parentRoute },
+                path = RoutePath(path),
+                component = Outlet
+            )
+        )
+
+        val builder = RoutingBuilder(route)
         builder.block()
 
-        val route: RouteObject = jso {
-            this.path = path
-            this.children = builder.routes.toTypedArray()
-        }
-
-        this.routes += route
+        route.addChildren(builder.build())
+        routes += route
     }
+
+    internal fun build(): Array<Route> = routes.toTypedArray()
 }
 
-fun routing(block: RoutingBuilder.() -> Unit): Routing {
-    val builder = RoutingBuilder()
+fun routing(
+    notFound: FC<Props>? = null,
+    block: RoutingBuilder.() -> Unit,
+): Routing {
+    val rootRoute = createRootRoute(
+        RootRouteOptions(
+            component = Outlet,
+            notFoundComponent = notFound
+        )
+    )
+
+    val builder = RoutingBuilder(rootRoute)
     builder.block()
-    return Routing(builder.routes.toTypedArray())
+
+    rootRoute.addChildren(builder.build())
+
+    val router = createRouter(
+        RouterOptions(
+            routeTree = rootRoute
+        )
+    )
+
+    return Routing(router)
 }

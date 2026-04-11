@@ -10,12 +10,15 @@ import org.webctc.common.types.tecon.shape.TrainNumber
 import react.FC
 import react.ReactNode
 import react.dom.onChange
+import react.dom.svg.DominantBaseline
 import react.dom.svg.ReactSVG.rect
 import react.dom.svg.ReactSVG.text
+import react.dom.svg.TextAnchor
 import web.cssom.FontSize
 import web.cssom.FontWeight
 import web.cssom.px
 import web.html.InputType
+import web.html.number
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -61,8 +64,13 @@ val TrainNumberElement = FC<TrainNumberElementProps> { props ->
             stroke = "none"
             fill = "orange"
             fontSize = trainNumber.size.toDouble()
-            textAnchor = trainNumber.anchor
-            dominantBaseline = "text-after-edge"
+            textAnchor = when (trainNumber.anchor) {
+                "start" -> TextAnchor.start
+                "middle" -> TextAnchor.middle
+                "end" -> TextAnchor.end
+                else -> null
+            }
+            dominantBaseline = DominantBaseline.textAfterEdge
             if (props.selected == true) {
                 +"1234E"
             } else {

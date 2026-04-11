@@ -4,7 +4,7 @@ import client
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import js.objects.jso
+import js.objects.unsafeJso
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import mui.icons.material.ExpandMore
@@ -21,6 +21,7 @@ import web.cssom.JustifyContent
 import web.cssom.px
 import web.html.HTMLInputElement
 import web.html.InputType
+import web.html.number
 import kotlin.reflect.KProperty1
 
 
@@ -88,7 +89,7 @@ val AccordionWayPoint = FC<AccordionWayPointProps> {
                     OutlinedInput {
                         size = Size.small
                         value = waypoint.identifyName
-                        inputProps = jso { ariaReadOnly = true }
+                        inputProps = unsafeJso { ariaReadOnly = true }
                     }
                 }
             }
@@ -244,7 +245,7 @@ private val TextFieldPosDouble = FC<TextFieldPosDoubleProps> {
     TextField {
         size = Size.small
         defaultValue = prop.get(pos)
-        key = prop.get(pos).toString()
+        key = Key(prop.get(pos).toString())
         type = InputType.number
         label = ReactNode(prop.name)
         onBlur = { focusEvent ->

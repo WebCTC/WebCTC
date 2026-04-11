@@ -13,6 +13,7 @@ pluginManagement {
         kotlin("multiplatform") version kotlinVersion
         kotlin("js") version kotlinVersion
         kotlin("plugin.serialization") version kotlinVersion
+        kotlin("plugin.js-plain-objects") version kotlinVersion
     }
 
     resolutionStrategy {
@@ -20,6 +21,19 @@ pluginManagement {
             when (requested.id.id) {
                 "forge" -> useModule("com.anatawa12.forge:ForgeGradle:1.2-1.1.+")
             }
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+
+    versionCatalogs {
+        create("kotlinWrappers") {
+            val wrappersVersion = "2026.4.4"
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:$wrappersVersion")
         }
     }
 }

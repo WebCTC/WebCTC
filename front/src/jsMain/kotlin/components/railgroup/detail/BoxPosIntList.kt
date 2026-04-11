@@ -13,6 +13,7 @@ import web.cssom.JustifyContent
 import web.cssom.px
 import web.html.HTMLInputElement
 import web.html.InputType
+import web.html.number
 import kotlin.reflect.KProperty1
 import kotlin.uuid.Uuid
 
@@ -93,7 +94,7 @@ val BoxPosIntList = FC<PosIntListProps> { props ->
         this.onClose = {
             open = null
         }
-        this.key = open?.toString()
+        this.key = Key(open?.toString() ?: "closed")
     }
 }
 
@@ -148,7 +149,7 @@ private val TextFieldPosInt = FC<TextFieldPosIntProps> { props ->
     TextField {
         size = Size.small
         defaultValue = prop.get(pos)
-        key = prop.get(pos).toString()
+        key = Key(prop.get(pos).toString())
         type = InputType.number
         label = ReactNode(prop.name)
         onBlur = { focusEvent ->

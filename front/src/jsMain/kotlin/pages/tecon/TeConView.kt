@@ -9,18 +9,21 @@ import mui.material.CssBaseline
 import mui.system.sx
 import org.webctc.common.types.tecon.TeCon
 import react.FC
-import react.router.useNavigate
-import react.router.useParams
+import tanstack.react.router.useNavigate
+import tanstack.react.router.useParams
+import tanstack.router.core.ParamName
+import tanstack.router.core.RoutePath
 import utils.useData
 import web.cssom.*
 
 val TeConView = FC {
     val params = useParams()
-    val uuid = params["uuid"]
+    val uuid = params[ParamName("uuid")]
     val navigate = useNavigate()
 
     val tecon by useData<TeCon>("/api/tecons/$uuid") {
-        navigate("/p/tecons")
+        navigate { to = RoutePath("/p/tecons") }
+
     }
     val parts = tecon?.parts
 

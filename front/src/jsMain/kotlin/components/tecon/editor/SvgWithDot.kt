@@ -1,7 +1,7 @@
 package components.tecon.editor
 
 import emotion.react.css
-import js.objects.jso
+import js.objects.unsafeJso
 import org.webctc.common.types.PosInt2D
 import react.*
 import react.dom.events.MouseEvent
@@ -38,7 +38,7 @@ val SvgWithDot = FC<SvgWithDotProps> { props ->
     val panzoomRef = useRef<dynamic>()
 
     useLayoutEffectOnce {
-        val panzoom = module.panzoom(tcnRef.current!!, jso { smoothScroll = false })
+        val panzoom = module.panzoom(tcnRef.current!!, unsafeJso { smoothScroll = false })
         panzoom.on("transform") { e: dynamic ->
             val transform = e.getTransform()
             transform.scale.toString().toDouble().also {

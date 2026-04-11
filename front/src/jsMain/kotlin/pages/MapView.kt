@@ -3,7 +3,7 @@ package pages
 import components.Header
 import components.map.*
 import emotion.styled.styled
-import js.objects.jso
+import js.objects.unsafeJso
 import kotlinx.browser.window
 import module.panzoom
 import mui.material.Box
@@ -50,7 +50,7 @@ val MapView = FC {
 
     useEffectOnce {
         val mtx = mtxRef.current!!
-        val panzoom = panzoom(mtx, jso { smoothScroll = false })
+        val panzoom = panzoom(mtx, unsafeJso { smoothScroll = false })
         panzoom.on("transform") { e: dynamic ->
             scale = e.getTransform().scale.toString().toDouble()
             return@on {}

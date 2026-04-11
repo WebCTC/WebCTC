@@ -15,8 +15,10 @@ import org.webctc.common.types.signal.SignalData
 import org.webctc.common.types.tecon.TeCon
 import react.*
 import react.dom.svg.ReactSVG.g
-import react.router.useNavigate
-import react.router.useParams
+import tanstack.react.router.useNavigate
+import tanstack.react.router.useParams
+import tanstack.router.core.ParamName
+import tanstack.router.core.RoutePath
 import utils.useData
 import utils.useListData
 import web.cssom.*
@@ -25,11 +27,11 @@ import kotlin.uuid.Uuid
 
 val TeConEdit = FC {
     val params = useParams()
-    val uuid = params["uuid"] as String
+    val uuid = params[ParamName("uuid")] as String
     val navigate = useNavigate()
 
     val tecon by useData<TeCon>("/api/tecons/$uuid") {
-        navigate("/p/tecons")
+        navigate { to = RoutePath("/p/tecons") }
     }
 
     val railList by useListData<LargeRailData>("/api/rails")
