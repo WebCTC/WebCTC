@@ -20,6 +20,7 @@ val BoxRgUUID = FC<BoxRgUUIDProps> { props ->
         +"UUID"
         Paper {
             OutlinedInput {
+                size = Size.small
                 fullWidth = true
                 value = uuid.toString()
                 inputProps = unsafeJso { ariaReadOnly = true }

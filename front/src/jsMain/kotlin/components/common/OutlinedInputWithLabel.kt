@@ -3,6 +3,7 @@ package components.common
 import mui.material.Box
 import mui.material.OutlinedInput
 import mui.material.Paper
+import mui.material.Size
 import react.FC
 import react.Props
 import react.dom.events.ChangeEvent
@@ -18,6 +19,7 @@ val OutlinedInputWithLabel = FC<OutlinedInputWithLabelProps> { props ->
         +"Name"
         Paper {
             OutlinedInput {
+                size = Size.small
                 fullWidth = true
                 value = props.name
                 onChange = {

@@ -2,6 +2,7 @@ package components.railgroup.detail
 
 import mui.icons.material.Delete
 import mui.material.*
+import mui.material.Size
 import mui.system.sx
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.uuid.isValidUUIDString
@@ -9,10 +10,7 @@ import react.*
 import react.dom.onChange
 import utils.removeAtNew
 import utils.useData
-import web.cssom.AlignItems
-import web.cssom.Display
-import web.cssom.JustifyContent
-import web.cssom.px
+import web.cssom.*
 import kotlin.uuid.Uuid
 
 external interface BoxRailGroupListProps : Props {
@@ -45,6 +43,9 @@ val BoxRailGroupList = FC<BoxRailGroupListProps> { props ->
         }
         Paper {
             List {
+                sx {
+                    padding = 0.px
+                }
                 railGroupList.forEachIndexed { index, it ->
                     ListItemRailGroupUUID {
                         uuid = it
@@ -69,6 +70,9 @@ val ListItemRailGroupUUID = FC<ListItemRailGroupUUIDProps> { props ->
     val railGroup by useData<RailGroup>("/api/railgroups/$uuid")
 
     ListItem {
+        sx {
+            padding = Padding(8.px, 0.px, 0.px, 12.px)
+        }
         secondaryAction = IconButton.create {
             Delete {}
             onClick = { props.onDelete() }
@@ -99,6 +103,7 @@ val ListItemRailGroupUUIDAppend = FC<ListItemRailGroupUUIDAppendProps> { props -
         sx {
             gap = 8.px
             alignItems = AlignItems.flexStart
+            paddingInline = 8.px
         }
         TextField {
             fullWidth = true
