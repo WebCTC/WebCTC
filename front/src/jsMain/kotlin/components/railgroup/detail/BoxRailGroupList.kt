@@ -43,9 +43,8 @@ val BoxRailGroupList = FC<BoxRailGroupListProps> { props ->
         }
         Paper {
             List {
-                sx {
-                    padding = 0.px
-                }
+                dense = true
+                disablePadding = true
                 railGroupList.forEachIndexed { index, it ->
                     ListItemRailGroupUUID {
                         uuid = it
