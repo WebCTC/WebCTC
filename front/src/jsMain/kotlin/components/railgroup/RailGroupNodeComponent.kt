@@ -7,14 +7,16 @@ import mui.system.PropsWithSx
 import mui.system.sx
 import react.FC
 import react.create
+import react.dom.events.MouseEvent
 import react.dom.html.ReactHTML.span
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.px
+import web.html.HTMLElement
 
 external interface RailGroupNodeComponentProps : PropsWithSx {
     var selected: Boolean
-    var onClick: () -> Unit
+    var onClick: (MouseEvent<HTMLElement, *>) -> Unit
     var name: String
     var count: Int
 }
@@ -28,7 +30,7 @@ val RailGroupNodeComponent = FC<RailGroupNodeComponentProps> { props ->
             borderRadius = 4.px
         }
         selected = props.selected
-        onClick = { props.onClick() }
+        onClick = { props.onClick(it) }
         ListItemText {
             primary = Box.create {
                 sx {

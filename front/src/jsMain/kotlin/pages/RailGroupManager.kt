@@ -6,10 +6,7 @@ import components.map.MapPanzoomSvg
 import components.map.WRailHover
 import components.map.WSignalGroup
 import components.map.WWayPoint
-import components.railgroup.CreateSplitButton
-import components.railgroup.RailGroupDetail
-import components.railgroup.RailGroupNodeComponent
-import components.railgroup.RailGroupTreeView
+import components.railgroup.*
 import emotion.react.Global
 import emotion.react.styles
 import io.ktor.client.call.*
@@ -53,6 +50,8 @@ val RailGroupManager = FC {
     var isShiftKeyDown by useState(false)
 
     var activeRailGroupUUID by useState<Uuid?>(null)
+    var selectedUUIDs by useState<Set<Uuid>>(setOf())
+    var lastClickedUuid by useState<Uuid?>(null)
 
     val activeRailGroup = useMemo(
         activeRailGroupUUID, railGroups
@@ -115,6 +114,55 @@ val RailGroupManager = FC {
 
     val onSave = { _: RailGroup ->
         setRailGroups { it.toMutableList() }
+    }
+
+    val toggleSelect = { uuid: Uuid ->
+        selectedUUIDs = if (uuid in selectedUUIDs) selectedUUIDs - uuid else selectedUUIDs + uuid
+        lastClickedUuid = uuid
+    }
+
+    val rangeSelect = { from: Uuid, to: Uuid ->
+        val flat = flattenTree(buildTree(folders, railGroups, null))
+        val uuids = flat.map { it.uuid() }
+        val i1 = uuids.indexOf(from)
+        val i2 = uuids.indexOf(to)
+        if (i1 >= 0 && i2 >= 0) {
+            selectedUUIDs = selectedUUIDs + uuids.subList(minOf(i1, i2), maxOf(i1, i2) + 1).toSet()
+        }
+        lastClickedUuid = to
+    }
+
+    val moveFolders = useAction<Set<Uuid>, Uuid?> { uuids, newParentUuid ->
+        uuids.forEach { folderUuid ->
+            if (newParentUuid != null && isDescendantOf(folders, folderUuid, newParentUuid)) return@forEach
+            val folder = folders.find { it.uuid == folderUuid } ?: return@forEach
+            val updated = folder.copy(parentUuid = newParentUuid)
+            client.put("/api/railgroups/folders/$folderUuid") {
+                contentType(ContentType.Application.Json)
+                setBody(updated)
+            }
+        }
+        setFolders { list ->
+            list.map { f ->
+                if (f.uuid in uuids &&
+                    (newParentUuid == null || !isDescendantOf(list, f.uuid, newParentUuid))
+                ) f.copy(parentUuid = newParentUuid) else f
+            }
+        }
+        selectedUUIDs = setOf()
+    }
+
+    val moveRailGroups = useAction<Set<Uuid>, Uuid?> { uuids, newFolderUuid ->
+        uuids.forEach { rgUuid ->
+            val rg = railGroups.find { it.uuid == rgUuid } ?: return@forEach
+            rg.folderUuid = newFolderUuid
+            client.put("/api/railgroups/$rgUuid") {
+                contentType(ContentType.Application.Json)
+                setBody(rg)
+            }
+        }
+        setRailGroups { it.toMutableList() }
+        selectedUUIDs = setOf()
     }
 
     useLayoutEffectOnce {
@@ -221,10 +269,20 @@ val RailGroupManager = FC {
                             this.folders = folders
                             this.railGroups = railGroups
                             this.activeUUID = activeRailGroupUUID
-                            this.onSelectRailGroup = { activeRailGroupUUID = it }
+                            this.selectedUUIDs = selectedUUIDs
+                            this.lastClickedUuid = lastClickedUuid
+                            this.onSelectRailGroup = { uuid ->
+                                activeRailGroupUUID = uuid
+                                selectedUUIDs = setOf(uuid)
+                                lastClickedUuid = uuid
+                            }
+                            this.onToggleSelect = { toggleSelect(it) }
+                            this.onRangeSelect = { from, to -> rangeSelect(from, to) }
                             this.onCreateFolder = { parentUuid -> createFolder(parentUuid) }
                             this.onRenameFolder = { folder, newName -> renameFolder(folder, newName) }
                             this.onDeleteFolder = { folder -> deleteFolder(folder) }
+                            this.onMoveFolders = { uuids, parent -> moveFolders(uuids, parent) }
+                            this.onMoveRailGroups = { uuids, folder -> moveRailGroups(uuids, folder) }
                         }
                     } else {
                         List {
@@ -233,9 +291,10 @@ val RailGroupManager = FC {
                             searchResult.sortedBy { it.name }.forEach { rg ->
                                 RailGroupNodeComponent {
                                     selected = rg.uuid == activeRailGroupUUID
-                                    onClick = { activeRailGroupUUID = rg.uuid }
+                                    onClick = { _ -> activeRailGroupUUID = rg.uuid }
                                     name = rg.name
                                     count = rg.railPosList.size
+                                    key = Key(rg.uuid.toString())
                                 }
                             }
                         }

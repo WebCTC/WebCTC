@@ -22,12 +22,12 @@ fun List<RailGroupFolder>.fullPath(folder: RailGroupFolder): String {
         parts.add(0, parent.name)
         current = parent
     }
-    return parts.joinToString(" / ")
+    return parts.joinToString(separator = " / ", prefix = "/ ")
 }
 
 val BoxFolderPicker = FC<BoxFolderPickerProps> { props ->
     val folders = props.folders.sortedBy { props.folders.fullPath(it) }
-    val currentValue = props.currentFolderUuid?.toString() ?: ""
+    val currentValue = props.currentFolderUuid?.toString() ?: "root"
 
     Box {
         +"Folder"
@@ -39,11 +39,11 @@ val BoxFolderPicker = FC<BoxFolderPickerProps> { props ->
                 onChange = { event, _ ->
                     val event = event.unsafeCast<ChangeEvent<HTMLSelectElement, HTMLSelectElement>>()
                     val v = event.target.value
-                    props.onChange(if (v == "") null else Uuid.parse(v))
+                    props.onChange(if (v == "root") null else Uuid.parse(v))
                 }
                 MenuItem {
-                    value = ""
-                    +"(Root)"
+                    value = "root"
+                    +"/"
                 }
                 folders.forEach { f ->
                     MenuItem {
