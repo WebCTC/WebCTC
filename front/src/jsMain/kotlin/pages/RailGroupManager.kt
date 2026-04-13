@@ -254,9 +254,21 @@ val RailGroupManager = FC {
                     }
                 }
                 Box {
-                    CreateSplitButton {
-                        onCreateRailGroup = { createRailGroup() }
-                        onCreateFolder = { createFolder(null) }
+                    sx {
+                        display = Display.flex
+                        gap = 8.px
+                    }
+                    Button {
+                        variant = ButtonVariant.contained
+                        sx { textTransform = None.none }
+                        onClick = { createRailGroup() }
+                        +"Create RailGroup"
+                    }
+                    Button {
+                        variant = ButtonVariant.contained
+                        sx { textTransform = None.none }
+                        onClick = { createFolder(null) }
+                        +"Create Folder"
                     }
                 }
                 Paper {
