@@ -4,9 +4,12 @@ import components.Header
 import components.map.MapPanzoomSvg
 import components.map.WRailHover
 import components.map.WSignalGroup
+import components.railgroup.RailGroupNodeComponent
 import components.tecon.TeConEditorViewComponent
 import mui.icons.material.ContentCopy
 import mui.material.*
+import mui.material.Size
+import mui.system.Box
 import mui.system.sx
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.LargeRailData
@@ -198,16 +201,15 @@ private val ListItemRailGroup = FC<ListItemRailGroupProps> { props ->
         disableGutters = true
         disablePadding = true
         secondaryAction = IconButton.create {
+            size = Size.small
             ContentCopy {}
             this.onClick = { navigator.clipboard.writeTextAsync(railGroup.uuid.toString()) }
         }
-        ListItemButton {
+        RailGroupNodeComponent {
+            name = railGroup.name
+            count = railGroup.railPosList.size
             this.selected = selected
             this.onClick = { onClick() }
-            ListItemText {
-                primary = ReactNode(railGroup.name)
-                secondary = ReactNode("${railGroup.railPosList.size} rails")
-            }
         }
     }
 }
