@@ -50,6 +50,7 @@ val TeConView = FC {
                 }
             } else {
                 TeConViewer {
+                    teConUuid = tecon!!.uuid.toString()
                     this.parts = parts
                 }
             }

@@ -46,6 +46,11 @@ inline fun <reified R : Any> useIntervalData(url: String?, interval: Duration): 
             return@useEffect
         }
         var ignore = false
+        MainScope().launch {
+            val res: R = client.get(url).body()
+            if (ignore) return@launch
+            setData { res }
+        }
         val intervalId = setInterval(interval) {
             MainScope().launch {
                 val res: R = client.get(url).body()
@@ -161,6 +166,11 @@ inline fun <reified R : Any> useIntervalListData(url: String?, interval: Duratio
         if (url.isNullOrEmpty()) {
             setData { listOf() }
             return@useEffect
+        }
+        MainScope().launch {
+            val res: List<R> = client.get(url).body()
+            if (ignore) return@launch
+            setData { res }
         }
         val intervalId = setInterval(interval) {
             MainScope().launch {

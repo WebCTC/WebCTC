@@ -25,6 +25,7 @@ import org.webctc.railgroup.update
 import org.webctc.router.api.Connection
 import org.webctc.router.api.RailGroupRouter
 import org.webctc.signal.SignalStateWS
+import org.webctc.tecon.TeConRuntimeManager
 import java.util.*
 import kotlin.uuid.Uuid
 import kotlin.uuid.toKotlinUuid
@@ -87,6 +88,7 @@ class WebCTCEventHandler {
                 tickCount = 0
             }
             RailGroupData.updateLocks()
+            TeConRuntimeManager.tick()
             SignalStateWS.sendAll()
             RailGroupStateWS.sendAll()
         }

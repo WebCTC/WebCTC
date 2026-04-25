@@ -7,6 +7,10 @@ import kotlinx.serialization.modules.subclass
 import org.webctc.common.types.rail.IRailMapData
 import org.webctc.common.types.rail.RailMapData
 import org.webctc.common.types.rail.RailMapSwitchData
+import org.webctc.common.types.tecon.operation.ITeConOperation
+import org.webctc.common.types.tecon.operation.JavaScriptOperation
+import org.webctc.common.types.tecon.operation.RedStoneOperation
+import org.webctc.common.types.tecon.operation.ReserveOperation
 import org.webctc.common.types.tecon.route.IRouteComposition
 import org.webctc.common.types.tecon.route.RouteCompositionLock
 import org.webctc.common.types.tecon.route.RouteCompositionRedStone
@@ -100,6 +104,16 @@ val kotlinxJson = Json {
         polymorphic(IRouteComposition::class) {
             subclass(RouteCompositionRedStone::class)
             subclass(RouteCompositionLock::class)
+        }
+        polymorphic(ITeConOperation::class) {
+            subclass(ReserveOperation::class)
+            subclass(RedStoneOperation::class)
+            subclass(JavaScriptOperation::class)
+        }
+        polymorphic(TeConLeverSideConfig::class) {
+            subclass(DisabledLeverSide::class)
+            subclass(DirectLeverSide::class)
+            subclass(SelectLeverSide::class)
         }
     }
     ignoreUnknownKeys = true

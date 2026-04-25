@@ -45,7 +45,10 @@ sealed class EditMode(
 
     data object TECON : EditMode(
         "TeCon Lever", 'L',
-        1, { (pos) -> TeConLever(pos) })
+        1, { (pos) -> TeConLever(pos, id = "lever-${pos.x}-${pos.y}") },
+        { TeConLeverElement.create { it(this) } },
+        { TeConLeverProperty.create { it(this) } }
+    )
 
     data object FREETEXT : EditMode(
         "Free Text", 'T',
@@ -56,7 +59,10 @@ sealed class EditMode(
 
     data object ROUTE : EditMode(
         "TeCon Route", ';',
-        1, { (pos) -> Route(pos) })
+        1, { (pos) -> Route(pos, id = "route-${pos.x}-${pos.y}") },
+        { RouteElement.create { it(this) } },
+        { RouteProperty.create { it(this) } }
+    )
 
     data object RECT : EditMode(
         "Station", 'T',
@@ -126,12 +132,13 @@ sealed class EditMode(
             }
         }
 
-        fun createPropertyElement(iShape: IShape, onChange: (IShape) -> Unit): ReactElement<*>? {
+        fun createPropertyElement(iShape: IShape, routes: List<Route>, onChange: (IShape) -> Unit): ReactElement<*>? {
             val mode = findMode(iShape) ?: return null
 
             val shapeSetter: (IShapePropertyElementProps<IShape>) -> Unit = {
                 it.iShape = iShape
                 it.onChange = onChange
+                it.routes = routes
             }
 
             @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")

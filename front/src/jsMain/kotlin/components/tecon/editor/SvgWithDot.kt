@@ -7,10 +7,7 @@ import react.*
 import react.dom.events.MouseEvent
 import react.dom.svg.ReactSVG.g
 import react.dom.svg.ReactSVG.svg
-import web.cssom.Color
-import web.cssom.number
-import web.cssom.px
-import web.cssom.url
+import web.cssom.*
 import web.svg.SVGElement
 import web.svg.SVGSVGElement
 
@@ -57,6 +54,7 @@ val SvgWithDot = FC<SvgWithDotProps> { props ->
         css {
             flexGrow = number(1.0)
             backgroundColor = Color("#202020")
+            userSelect = None.none
             if (dotVisibility) {
                 backgroundImage =
                     url("data:image/svg+xml;charset=utf8,%3Csvg%20width%3D%2232%22%20height%3D%2232%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%221%22%20fill%3D%22gray%22%2F%3E%3C%2Fsvg%3E")

@@ -17,6 +17,7 @@ import org.webctc.common.types.PosInt2D
 import org.webctc.common.types.kotlinxJson
 import org.webctc.common.types.tecon.TeCon
 import org.webctc.common.types.tecon.shape.IShape
+import org.webctc.common.types.tecon.shape.Route
 import react.FC
 import react.Props
 import react.useRef
@@ -173,7 +174,7 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                             overflow = Auto.auto
                         }
                         CardContent {
-                            +EditMode.createPropertyElement(part) {
+                            +EditMode.createPropertyElement(part, parts.filterIsInstance<Route>()) {
                                 val index = parts.indexOf(part)
                                 selectedPart = it
                                 parts = parts.setNew(index, it)

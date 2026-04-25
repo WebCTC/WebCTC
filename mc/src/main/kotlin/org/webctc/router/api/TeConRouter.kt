@@ -10,7 +10,9 @@ import org.webctc.WebCTCCore
 import org.webctc.cache.tecon.TeConData
 import org.webctc.cache.tecon.delete
 import org.webctc.common.types.tecon.TeCon
+import org.webctc.common.types.tecon.TeConOperateRequest
 import org.webctc.router.WebCTCRouter
+import org.webctc.tecon.TeConRuntimeManager
 import kotlin.uuid.Uuid
 
 class TeConRouter : WebCTCRouter() {
@@ -24,6 +26,11 @@ class TeConRouter : WebCTCRouter() {
             call.respond(teCon)
         }
 
+        get("/{TeCon}/runtime") {
+            val teCon = call.getTeCon() ?: return@get
+            call.respond(TeConRuntimeManager.getRuntimeState(teCon))
+        }
+
         authenticate("auth-session") {
             post {
                 val teCon = TeConData.create()
@@ -33,6 +40,14 @@ class TeConRouter : WebCTCRouter() {
             }
 
             route("/{TeCon}") {
+                post("/operate") {
+                    val teCon = call.getTeCon() ?: return@post
+                    val request = call.receive<TeConOperateRequest>()
+                    val session = call.principal<WebCTCCore.UserSession>()
+                    val response = TeConRuntimeManager.operate(teCon, request, session)
+                    call.respond(if (response.ok) HttpStatusCode.OK else HttpStatusCode.Conflict, response)
+                }
+
                 put {
                     val tecon = call.getTeCon() ?: return@put
                     val newTeCon = call.receive<TeCon>()
