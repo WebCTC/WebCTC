@@ -109,6 +109,25 @@ tasks.jar {
     }
 }
 
+tasks.register<Jar>("slimJar") {
+    dependsOn(tasks.classes)
+    archiveClassifier.set("slim")
+    from(sourceSets.main.get().output)
+
+    from(rootDir) {
+        include("README.md")
+        include("LICENCE")
+    }
+}
+
+tasks.assemble {
+    dependsOn("slimJar")
+}
+
+artifacts {
+    add("archives", tasks.named("slimJar"))
+}
+
 kotlin {
     compilerOptions {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
