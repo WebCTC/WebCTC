@@ -64,7 +64,6 @@ val TeConView = FC {
                 Box {
                     sx {
                         position = Position.absolute
-                        height = 100.pct
                         borderRadius = 16.px
                         padding = 16.px
                         display = Display.flex
