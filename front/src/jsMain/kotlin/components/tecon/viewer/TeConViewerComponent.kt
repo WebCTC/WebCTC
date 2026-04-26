@@ -92,6 +92,11 @@ val TeConViewer = FC<TeConViewerProps> { props ->
             return
         }
 
+        if (armedLeverId == lever.id && armedSide == side) {
+            clearArmed()
+            return
+        }
+
         when (val sideConfig = if (side == TeConLeverSide.L) lever.left else lever.right) {
             is DirectLeverSide -> {
                 operate(
