@@ -301,6 +301,9 @@ object TeConRuntimeManager {
     }
 
     private fun canCancel(action: TeConAction): Boolean {
+        if (!action.requireNoTrainToCancel) {
+            return true
+        }
         val reserveOperations = action.operations.filterIsInstance<ReserveOperation>()
         return reserveOperations.all { reserve ->
             reserve.chain.chain.all { !RailGroupData.isTrainOnRail(it) }

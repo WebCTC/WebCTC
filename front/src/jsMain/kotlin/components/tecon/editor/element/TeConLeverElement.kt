@@ -17,10 +17,7 @@ import org.webctc.common.types.tecon.operation.JavaScriptOperation
 import org.webctc.common.types.tecon.operation.RedStoneOperation
 import org.webctc.common.types.tecon.operation.ReserveOperation
 import org.webctc.common.types.tecon.shape.*
-import react.FC
-import react.Key
-import react.Props
-import react.ReactNode
+import react.*
 import react.dom.events.ChangeEvent
 import react.dom.onChange
 import react.dom.svg.ReactSVG.circle
@@ -400,6 +397,13 @@ private val TeConActionEditor = FC<TeConActionEditorProps> { props ->
             this.onChange = { event ->
                 props.onChange(action.copy(name = event.target.unsafeCast<HTMLInputElement>().value))
             }
+        }
+        FormControlLabel {
+            control = Checkbox.create {
+                checked = action.requireNoTrainToCancel
+                this.onChange = { _, checked -> props.onChange(action.copy(requireNoTrainToCancel = checked)) }
+            }
+            label = ReactNode("在線中は復位できないようにする")
         }
 
         OperationListEditor {

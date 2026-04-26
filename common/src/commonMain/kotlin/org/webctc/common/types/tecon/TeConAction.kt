@@ -7,5 +7,6 @@ import org.webctc.common.types.tecon.operation.ITeConOperation
 data class TeConAction(
     val routeId: String? = null,
     val name: String = "Action",
+    val requireNoTrainToCancel: Boolean = false,
     val operations: Set<ITeConOperation> = emptySet(),
 )
