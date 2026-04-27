@@ -12,6 +12,8 @@ interface ITeConOperation
 data class ReserveOperation(
     val chain: RailGroupChain = RailGroupChain(),
     val key: String = "",
+    val reservedRedStonePosSet: Set<PosInt> = emptySet(),
+    val lockedRedStonePosSet: Set<PosInt> = emptySet(),
 ) : ITeConOperation
 
 @Serializable

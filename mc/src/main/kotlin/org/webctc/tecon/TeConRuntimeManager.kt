@@ -74,6 +74,7 @@ object TeConRuntimeManager {
                         deactivateRedStone(active, teCon)
                         true
                     } else {
+                        updateActiveReserveRedStone(teCon, active, action)
                         false
                     }
                 }
@@ -209,7 +210,10 @@ object TeConRuntimeManager {
         return when (operation) {
             is ReserveOperation -> {
                 val uuids = operation.chain.chain.toTypedArray()
-                RailGroupData.reserve(uuids, operation.resolveKey(teCon, lever, side, action))
+                val key = operation.resolveKey(teCon, lever, side, action)
+                RailGroupData.reserve(uuids, key).also {
+                    updateReserveRedStone(operation, key)
+                }
             }
 
             is RedStoneOperation -> {
@@ -242,10 +246,13 @@ object TeConRuntimeManager {
         session: Any?,
     ) {
         when (operation) {
-            is ReserveOperation -> RailGroupData.release(
-                operation.chain.chain.toTypedArray(),
-                operation.resolveKey(teCon, lever, side, action)
-            )
+            is ReserveOperation -> {
+                RailGroupData.release(
+                    operation.chain.chain.toTypedArray(),
+                    operation.resolveKey(teCon, lever, side, action)
+                )
+                clearReserveRedStone(operation)
+            }
 
             is RedStoneOperation -> setRedStone(operation.redStonePosSet, false)
             is JavaScriptOperation -> {
@@ -300,6 +307,18 @@ object TeConRuntimeManager {
         }
     }
 
+    private fun updateReserveRedStone(operation: ReserveOperation, key: String) {
+        val uuids = operation.chain.chain.toTypedArray()
+        val hasRailGroups = uuids.isNotEmpty()
+        setRedStone(operation.reservedRedStonePosSet, hasRailGroups && RailGroupData.isReserved(uuids, key))
+        setRedStone(operation.lockedRedStonePosSet, hasRailGroups && RailGroupData.isLocked(uuids, key))
+    }
+
+    private fun clearReserveRedStone(operation: ReserveOperation) {
+        setRedStone(operation.reservedRedStonePosSet, false)
+        setRedStone(operation.lockedRedStonePosSet, false)
+    }
+
     private fun canCancel(action: TeConAction): Boolean {
         if (!action.requireNoTrainToCancel) {
             return true
@@ -325,7 +344,15 @@ object TeConRuntimeManager {
 
     private fun deactivateRedStone(active: ActiveTeConAction, teCon: TeCon?) {
         val action = teCon?.findLever(active.leverId)?.findAction(active.side, active.routeId) ?: return
+        action.operations.filterIsInstance<ReserveOperation>().forEach(::clearReserveRedStone)
         action.operations.filterIsInstance<RedStoneOperation>().forEach { setRedStone(it.redStonePosSet, false) }
+    }
+
+    private fun updateActiveReserveRedStone(teCon: TeCon, active: ActiveTeConAction, action: TeConAction) {
+        val lever = teCon.findLever(active.leverId) ?: return
+        action.operations.filterIsInstance<ReserveOperation>().forEach {
+            updateReserveRedStone(it, it.resolveKey(teCon, lever, active.side, action))
+        }
     }
 }
 
