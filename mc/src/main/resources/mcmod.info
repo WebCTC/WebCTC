@@ -1,10 +1,10 @@
 [
 {
-  "modid": "webctc",
-  "name": "WebCTC",
+  "modid": "${modId}",
+  "name": "${modName}",
   "description": "No more need to build a complicated circuit and IC. Let's make CTC more easily with WebCTC !",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
+  "version": "${modVersion}",
+  "mcversion": "${minecraftVersion}",
   "url": "https://github.com/WebCTC/WebCTC",
   "updateUrl": "",
   "authorList": ["Kaiz_JP", "masa0300"],

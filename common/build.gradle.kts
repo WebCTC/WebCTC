@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
@@ -5,7 +7,11 @@ plugins {
 
 val serializationVersion = extra["kotlinx.serialization.version"] as String
 kotlin {
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
+    }
     js {
         binaries.executable()
         browser { }

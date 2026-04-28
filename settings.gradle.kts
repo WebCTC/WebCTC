@@ -2,8 +2,14 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        maven(url = "https://maven.minecraftforge.net/")
-        maven(url = "https://plugins.gradle.org/m2/")
+        maven {
+            name = "GTNH Maven"
+            url = uri("https://nexus.gtnewhorizons.com/repository/public/")
+            mavenContent {
+                includeGroupByRegex("com\\.gtnewhorizons\\..+")
+                includeGroup("com.gtnewhorizons")
+            }
+        }
     }
 
     plugins {
@@ -14,14 +20,8 @@ pluginManagement {
         kotlin("js") version kotlinVersion
         kotlin("plugin.serialization") version kotlinVersion
         kotlin("plugin.js-plain-objects") version kotlinVersion
-    }
 
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-                "forge" -> useModule("com.anatawa12.forge:ForgeGradle:1.2-1.1.+")
-            }
-        }
+        id("com.gtnewhorizons.gtnhsettingsconvention") version ("2.0.2")
     }
 }
 

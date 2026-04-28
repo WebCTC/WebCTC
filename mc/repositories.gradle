@@ -1,0 +1,15 @@
+repositories {
+    mavenCentral()
+    maven {
+        name = "GTNH Maven"
+        url = uri("https://nexus.gtnewhorizons.com/repository/public/")
+    }
+    maven {
+        name = "curse"
+        url = "https://www.cursemaven.com"
+    }
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
+}

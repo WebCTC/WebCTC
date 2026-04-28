@@ -1,0 +1,33 @@
+ext.ktorVersion = project.findProperty("ktor.version")
+
+def ktor(target) {
+    return "io.ktor:ktor-$target:${project.ktorVersion}"
+}
+
+def ktorSv(name) {
+    return ktor("server-$name")
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:26.0.2'
+
+    shadowImplementation ktorSv("core")
+    shadowImplementation ktorSv("netty")
+    shadowImplementation ktorSv("compression")
+
+    shadowImplementation ktorSv("cors")
+    shadowImplementation ktorSv("websockets")
+    shadowImplementation ktorSv("content-negotiation")
+    shadowImplementation ktorSv("auth")
+    shadowImplementation ktorSv("sessions")
+
+    shadowImplementation ktor("serialization-kotlinx-json")
+
+    shadowImplementation 'com.webauthn4j:webauthn4j-core:0.21.9.RELEASE'
+    shadowImplementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.1'
+
+    implementation project(":common")
+
+    // rfg.deobf などの独自メソッドもそのまま呼び出し可能
+    devOnlyNonPublishable(rfg.deobf(rootProject.files("libs/src1.7.10_20200822+KaizPatchX-1.10.0-rc.1.jar")))
+}
