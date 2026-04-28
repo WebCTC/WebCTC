@@ -29,5 +29,7 @@ dependencies {
     implementation project(":common")
 
     // rfg.deobf などの独自メソッドもそのまま呼び出し可能
-    implementation rfg.deobf("com.github.Kai-Z-JP:KaizPatchX:v1.9.5")
+    implementation(rfg.deobf("com.github.Kai-Z-JP:KaizPatchX:v1.9.5")) {
+        transitive = false
+    }
 }
