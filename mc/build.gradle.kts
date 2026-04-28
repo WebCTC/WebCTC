@@ -58,7 +58,7 @@ dependencies {
 
     embed(ktor("serialization-kotlinx-json"))
 
-    embed("com.webauthn4j:webauthn4j-core:0.21.9.RELEASE")
+    embed("com.webauthn4j:webauthn4j-core:0.31.0.RELEASE")
 
     embed("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
 
