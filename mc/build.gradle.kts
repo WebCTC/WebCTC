@@ -45,7 +45,7 @@ fun ktor(target: String) = "io.ktor:ktor-$target:$ktorVersion"
 fun ktorSv(name: String) = ktor("server-$name")
 
 dependencies {
-    compileOnly("org.jetbrains:annotations:26.0.2")
+    compileOnly("org.jetbrains:annotations:26.1.0")
 
     embed(ktorSv("core"))
     embed(ktorSv("netty"))
