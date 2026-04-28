@@ -22,7 +22,10 @@ val sourcesJar by tasks.named<Jar>("sourcesJar") {
 
 val commonKotlin = project(":common").extensions.getByType<KotlinMultiplatformExtension>()
 val commonJvmMain = commonKotlin.targets.getByName("jvm").compilations.getByName("main")
+val commonSourceRoot = project(":common").layout.projectDirectory.dir("src/commonMain/kotlin")
 val frontProductionExecutable = project(":front").layout.buildDirectory.dir("dist/js/productionExecutable")
+val generatedOpenApi = layout.buildDirectory.file("generated/openapi/openapi.json")
+evaluationDependsOn(":openapi-gen")
 
 fun CopySpec.fromFrontendAssets() {
     from(frontProductionExecutable) {
@@ -37,6 +40,34 @@ fun CopySpec.fromRootDocs() {
     }
 }
 
+fun CopySpec.fromOpenApiAssets() {
+    from(generatedOpenApi) {
+        into("assets/webctc/html")
+    }
+}
+
+val openApiGenProject = project(":openapi-gen")
+
+val generateOpenApi by tasks.registering(JavaExec::class) {
+    dependsOn(openApiGenProject.tasks.named("classes"))
+    classpath(
+        openApiGenProject.layout.buildDirectory.dir("classes/kotlin/main"),
+        openApiGenProject.layout.buildDirectory.dir("resources/main"),
+        openApiGenProject.configurations.named("runtimeClasspath")
+    )
+    mainClass.set("org.webctc.openapi.gen.OpenApiGeneratorKt")
+    args(
+        layout.projectDirectory.dir("src/main/kotlin").asFile.absolutePath,
+        layout.projectDirectory.file("src/main/kotlin/org/webctc/WebCTCCore.kt").asFile.absolutePath,
+        generatedOpenApi.get().asFile.absolutePath,
+        commonSourceRoot.asFile.absolutePath,
+        layout.projectDirectory.dir("src/main/kotlin").asFile.absolutePath,
+    )
+    inputs.dir(layout.projectDirectory.dir("src/main/kotlin"))
+    inputs.dir(commonSourceRoot)
+    outputs.file(generatedOpenApi)
+}
+
 tasks.withType<Jar>().configureEach {
     exclude("module-info.class")
     exclude("META-INF/versions/**")
@@ -44,6 +75,7 @@ tasks.withType<Jar>().configureEach {
 
 tasks.jar {
     dependsOn(":front:build")
+    dependsOn(generateOpenApi)
 
     destinationDirectory.set(File(parent!!.buildDir, "libs"))
 
@@ -51,14 +83,17 @@ tasks.jar {
 
     fromRootDocs()
     fromFrontendAssets()
+    fromOpenApiAssets()
 }
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(":front:build")
+    dependsOn(generateOpenApi)
     dependsOn(project(":common").tasks.named("jvmMainClasses"))
     from(commonJvmMain.output.allOutputs)
     fromRootDocs()
     fromFrontendAssets()
+    fromOpenApiAssets()
 
     dependencies {
         exclude(dependency("org.jetbrains.kotlin:.*:.*"))

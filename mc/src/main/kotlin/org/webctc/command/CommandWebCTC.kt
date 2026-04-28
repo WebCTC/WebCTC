@@ -58,6 +58,22 @@ class CommandWebCTC : CommandBase() {
                         text.appendSibling(url)
                         sender.addChatMessage(text)
                     }
+
+                    "swagger" -> {
+                        val text = ChatComponentText("URL: ")
+                        val isHttps = WebCTCConfig.accessUrl.startsWith("https://")
+                        val port = WebCTCConfig.accessPort
+                        val origin = buildString {
+                            append(WebCTCConfig.accessUrl)
+                            if (!(port == 80 && !isHttps || port == 443 && isHttps)) append(":$port")
+                        }
+
+                        val url = ChatComponentText("$origin/swagger")
+                        url.chatStyle.chatClickEvent =
+                            ClickEvent(ClickEvent.Action.OPEN_URL, url.chatComponentText_TextValue)
+                        text.appendSibling(url)
+                        sender.addChatMessage(text)
+                    }
                 }
             }
         } else {
@@ -67,7 +83,7 @@ class CommandWebCTC : CommandBase() {
 
     override fun addTabCompletionOptions(sender: ICommandSender, args: Array<String>): List<String>? {
         return when (args.size) {
-            1 -> listOf("auth", "waypoint").filter { it.startsWith(args[0]) }
+            1 -> listOf("auth", "swagger", "waypoint").filter { it.startsWith(args[0]) }
             2 -> if (args[0] == "waypoint") listOf("create", "delete").filter { it.startsWith(args[1]) } else null
             3 -> if (args[1] == "delete") WayPointCacheData.wayPointCache.keys.filter { it.startsWith(args[2]) } else null
             else -> null

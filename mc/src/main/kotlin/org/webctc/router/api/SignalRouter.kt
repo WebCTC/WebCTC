@@ -1,7 +1,6 @@
 package org.webctc.router.api
 
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -11,14 +10,17 @@ import jp.ngt.rtm.modelpack.modelset.ModelSetSignal
 import org.webctc.cache.signal.SignalCacheData
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.signal.SignalData
+import org.webctc.openapi.OpenApiRoute
 import org.webctc.router.WebCTCRouter
 import org.webctc.signal.SignalStateWS
 
 class SignalRouter : WebCTCRouter() {
     override fun install(application: Route): Route.() -> Unit = {
+        @OpenApiRoute(summary = "List cached signals", response = SignalData::class, responseList = true)
         get {
             this.call.respond(SignalCacheData.signalMapCache.values)
         }
+        @OpenApiRoute(summary = "Get a signal by block position", response = SignalData::class, query = "x,y,z")
         get("/signal") {
             val x = this.call.request.queryParameters["x"]?.toIntOrNull()
                 ?: return@get this.call.respond(HttpStatusCode.BadRequest)
@@ -38,6 +40,11 @@ class SignalRouter : WebCTCRouter() {
         }
 
         route("/{SignalPos}") {
+            @OpenApiRoute(
+                docPath = "/{SignalPos}",
+                summary = "Get a signal by serialized position",
+                response = SignalData::class
+            )
             get {
                 val signalPos = this.call.parameters["SignalPos"]?.toLongOrNull()
                     ?: return@get this.call.respond(HttpStatusCode.BadRequest)
@@ -52,6 +59,7 @@ class SignalRouter : WebCTCRouter() {
         }
 
         route("/state") {
+            @OpenApiRoute(docPath = "/state/ws", summary = "Subscribe to signal state")
             webSocket("/ws") {
                 val uuids = receiveDeserialized<Set<PosInt>>()
                 val signalStateWSSet = uuids.mapNotNull { pos ->

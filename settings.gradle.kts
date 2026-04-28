@@ -21,6 +21,8 @@ pluginManagement {
         kotlin("plugin.serialization") version kotlinVersion
         kotlin("plugin.js-plain-objects") version kotlinVersion
 
+        val ktorVersion = extra["ktor.version"] as String
+        id("io.ktor.plugin") version ktorVersion
         id("com.gtnewhorizons.gtnhsettingsconvention") version ("2.0.2")
     }
 }
@@ -42,3 +44,4 @@ rootProject.name = "WebCTC"
 include("front")
 include("mc")
 include("common")
+include("openapi-gen")

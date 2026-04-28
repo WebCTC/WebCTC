@@ -1,7 +1,6 @@
 package org.webctc.router.api
 
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import jp.ngt.rtm.entity.train.EntityTrainBase
@@ -11,17 +10,20 @@ import org.webctc.WebCTCCore
 import org.webctc.common.types.PosDouble
 import org.webctc.common.types.trains.CustomButtonData
 import org.webctc.common.types.trains.TrainData
+import org.webctc.openapi.OpenApiRoute
 import org.webctc.router.WebCTCRouter
 
 class TrainsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
+        @OpenApiRoute(summary = "List trains", response = TrainData::class, responseList = true)
         get {
             call.respond(
                 WebCTCCore.INSTANCE.server.entityWorld.loadedEntityList
                     .filterIsInstance<EntityTrainBase>().map(EntityTrainBase::toData)
             )
         }
+        @OpenApiRoute(summary = "Get a train", response = TrainData::class)
         get("/{EntityId}") {
             val eId = call.parameters["EntityId"]?.toInt()
             val entity = eId?.let { WebCTCCore.INSTANCE.server.entityWorld.getEntityByID(it) }

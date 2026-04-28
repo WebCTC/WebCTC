@@ -1,7 +1,6 @@
 package org.webctc.router.api
 
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -18,6 +17,7 @@ import org.webctc.cache.toDataClass
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.rail.*
 import org.webctc.common.types.toPosInt
+import org.webctc.openapi.OpenApiRoute
 import org.webctc.router.WebCTCRouter
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
@@ -28,9 +28,11 @@ class RailRouter : WebCTCRouter() {
     }
 
     override fun install(application: Route): Route.() -> Unit = {
+        @OpenApiRoute(summary = "List cached rails", response = LargeRailData::class, responseList = true)
         get {
             call.respond(RailCacheData.railMapCache.values)
         }
+        @OpenApiRoute(summary = "Get a rail by block position", response = LargeRailData::class, query = "x,y,z")
         get("/rail") {
             val x = call.request.queryParameters["x"]?.toIntOrNull()
             val y = call.request.queryParameters["y"]?.toIntOrNull()
@@ -45,6 +47,7 @@ class RailRouter : WebCTCRouter() {
                 call.respond(railCore.toData())
             }
         }
+        @OpenApiRoute(summary = "Subscribe to rail updates")
         webSocket("/ws") {
             val thisConnection = Connection(this)
             try {

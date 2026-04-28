@@ -23,6 +23,7 @@ import org.webctc.WebCTCCore
 import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.common.types.railgroup.RailGroupFolder
+import org.webctc.openapi.OpenApiRoute
 import org.webctc.railgroup.RailGroupData
 import org.webctc.railgroup.RailGroupStateWS
 import org.webctc.railgroup.create
@@ -38,21 +39,41 @@ class RailGroupRouter : WebCTCRouter() {
     }
 
     override fun install(application: Route): Route.() -> Unit = {
+        @OpenApiRoute(summary = "List rail groups", response = RailGroup::class, responseList = true)
         get {
             call.respond(RailGroupData.railGroupList)
         }
 
         route("/folders") {
+            @OpenApiRoute(
+                docPath = "/folders",
+                summary = "List rail group folders",
+                response = RailGroupFolder::class,
+                responseList = true
+            )
             get {
                 call.respond(RailGroupData.folderList)
             }
             authenticate("auth-session") {
+                @OpenApiRoute(
+                    docPath = "/folders",
+                    summary = "Create a rail group folder",
+                    response = RailGroupFolder::class,
+                    authenticated = true
+                )
                 post {
                     val folder = RailGroupFolder.create()
                     call.respond(folder)
                     WebCTCCore.INSTANCE.railGroupData.markDirty()
                 }
                 route("/{Folder}") {
+                    @OpenApiRoute(
+                        docPath = "/folders/{Folder}",
+                        summary = "Update a rail group folder",
+                        request = RailGroupFolder::class,
+                        response = RailGroupFolder::class,
+                        authenticated = true
+                    )
                     put {
                         val folder = call.getFolder() ?: return@put
                         val updated: RailGroupFolder = call.receive()
@@ -60,6 +81,11 @@ class RailGroupRouter : WebCTCRouter() {
                         call.respond(folder)
                         WebCTCCore.INSTANCE.railGroupData.markDirty()
                     }
+                    @OpenApiRoute(
+                        docPath = "/folders/{Folder}",
+                        summary = "Delete a rail group folder",
+                        authenticated = true
+                    )
                     delete {
                         val folder = call.getFolder() ?: return@delete
                         val parentUuid = folder.parentUuid
@@ -78,12 +104,14 @@ class RailGroupRouter : WebCTCRouter() {
         }
 
         route("/{RailGroup}") {
+            @OpenApiRoute(docPath = "/{RailGroup}", summary = "Get a rail group", response = RailGroup::class)
             get {
                 call.getRailGroup()?.let { call.respond(it) }
             }
         }
 
         route("/state") {
+            @OpenApiRoute(docPath = "/state/ws", summary = "Subscribe to rail group state")
             webSocket("/ws") {
                 val uuids = receiveDeserialized<Set<Uuid>>()
                 val railGroupStateWSSet = uuids.mapNotNull { uuid ->
@@ -97,6 +125,7 @@ class RailGroupRouter : WebCTCRouter() {
         }
 
         authenticate("auth-session") {
+            @OpenApiRoute(summary = "Create a rail group", response = RailGroup::class, authenticated = true)
             post {
                 val railGroup = RailGroup.create()
                 call.respond(railGroup)
@@ -105,6 +134,7 @@ class RailGroupRouter : WebCTCRouter() {
             }
 
             route("/{RailGroup}") {
+                @OpenApiRoute(docPath = "/{RailGroup}", summary = "Delete a rail group", authenticated = true)
                 delete {
                     val railGroup = call.getRailGroup() ?: return@delete
 
@@ -114,6 +144,13 @@ class RailGroupRouter : WebCTCRouter() {
 
                     WebCTCCore.INSTANCE.railGroupData.markDirty()
                 }
+                @OpenApiRoute(
+                    docPath = "/{RailGroup}",
+                    summary = "Update a rail group",
+                    request = RailGroup::class,
+                    response = RailGroup::class,
+                    authenticated = true
+                )
                 put {
                     val oldRailGroup = call.getRailGroup() ?: return@put
                     val railGroup: RailGroup = call.receive()
@@ -126,10 +163,12 @@ class RailGroupRouter : WebCTCRouter() {
                 }
             }
             route("ws") {
+                @OpenApiRoute(docPath = "/ws/block", summary = "Start block position selection", authenticated = true)
                 webSocket("/block") {
                     val uuid = call.sessions.get<WebCTCCore.UserSession>()?.uuid ?: return@webSocket
                     this.initPosSetter("BlockPosSetter", uuid, blockPosConnection, Items.stick)
                 }
+                @OpenApiRoute(docPath = "/ws/signal", summary = "Start signal position selection", authenticated = true)
                 webSocket("/signal") {
                     val uuid = call.sessions.get<WebCTCCore.UserSession>()?.uuid ?: return@webSocket
                     this.initPosSetter("SignalPosSetter", uuid, signalPosConnection, Items.blaze_rod)

@@ -3,4 +3,6 @@
 build
 kotlin-js-store
 index.html
+!mc/src/main/resources/assets/webctc/html/swagger/index.html
 .kotlin
+mc/run
