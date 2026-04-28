@@ -29,5 +29,5 @@ dependencies {
     implementation project(":common")
 
     // rfg.deobf などの独自メソッドもそのまま呼び出し可能
-    devOnlyNonPublishable(rfg.deobf(rootProject.files("libs/src1.7.10_20200822+KaizPatchX-1.10.0-rc.1.jar")))
+    implementation rfg.deobf("com.github.Kai-Z-JP:KaizPatchX:v1.9.5")
 }
