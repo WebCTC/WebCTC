@@ -208,6 +208,14 @@ class RailGroupData(mapName: String) : WorldSavedData(mapName) {
             }
         }
 
+        fun getTrainName(uuid: Uuid): String? {
+            val railGroup = findRailGroup(uuid) ?: return null
+
+            val isTrainOnRail = railGroup.isTrainOnRail()
+            val trainName = if (isTrainOnRail) railGroup.getTrainName() else null
+            return trainName
+        }
+
         private fun findRailGroup(uuid: Uuid): RailGroup? {
             return railGroupList.find { it.uuid == uuid }
         }

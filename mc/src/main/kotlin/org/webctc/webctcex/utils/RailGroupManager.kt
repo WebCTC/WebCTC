@@ -81,5 +81,10 @@ class RailGroupManager {
                 it is TileEntityLargeRailSwitchCore && it.isTurning()
             } == true
         }
+
+        @JvmStatic
+        fun getTrainName(uuid: String): String? {
+            return RailGroupData.getTrainName(Uuid.parse(uuid))
+        }
     }
 }

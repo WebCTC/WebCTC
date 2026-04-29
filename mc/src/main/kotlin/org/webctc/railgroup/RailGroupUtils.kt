@@ -33,18 +33,18 @@ fun RailGroup.isReserved(): Boolean {
     return RailGroupData.isReserved(this.uuid)
 }
 
+fun RailGroup.getTrainName(): String {
+    val rgFormation = FormationManager.getInstance().formations.values
+        .find { it?.getCurrentRailObj()?.toData()?.pos in this.railPosList }
+
+    return rgFormation?.getControlCar()?.resourceState?.name ?: "?"
+}
+
 fun RailGroup.getState(): RailGroupState {
     val isTrainOnRail = this.isTrainOnRail()
     val isReserved = this.isReserved()
     val isLocked = this.isLocked()
-
-    val rgFormation = if (isTrainOnRail) FormationManager.getInstance().formations.values
-        .find { it?.getCurrentRailObj()?.toData()?.pos in this.railPosList } else null
-    val trainName = if (rgFormation != null) {
-        rgFormation.getControlCar()?.resourceState?.name ?: "?"
-    } else {
-        null
-    }
+    val trainName = if (isTrainOnRail) this.getTrainName() else null
 
     return RailGroupState(this.uuid, isLocked, isReserved, isTrainOnRail, trainName)
 }
