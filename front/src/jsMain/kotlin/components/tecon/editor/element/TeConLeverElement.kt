@@ -531,16 +531,16 @@ private val OperationEditor = FC<OperationEditorProps> { props ->
                     }
                 }
                 BoxPosIntList {
-                    title = "Reserve RedStone Pos"
-                    wsPath = "/api/railgroups/ws/block"
-                    posList = operation.reservedRedStonePosSet
-                    updatePosList = { props.onChange(operation.copy(reservedRedStonePosSet = it)) }
-                }
-                BoxPosIntList {
                     title = "Lock RedStone Pos"
                     wsPath = "/api/railgroups/ws/block"
                     posList = operation.lockedRedStonePosSet
                     updatePosList = { props.onChange(operation.copy(lockedRedStonePosSet = it)) }
+                }
+                BoxPosIntList {
+                    title = "Reserve RedStone Pos"
+                    wsPath = "/api/railgroups/ws/block"
+                    posList = operation.reservedRedStonePosSet
+                    updatePosList = { props.onChange(operation.copy(reservedRedStonePosSet = it)) }
                 }
             }
 
