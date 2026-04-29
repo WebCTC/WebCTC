@@ -385,7 +385,11 @@ private val TeConActionEditor = FC<TeConActionEditorProps> { props ->
                 props.routes.forEach { route ->
                     MenuItem {
                         value = route.id
-                        +(route.name.ifBlank { route.id })
+                        if (route.name.isBlank()) {
+                            +route.id
+                        } else {
+                            +"${route.name} (${route.id})"
+                        }
                     }
                 }
             }
