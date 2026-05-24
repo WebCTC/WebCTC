@@ -94,6 +94,8 @@ fun Formation.getCurrentRailObj(): TileEntityLargeRailCore? {
         if (controlCar?.getBogie(0)?.isFront == true) controlCar.getBogie(0)
         else controlCar?.getBogie(1)
 
-    return EntityBogie::class.java.getDeclaredField("currentRailObj")
-        .apply { isAccessible = true }.get(frontBogie) as? TileEntityLargeRailCore
+    return frontBogie?.run {
+        EntityBogie::class.java.getDeclaredField("currentRailObj")
+            .apply { isAccessible = true }.get(this)
+    } as? TileEntityLargeRailCore
 }
