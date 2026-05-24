@@ -23,11 +23,13 @@ jobs:
             # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
             -   uses: actions/checkout@v2
 
-            -   name: Set up JDK 25
+            -   name: Set up JDK
                 uses: actions/setup-java@v5
                 with:
                     distribution: 'zulu'
-                    java-version: '25'
+                    java-version: |
+                        8
+                        25
 
             -   name: get shortsha
                 id: vars
