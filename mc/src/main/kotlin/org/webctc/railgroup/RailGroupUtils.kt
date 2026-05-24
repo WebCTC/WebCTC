@@ -2,12 +2,14 @@ package org.webctc.railgroup
 
 import jp.ngt.rtm.electric.TileEntitySignal
 import jp.ngt.rtm.entity.train.util.FormationManager
+import jp.ngt.rtm.rail.TileEntityLargeRailCore
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTBase
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.nbt.NBTTagString
 import net.minecraft.server.MinecraftServer
+import org.webctc.WebCTCCore
 import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.readFromNBT
 import org.webctc.cache.writeToNBT
@@ -23,6 +25,18 @@ fun RailGroup.isTrainOnRail(): Boolean {
     return railPosList
         .mapNotNull { RailCacheData.railMapCache[it] }
         .any { it.isTrainOnRail }
+}
+
+private fun RailGroup.isTrainOnRailDirect(): Boolean {
+    if (this.isTrainOnRail()) return true
+    val railPosList = this.railPosList
+    val world = WebCTCCore.INSTANCE.server.entityWorld
+    val isTrainOnRailDirect = world.loadedTileEntityList
+        .filterIsInstance<TileEntityLargeRailCore>()
+        .filter { PosInt(it.xCoord, it.yCoord, it.zCoord) in railPosList }
+        .any { it.isTrainOnRail }
+
+    return isTrainOnRailDirect
 }
 
 fun RailGroup.isLocked(): Boolean {
@@ -178,7 +192,6 @@ fun SettingEntry.Companion.readFromNBT(nbt: NBTTagCompound): SettingEntry {
     return SettingEntry(key, value)
 }
 
-
 fun RailGroup.update() {
     val isTrainOnRail = this.isTrainOnRail()
     this.signalLevel = ((if (isTrainOnRail) 0
@@ -221,8 +234,12 @@ fun RailGroup.update() {
             world.setBlock(it.x, it.y, it.z, block, 14, 3)
         }
     }
+}
 
-    if (isTrainOnRail && RailGroupData.hasReleaseFlag(this.uuid)) {
+fun RailGroup.tick() {
+    val isTrainOnRailDirect = this.isTrainOnRailDirect()
+
+    if (isTrainOnRailDirect && RailGroupData.hasReleaseFlag(this.uuid)) {
         RailGroupData.unsafeRelease(this.uuid)
     }
 }
