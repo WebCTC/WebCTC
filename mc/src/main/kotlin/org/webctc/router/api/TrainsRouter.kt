@@ -63,6 +63,6 @@ fun EntityTrainBase.toData(): TrainData {
             val text = if (list.size > value) list[value] else null
             CustomButtonData(value, text)
         },
-//        this.resourceState.dataMap.entries.map { it.key to it.value.get() }.toMap()
+        this.resourceState.dataMap.entries.map { (key, value) -> key to value.toString() }.toMap()
     )
 }

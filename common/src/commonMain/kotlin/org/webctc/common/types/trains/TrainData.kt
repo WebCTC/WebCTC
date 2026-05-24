@@ -18,7 +18,7 @@ data class TrainData(
     val trainStateData: ByteArray,
     val name: String,
     val customButton: List<CustomButtonData>,
-//    val dataMap: Map<String, Any?>
+    val dataMap: Map<String, String>
 )
 
 @Serializable
