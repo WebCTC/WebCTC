@@ -237,9 +237,7 @@ fun RailGroup.update() {
 }
 
 fun RailGroup.tick() {
-    val isTrainOnRailDirect = this.isTrainOnRailDirect()
-
-    if (isTrainOnRailDirect && RailGroupData.hasReleaseFlag(this.uuid)) {
+    if (RailGroupData.hasReleaseFlag(this.uuid) && this.isTrainOnRailDirect()) {
         RailGroupData.unsafeRelease(this.uuid)
     }
 }
