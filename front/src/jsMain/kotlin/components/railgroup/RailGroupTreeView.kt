@@ -230,7 +230,7 @@ val RGFolderNodeFC: FC<RGFolderNodeProps> = FC { props ->
     val folder = props.folder
     var anchorElement by useState<Element?>(null)
     val isOpen = anchorElement != null
-    var expanded by useState(true)
+    var expanded by useState(false)
     var renameDialogOpen by useState(false)
     var deleteDialogOpen by useState(false)
     var renameText by useState(folder.name)
